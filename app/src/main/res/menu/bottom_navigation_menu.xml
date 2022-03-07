@@ -6,7 +6,7 @@
         android:icon="@drawable/ic_round_home_24"
         android:title="Home"/>
     <item
-        android:id="@+id/mediaLibrary"
+        android:id="@+id/mediaLibraryFragment"
         android:enabled="true"
         android:icon="@drawable/ic_round_library_music_24"
         android:title="Media library"/>

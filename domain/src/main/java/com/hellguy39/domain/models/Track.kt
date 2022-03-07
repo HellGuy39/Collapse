@@ -1,10 +1,8 @@
-package com.hellguy39.data.models
-
-import android.graphics.Bitmap
+package com.hellguy39.domain.models
 
 data class Track(
+    val id: Int,
     var name: String = "N/A",
     var author: String = "N/A",
-    var image: Bitmap? = null,
     var path: String = "N/A"
 )

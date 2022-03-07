@@ -12,5 +12,10 @@
         tools:layout="@layout/fragment_home">
 
     </fragment>
+    <fragment
+        android:id="@+id/mediaLibraryFragment"
+        android:name="com.hellguy39.collapse.presentaton.fragments.media_library.MediaLibraryFragment"
+        android:label="media_library_fragment"
+        tools:layout="@layout/media_library_fragment" />
 
 </navigation>

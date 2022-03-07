@@ -22,7 +22,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         _binding = FragmentHomeBinding.bind(view)
         _binding.topAppBar.title = "Hello world"
 
-        val list = mutableListOf<Playlist>()
+        /*val list = mutableListOf<Playlist>()
 
         val playlist = Playlist(
             tittle = "Smells Like Teen Spirit"
@@ -34,7 +34,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         _binding.rvRecentPlaylists.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             adapter = RecentPlaylistsAdapter(playlistList = list, resources = resources)
-        }
+        }*/
 
     }
 

@@ -26,8 +26,7 @@ class RecentPlaylistsAdapter(
         holder: PlaylistViewHolder,
         position: Int,
     ) {
-        val playlist: Playlist = playlistList[position]
-        holder.bind(playlist, resources)
+        holder.bind(playlistList[position], resources)
     }
 
     override fun getItemCount(): Int = playlistList.size
