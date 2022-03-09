@@ -12,6 +12,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Collapse">
+        <service
+            android:name=".presentaton.services.PlayerService"
+            android:enabled="true"
+            android:exported="true"></service>
+
         <activity
             android:name=".presentaton.activities.main.MainActivity"
             android:exported="true">

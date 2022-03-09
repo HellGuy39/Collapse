@@ -32,7 +32,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         list.add(playlist)
 
         _binding.rvRecentPlaylists.apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = RecentPlaylistsAdapter(playlistList = list, resources = resources)
         }*/
 

@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:fitsSystemWindows="true"
+    android:id="@+id/rootLayout"
+    android:animateLayoutChanges="true"
     tools:context=".presentaton.activities.main.MainActivity">
 
     <androidx.fragment.app.FragmentContainerView
