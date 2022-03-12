@@ -1,6 +1,7 @@
 package com.hellguy39.collapse.presentaton.adapters
 
 import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView

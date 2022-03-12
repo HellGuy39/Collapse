@@ -1,17 +1,18 @@
 package com.hellguy39.collapse.presentaton.activities.main
 
 import android.animation.LayoutTransition
-import androidx.appcompat.app.AppCompatActivity
+import android.app.Notification
 import android.os.Bundle
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
+import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.hellguy39.collapse.R
-import com.hellguy39.collapse.app.App
 import com.hellguy39.collapse.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -26,7 +27,6 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(_binding.root)
-
         //(applicationContext as App).appComponent.inject(this)
 
         navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer) as NavHostFragment

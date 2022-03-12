@@ -1,5 +1,6 @@
 package com.hellguy39.domain.models
 
+import java.io.File
 import java.io.Serializable
 
 data class Track(
@@ -7,7 +8,7 @@ data class Track(
     var name: String = "N/A",
     var artist: String = "N/A",
     var path: String = "N/A",
-    var embeddedPicture: ByteArray? = null
+    var embeddedPicture: ByteArray? = null,
 ) : Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -35,4 +36,6 @@ data class Track(
         result = 31 * result + (embeddedPicture?.contentHashCode() ?: 0)
         return result
     }
+
+
 }

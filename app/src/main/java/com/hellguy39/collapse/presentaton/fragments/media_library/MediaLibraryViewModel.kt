@@ -16,11 +16,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MediaLibraryViewModel @Inject constructor(
-    private val getAllTracksUseCase: GetAllTracksUseCase,
-    private val addTrackUseCase: AddTrackUseCase
+
 ) : ViewModel() {
 
-    private val trackListLiveData = MutableLiveData<List<Track>>()
+    /*private val trackListLiveData = MutableLiveData<List<Track>>()
 
     init {
         fetchTrackList()
@@ -40,5 +39,5 @@ class MediaLibraryViewModel @Inject constructor(
         withContext(Dispatchers.Main) {
             trackListLiveData.value = tracks
         }
-    }
+    }*/
 }

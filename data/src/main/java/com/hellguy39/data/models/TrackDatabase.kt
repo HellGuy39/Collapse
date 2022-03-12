@@ -3,6 +3,7 @@ package com.hellguy39.data.models
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.hellguy39.domain.models.Track
+import java.io.File
 
 @Entity
 data class TrackDatabase(
@@ -10,7 +11,7 @@ data class TrackDatabase(
     var name: String = "N/A",
     var artist: String = "N/A",
     var path: String = "N/A",
-    var embeddedPicture: ByteArray? = null
+    var embeddedPicture: ByteArray? = null,
 ) {
     fun toDatabaseEntity(track: Track) {
         this.id = track.id
@@ -26,7 +27,7 @@ data class TrackDatabase(
             name = this.name,
             artist = this.artist,
             path = this.path,
-            embeddedPicture = this.embeddedPicture
+            embeddedPicture = this.embeddedPicture,
         )
     }
 
@@ -49,7 +50,7 @@ data class TrackDatabase(
     }
 
     override fun hashCode(): Int {
-        var result = id ?: 0
+        var result = id
         result = 31 * result + name.hashCode()
         result = 31 * result + artist.hashCode()
         result = 31 * result + path.hashCode()

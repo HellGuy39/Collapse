@@ -3,6 +3,8 @@
     package="com.hellguy39.collapse">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".app.App"
@@ -15,7 +17,7 @@
         <service
             android:name=".presentaton.services.PlayerService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="false" />
 
         <activity
             android:name=".presentaton.activities.main.MainActivity"

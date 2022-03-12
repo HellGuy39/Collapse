@@ -17,7 +17,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 class DataModule {
 
-    @Provides
+    /*@Provides
     @Singleton
     fun provideTracksDatabase(app: Application): TracksDatabase {
         return Room.databaseBuilder(
@@ -44,6 +44,6 @@ class DataModule {
     fun provideGetAllTracksUseCase(tracksRepositoryImpl: TracksRepository): GetAllTracksUseCase {
         return GetAllTracksUseCase(tracksRepositoryImpl)
     }
-
+*/
 
 }
