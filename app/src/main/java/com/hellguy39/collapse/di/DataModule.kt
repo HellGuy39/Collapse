@@ -1,11 +1,9 @@
 package com.hellguy39.collapse.di
 
 import android.app.Application
-import androidx.room.Room
-import com.hellguy39.data.db.TracksDatabase
+import android.content.Context
 import com.hellguy39.data.repositories.TracksRepositoryImpl
 import com.hellguy39.domain.repositories.TracksRepository
-import com.hellguy39.domain.usecases.AddTrackUseCase
 import com.hellguy39.domain.usecases.GetAllTracksUseCase
 import dagger.Module
 import dagger.Provides
@@ -38,12 +36,23 @@ class DataModule {
     fun provideAddTrackUseCase(tracksRepositoryImpl: TracksRepository): AddTrackUseCase {
         return AddTrackUseCase(tracksRepositoryImpl)
     }
+*/
+    @Provides
+    @Singleton
+    fun provideContext(app: Application): Context {
+        return app.applicationContext
+    }
+
+    @Provides
+    @Singleton
+    fun provideLocationRepository(context: Context) : TracksRepository {
+        return TracksRepositoryImpl(context)
+    }
 
     @Provides
     @Singleton
     fun provideGetAllTracksUseCase(tracksRepositoryImpl: TracksRepository): GetAllTracksUseCase {
         return GetAllTracksUseCase(tracksRepositoryImpl)
     }
-*/
 
 }

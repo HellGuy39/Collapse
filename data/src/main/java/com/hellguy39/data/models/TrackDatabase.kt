@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 import com.hellguy39.domain.models.Track
 import java.io.File
 
+/*
 @Entity
 data class TrackDatabase(
     @PrimaryKey(autoGenerate = true) var id: Int = 0,
@@ -59,4 +60,4 @@ data class TrackDatabase(
     }
 
 
-}
+}*/

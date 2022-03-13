@@ -17,12 +17,14 @@
         app:srcCompat="@drawable/ic_round_audiotrack_24" />
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/ibPlayPause"
         app:layout_constraintStart_toEndOf="@+id/ivTrackImage"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -31,8 +33,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:maxLines="1"
             android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
             android:textSize="20sp"
             tools:text="Smells Like Teen Spirit" />
 
@@ -40,12 +42,22 @@
             android:id="@+id/tvAuthor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
             android:ellipsize="end"
             android:fontFamily="@font/roboto_light"
             android:maxLines="1"
+            android:textSize="16sp"
             tools:text="Nirvana" />
 
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/ibPlayPause"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:backgroundTint="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?android:attr/colorPrimary" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

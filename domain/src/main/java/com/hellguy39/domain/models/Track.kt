@@ -1,12 +1,11 @@
 package com.hellguy39.domain.models
 
-import java.io.File
 import java.io.Serializable
 
 data class Track(
     var id: Int = 0,
-    var name: String = "N/A",
-    var artist: String = "N/A",
+    var name: String = "Unknown",
+    var artist: String = "Unknown",
     var path: String = "N/A",
     var embeddedPicture: ByteArray? = null,
 ) : Serializable {

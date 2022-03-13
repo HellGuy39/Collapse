@@ -49,7 +49,7 @@ class PlayerService : Service() {
             this,
             notificationId,
             channelId
-        ).setMediaDescriptionAdapter(DescriptionAdapter(this))
+        ).setMediaDescriptionAdapter(DescriptionAdapter(this, resources))
             .setNotificationListener(object : PlayerNotificationManager.NotificationListener {
                 override fun onNotificationPosted(
                     notificationId: Int,
@@ -81,6 +81,7 @@ class PlayerService : Service() {
             exoPlayer.addMediaItem(MediaItem.fromUri(trackList[n].path))
         }
 
+        exoPlayer.seekToDefaultPosition(trackWrapper.position)
         exoPlayer.prepare()
 
         return START_STICKY
@@ -112,7 +113,7 @@ class PlayerService : Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        playerNotificationManager.setPlayer(null)
+        //playerNotificationManager.setPlayer(null)
         stopSelf()
     }
 }

@@ -9,7 +9,8 @@ import com.hellguy39.domain.models.Track
 
 class TrackListAdapter(
     private val trackList: List<Track>,
-    private val resources: Resources
+    private val resources: Resources,
+    private val listener: OnTrackListener
 ): RecyclerView.Adapter<TrackViewHolder>() {
 
     override fun onCreateViewHolder(
@@ -24,8 +25,12 @@ class TrackListAdapter(
         holder: TrackViewHolder,
         position: Int
     ) {
-        holder.bind(trackList[position], resources)
+        holder.bind(trackList[position], resources, position, listener)
     }
 
     override fun getItemCount(): Int = trackList.size
+
+    interface OnTrackListener {
+        fun onTrackClick(pos: Int)
+    }
 }
