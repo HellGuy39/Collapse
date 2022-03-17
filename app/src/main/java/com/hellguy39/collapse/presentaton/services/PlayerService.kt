@@ -8,18 +8,19 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.MediaMetadata
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
-import com.google.android.exoplayer2.upstream.DataSource
 import com.hellguy39.collapse.presentaton.activities.main.DescriptionAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class PlayerService : Service() {
 
-    private lateinit var exoPlayer: ExoPlayer
-    private lateinit var dataSourceFactory: DataSource.Factory
     private lateinit var playerNotificationManager: PlayerNotificationManager
 
     private val notificationId = 101
@@ -27,6 +28,13 @@ class PlayerService : Service() {
     private val channelName = "foreground_player_channel"
 
     companion object {
+
+        private lateinit var exoPlayer: ExoPlayer
+
+        /*private var positionLiveData = MutableLiveData<Long>()*/
+        private var mediaMetadataLiveData = MutableLiveData<MediaMetadata>()
+        private var isPlayingLiveData = MutableLiveData<Boolean>()
+
         fun startService(context: Context, contentWrapper: ServiceContentWrapper) {
             val service = Intent(context, PlayerService::class.java)
             service.putExtra("track_list", contentWrapper)
@@ -37,15 +45,30 @@ class PlayerService : Service() {
             val service = Intent(context, PlayerService::class.java)
             context.stopService(service)
         }
+
+        fun isPlaying(): LiveData<Boolean> = isPlayingLiveData
+        fun getCurrentPosition(): Long = exoPlayer.currentPosition
+        fun getCurrentMetadata(): LiveData<MediaMetadata> = mediaMetadataLiveData
+        fun getDuration(): Long = exoPlayer.duration
+        fun isShuffle(): Boolean = exoPlayer.shuffleModeEnabled
+        fun isRepeat(): Int = exoPlayer.repeatMode
+        fun onPlay() = exoPlayer.play()
+        fun onPause() = exoPlayer.pause()
+        fun onNext() { if (exoPlayer.hasNextMediaItem()) exoPlayer.seekToNextMediaItem() }
+        fun onPrevious() { if (exoPlayer.hasPreviousMediaItem()) exoPlayer.seekToPreviousMediaItem() }
+        fun onShuffle(b: Boolean) { exoPlayer.shuffleModeEnabled = b }
+        fun onRepeat(n: Int) = { exoPlayer.repeatMode = n }
+        fun onSeekTo(pos: Long) = exoPlayer.seekTo(pos)
     }
 
     override fun onCreate() {
         super.onCreate()
+        isPlayingLiveData.value = false
         exoPlayer = ExoPlayer.Builder(this).build()
 
-        createNotificationsChannel(channelId, channelName)
+        createNotificationsChannel()
 
-        val playerNotificationManager = PlayerNotificationManager.Builder(
+        playerNotificationManager = PlayerNotificationManager.Builder(
             this,
             notificationId,
             channelId
@@ -67,13 +90,11 @@ class PlayerService : Service() {
                 }
             })
             .build()
-
         playerNotificationManager.setPlayer(exoPlayer)
         exoPlayer.playWhenReady = true
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
         val trackWrapper = intent?.getSerializableExtra("track_list") as ServiceContentWrapper
         val trackList = trackWrapper.trackList
 
@@ -82,16 +103,24 @@ class PlayerService : Service() {
         }
 
         exoPlayer.seekToDefaultPosition(trackWrapper.position)
+
+        exoPlayer.addListener(object : Player.Listener {
+            override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+                mediaMetadataLiveData.value = mediaMetadata
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                isPlayingLiveData.value = isPlaying
+            }
+        })
+
+
         exoPlayer.prepare()
 
         return START_STICKY
     }
 
-    private fun getTracks() {
-
-    }
-
-    private fun createNotificationsChannel(channelId: String, channelName: String) {
+    private fun createNotificationsChannel() {
         val channel = NotificationChannel(
             channelId,
             channelName,

@@ -78,10 +78,6 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), TrackLis
         }
     }
 
-    fun onTrackClicked() {
-
-    }
-
     private fun checkPermission() {
         if (isPermissionGranted()) {
             _viewModel.updateTrackList()
@@ -96,10 +92,6 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), TrackLis
                 Manifest.permission.READ_EXTERNAL_STORAGE
             ) == PackageManager.PERMISSION_GRANTED)
     }
-
-
-    private fun navigateToTrack(track: Track) = findNavController()
-        .navigate(MediaLibraryFragmentDirections.actionMediaLibraryFragmentToTrackFragment(track))
 
     override fun onTrackClick(pos: Int) {
         PlayerService.startService(requireContext(), ServiceContentWrapper(

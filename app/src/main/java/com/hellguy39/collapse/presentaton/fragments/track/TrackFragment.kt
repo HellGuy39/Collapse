@@ -1,27 +1,24 @@
 package com.hellguy39.collapse.presentaton.fragments.track
 
-import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
-import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.exoplayer2.MediaMetadata
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackFragmentBinding
+import com.hellguy39.collapse.presentaton.services.PlayerService
 
 
-class TrackFragment : Fragment(R.layout.track_fragment), MediaPlayer.OnPreparedListener, View.OnClickListener {
+class TrackFragment : Fragment(R.layout.track_fragment), View.OnClickListener {
 
     companion object {
         fun newInstance() = TrackFragment()
     }
 
     private val args: TrackFragmentArgs by navArgs()
-    private lateinit var mediaPlayer: MediaPlayer
 
     private lateinit var _viewModel: TrackViewModel
     private lateinit var _binding: TrackFragmentBinding
@@ -37,50 +34,65 @@ class TrackFragment : Fragment(R.layout.track_fragment), MediaPlayer.OnPreparedL
         _binding.topAppBar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
+
+        _binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
+
+        _binding.ibPlayPause.setOnClickListener(this)
+        _binding.ibNextTrack.setOnClickListener(this)
+        _binding.ibPreviousTrack.setOnClickListener(this)
+        _binding.ibShuffle.setOnClickListener(this)
+        _binding.ibRepeatTrack.setOnClickListener(this)
+
+        setObservers()
     }
 
-    override fun onStart() {
-        super.onStart()
-        val uri = Uri.parse(args.track.path)
-        mediaPlayer = MediaPlayer.create(requireContext(), uri)
-        mediaPlayer.setOnPreparedListener(this)
-        updateUI(uri)
+    private fun setObservers() {
+        PlayerService.isPlaying().observe(viewLifecycleOwner) {
+            if (it) {
+                _binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
+            } else {
+                _binding.ibPlayPause.setImageResource(R.drawable.ic_round_play_arrow_24)
+            }
+        }
+
+        PlayerService.getCurrentMetadata().observe(viewLifecycleOwner) {
+            if (it != null)
+                updateUI(it)
+        }
     }
 
-    override fun onPrepared(p0: MediaPlayer?) {
-        mediaPlayer.start()
-    }
-
-    private fun updateUI(uri: Uri) {
-        val mmr = MediaMetadataRetriever()
+    private fun updateUI(mediaMetadata: MediaMetadata) {
+        /*val mmr = MediaMetadataRetriever()
         mmr.setDataSource(context, uri)
 
         val cover = mmr.embeddedPicture
         val tittle = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
         val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+*/
+        _binding.tvTrackName.text = mediaMetadata.title ?: "Unknown"
+        _binding.tvPerformer.text = mediaMetadata.artist ?: "Unknown"
 
-        _binding.tvTrackName.text = tittle
-        _binding.tvPerformer.text = artist
-
-        if (cover != null) {
+        /*if (cover != null) {
             val bitmap = BitmapFactory.decodeByteArray(cover, 0, cover.size)
             _binding.ivCover.setImageBitmap(bitmap)
         } else {
             _binding.ivCover.setImageResource(R.drawable.ic_round_audiotrack_24)
-        }
-
+        }*/
     }
 
     override fun onClick(p0: View?) {
         when(p0?.id) {
             _binding.ibPlayPause.id -> {
-
+                if (PlayerService.isPlaying().value == true)
+                    PlayerService.onPause()
+                else
+                    PlayerService.onPlay()
             }
             _binding.ibNextTrack.id -> {
-
+                PlayerService.onNext()
             }
             _binding.ibPreviousTrack.id -> {
-
+                PlayerService.onPrevious()
             }
             _binding.ibShuffle.id -> {
 

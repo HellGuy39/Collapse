@@ -16,11 +16,7 @@
         android:id="@+id/mediaLibraryFragment"
         android:name="com.hellguy39.collapse.presentaton.fragments.media_library.MediaLibraryFragment"
         android:label="media_library_fragment"
-        tools:layout="@layout/media_library_fragment" >
-        <action
-            android:id="@+id/action_mediaLibraryFragment_to_trackFragment"
-            app:destination="@id/trackFragment" />
-    </fragment>
+        tools:layout="@layout/media_library_fragment" />
     <fragment
         android:id="@+id/trackFragment"
         android:name="com.hellguy39.collapse.presentaton.fragments.track.TrackFragment"
@@ -30,5 +26,10 @@
             android:name="track"
             app:argType="com.hellguy39.domain.models.Track" />
     </fragment>
+    <fragment
+        android:id="@+id/radioFragment"
+        android:name="com.hellguy39.collapse.presentaton.fragments.radio.RadioFragment"
+        android:label="radio_fragment"
+        tools:layout="@layout/radio_fragment" />
 
 </navigation>
