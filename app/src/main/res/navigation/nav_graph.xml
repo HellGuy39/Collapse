@@ -31,5 +31,10 @@
         android:name="com.hellguy39.collapse.presentaton.fragments.radio.RadioFragment"
         android:label="radio_fragment"
         tools:layout="@layout/radio_fragment" />
+    <fragment
+        android:id="@+id/equalizerFragment"
+        android:name="com.hellguy39.collapse.presentaton.fragments.equalizer.EqualizerFragment"
+        android:label="equalizer_fragment"
+        tools:layout="@layout/equalizer_fragment" />
 
 </navigation>

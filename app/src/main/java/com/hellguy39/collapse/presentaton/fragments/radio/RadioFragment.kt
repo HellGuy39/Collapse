@@ -10,6 +10,8 @@ import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.RadioFragmentBinding
 import com.hellguy39.collapse.databinding.TrackFragmentBinding
 import com.hellguy39.collapse.presentaton.services.PlayerService
+import com.hellguy39.collapse.presentaton.services.ServiceContentWrapper
+import com.hellguy39.collapse.utils.PlayerType
 
 class RadioFragment : Fragment(R.layout.radio_fragment) {
 
@@ -29,5 +31,10 @@ class RadioFragment : Fragment(R.layout.radio_fragment) {
         super.onViewCreated(view, savedInstanceState)
         _binding = RadioFragmentBinding.bind(view)
 
+        /*PlayerService.stopService(requireContext())
+        PlayerService.startService(requireContext(), ServiceContentWrapper(
+            type = PlayerType.Radio,
+            url = "http://kastos.cdnstream.com/1345_32"
+        ))*/
     }
 }

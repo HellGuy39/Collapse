@@ -1,5 +1,7 @@
 package com.hellguy39.collapse.presentaton.fragments.track
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -62,22 +64,15 @@ class TrackFragment : Fragment(R.layout.track_fragment), View.OnClickListener {
     }
 
     private fun updateUI(mediaMetadata: MediaMetadata) {
-        /*val mmr = MediaMetadataRetriever()
-        mmr.setDataSource(context, uri)
-
-        val cover = mmr.embeddedPicture
-        val tittle = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
-        val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
-*/
         _binding.tvTrackName.text = mediaMetadata.title ?: "Unknown"
         _binding.tvPerformer.text = mediaMetadata.artist ?: "Unknown"
 
-        /*if (cover != null) {
-            val bitmap = BitmapFactory.decodeByteArray(cover, 0, cover.size)
-            _binding.ivCover.setImageBitmap(bitmap)
-        } else {
+        val bytes = mediaMetadata.artworkData
+
+        if (bytes != null)
+            _binding.ivCover.setImageBitmap(BitmapFactory.decodeByteArray(mediaMetadata.artworkData, 0, bytes.size))
+        else
             _binding.ivCover.setImageResource(R.drawable.ic_round_audiotrack_24)
-        }*/
     }
 
     override fun onClick(p0: View?) {

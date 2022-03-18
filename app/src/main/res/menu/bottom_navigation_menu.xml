@@ -15,4 +15,10 @@
         android:enabled="true"
         android:icon="@drawable/ic_round_library_music_24"
         android:title="Media library"/>
+
+    <item
+        android:id="@+id/equalizerFragment"
+        android:enabled="true"
+        android:icon="@drawable/ic_round_equalizer_24"
+        android:title="Equalizer"/>
 </menu>

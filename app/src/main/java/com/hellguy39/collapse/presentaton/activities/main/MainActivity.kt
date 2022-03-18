@@ -11,6 +11,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.google.android.exoplayer2.MediaMetadata
@@ -87,6 +88,11 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     }
 
     private fun showTrackCard() {
+        val id = navController.currentDestination?.id ?: return
+
+        if(!isBottomNavigationFragment(id))
+            return
+
         _binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
         _binding.trackCard.apply {
             translationY = this.height.toFloat()

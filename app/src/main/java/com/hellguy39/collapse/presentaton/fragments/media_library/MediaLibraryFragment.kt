@@ -18,6 +18,7 @@ import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.TrackListAdapter
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.services.ServiceContentWrapper
+import com.hellguy39.collapse.utils.PlayerType
 import com.hellguy39.domain.models.Track
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -94,9 +95,11 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), TrackLis
     }
 
     override fun onTrackClick(pos: Int) {
+        PlayerService.stopService(requireContext())
         PlayerService.startService(requireContext(), ServiceContentWrapper(
-            pos,
-            tracks
+            type = PlayerType.LocalTrack,
+            position = pos,
+            trackList = tracks
         ))
     }
 
