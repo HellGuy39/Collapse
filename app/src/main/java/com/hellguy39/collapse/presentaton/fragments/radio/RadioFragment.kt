@@ -4,14 +4,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.exoplayer2.MediaMetadata
-import com.google.android.exoplayer2.metadata.Metadata
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.RadioFragmentBinding
-import com.hellguy39.collapse.databinding.TrackFragmentBinding
-import com.hellguy39.collapse.presentaton.services.PlayerService
-import com.hellguy39.collapse.presentaton.services.ServiceContentWrapper
-import com.hellguy39.collapse.utils.PlayerType
 
 class RadioFragment : Fragment(R.layout.radio_fragment) {
 

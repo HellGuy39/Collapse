@@ -3,27 +3,13 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/drawable/ic_baseline_pause_circle_filled_24.xml" value="0.2645" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/drawable/ic_baseline_play_circle_filled_24.xml" value="0.2645" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/drawable/ic_round_pause_24.xml" value="0.2645" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/drawable/ic_round_play_arrow_24.xml" value="0.2645" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/drawable/ic_round_skip_next_24.xml" value="0.2645" />
         <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/activity_main.xml" value="0.259375" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/equalizer_fragment.xml" value="0.259375" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/fragment_home.xml" value="0.2453125" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/fragment_web_view.xml" value="0.259375" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/media_library_fragment.xml" value="0.259375" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/notification_player.xml" value="0.259375" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/playlist_fragment.xml" value="0.259375" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/playlist_item.xml" value="0.259375" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/radio_fragment.xml" value="0.259375" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/track_fragment.xml" value="0.259375" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/track_item.xml" value="0.259375" />
-        <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/menu/bottom_navigation_menu.xml" value="0.259375" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/layout/equalizer_fragment.xml" value="0.3100897526395494" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_7" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

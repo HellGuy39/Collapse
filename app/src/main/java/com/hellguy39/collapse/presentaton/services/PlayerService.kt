@@ -22,7 +22,8 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.hellguy39.collapse.presentaton.activities.main.DescriptionAdapter
-import com.hellguy39.collapse.utils.PlayerType
+import com.hellguy39.domain.utils.PlayerType
+import com.hellguy39.domain.models.ServiceContentWrapper
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -41,8 +42,9 @@ class PlayerService : Service() {
         private lateinit var exoPlayer: ExoPlayer
 
         /*private var positionLiveData = MutableLiveData<Long>()*/
-        private var mediaMetadataLiveData = MutableLiveData<MediaMetadata>()
-        private var isPlayingLiveData = MutableLiveData<Boolean>()
+        private val mediaMetadataLiveData = MutableLiveData<MediaMetadata>()
+        private val isPlayingLiveData = MutableLiveData<Boolean>()
+        private val audioSessionIdLiveData = MutableLiveData<Int>()
 
         fun startService(context: Context, contentWrapper: ServiceContentWrapper) {
             val service = Intent(context, PlayerService::class.java)
@@ -59,7 +61,7 @@ class PlayerService : Service() {
         fun getCurrentPosition(): Long = exoPlayer.currentPosition
         fun getCurrentMetadata(): LiveData<MediaMetadata> = mediaMetadataLiveData
         fun getDuration(): Long = exoPlayer.duration
-        fun getAudioSessionId(): Int = exoPlayer.audioSessionId
+        fun getAudioSessionId(): LiveData<Int> = audioSessionIdLiveData
         fun isShuffle(): Boolean = exoPlayer.shuffleModeEnabled
         fun isRepeat(): Int = exoPlayer.repeatMode
 
@@ -103,15 +105,32 @@ class PlayerService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val content = intent?.getSerializableExtra("track_list") as ServiceContentWrapper
+        val content = intent?.getParcelableExtra<ServiceContentWrapper>("track_list") as ServiceContentWrapper
 
         when(content.type) {
             PlayerType.LocalTrack -> initDefaultPlayer(content)
             PlayerType.Radio -> initRadioPlayer(content)
         }
 
+        exoPlayer.addListener(object : Player.Listener {
+            override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+                mediaMetadataLiveData.value = mediaMetadata
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                isPlayingLiveData.value = isPlaying
+            }
+
+            override fun onAudioSessionIdChanged(audioSessionId: Int) {
+                audioSessionIdLiveData.value = audioSessionId
+            }
+        })
+
+        audioSessionIdLiveData.value = exoPlayer.audioSessionId
         playerNotificationManager.setPlayer(exoPlayer)
+
         exoPlayer.playWhenReady = true
+        exoPlayer.prepare()
 
         return START_STICKY
     }
@@ -129,23 +148,6 @@ class PlayerService : Service() {
 
         exoPlayer.seekToDefaultPosition(content.position)
 
-        exoPlayer.addListener(object : Player.Listener {
-            override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
-                mediaMetadataLiveData.value = mediaMetadata
-            }
-
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                isPlayingLiveData.value = isPlaying
-            }
-
-            override fun onAudioSessionIdChanged(audioSessionId: Int) {
-                super.onAudioSessionIdChanged(audioSessionId)
-            }
-        })
-
-
-        exoPlayer.prepare()
-
     }
 
     private fun initRadioPlayer(content: ServiceContentWrapper) {
@@ -161,7 +163,6 @@ class PlayerService : Service() {
             .build()
 
         exoPlayer.addMediaSource(mediaSource)
-        exoPlayer.prepare()
     }
 
     private fun createNotificationsChannel() {

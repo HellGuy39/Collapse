@@ -144,6 +144,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     private fun isBottomNavigationFragment(id: Int):Boolean {
         return id == R.id.homeFragment ||
                 id == R.id.mediaLibraryFragment ||
-                id == R.id.radioFragment
+                id == R.id.radioFragment ||
+                id == R.id.equalizerFragment
     }
 }

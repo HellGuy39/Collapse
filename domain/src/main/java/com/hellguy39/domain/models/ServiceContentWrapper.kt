@@ -1,12 +1,13 @@
-package com.hellguy39.collapse.presentaton.services
+package com.hellguy39.domain.models
 
-import com.hellguy39.collapse.utils.PlayerType
-import com.hellguy39.domain.models.Track
-import java.io.Serializable
+import android.os.Parcelable
+import com.hellguy39.domain.utils.PlayerType
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class ServiceContentWrapper(
     var type: Enum<PlayerType> = PlayerType.Undefined,
     var url: String? = null,
     var position: Int = 0,
     var trackList: List<Track>? = null
-) : Serializable
+) : Parcelable
