@@ -10,7 +10,7 @@ import com.hellguy39.domain.models.Track
 
 class TrackViewHolder(v: View): RecyclerView.ViewHolder(v) {
 
-    private val _binding = TrackItemBinding.bind(v)
+    private val binding = TrackItemBinding.bind(v)
 
     fun bind(
         track: Track,
@@ -19,18 +19,17 @@ class TrackViewHolder(v: View): RecyclerView.ViewHolder(v) {
         listener: TrackListAdapter.OnTrackListener
     ) {
 
-        _binding.tvTrackName.text = track.name//.ifEmpty { "Unknown" }
-        _binding.tvAuthor.text = track.artist//.ifEmpty { "Unknown" }
+        binding.tvTrackName.text = track.name//.ifEmpty { "Unknown" }
+        binding.tvAuthor.text = track.artist//.ifEmpty { "Unknown" }
 
-        val cover = track.embeddedPicture
-        if (cover != null) {
-            val bitmap = BitmapFactory.decodeByteArray(cover, 0, cover.size)
-            _binding.ivTrackImage.setImageBitmap(bitmap)
-        } else {
-            _binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
-        }
+        val bytes = track.embeddedPicture
 
-        _binding.root.setOnClickListener {
+        if (bytes != null)
+            binding.ivTrackImage.setImageBitmap(BitmapFactory.decodeByteArray(track.embeddedPicture, 0, bytes.size))
+        else
+            binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
+
+        binding.root.setOnClickListener {
             listener.onTrackClick(position)
         }
     }

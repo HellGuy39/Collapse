@@ -1,6 +1,7 @@
 package com.hellguy39.collapse.presentaton.fragments.equalizer
 
 import android.media.audiofx.AudioEffect
+import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
 import androidx.lifecycle.ViewModelProvider
@@ -10,6 +11,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import com.google.android.material.slider.Slider
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.EqualizerFragmentBinding
@@ -19,12 +21,14 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment) {
 
     companion object {
         fun newInstance() = EqualizerFragment()
+        private const val STEP_SIZE = 1f
     }
 
     private lateinit var viewModel: EqualizerViewModel
     private lateinit var binding: EqualizerFragmentBinding
     private lateinit var equalizer: Equalizer
     private lateinit var virtualizer: Virtualizer
+    private lateinit var bassBoost: BassBoost
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,10 +51,16 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment) {
     private fun initEQ(id: Int) {
         equalizer = Equalizer(0, id)
         virtualizer = Virtualizer(0, id)
+        bassBoost = BassBoost(0, id)
 
         equalizer.enabled = true
+        bassBoost.enabled = true
+        virtualizer.enabled = true
 
         setupEqualizer()
+        setupPreset()
+        setupBassBoost()
+        setupVirtualizer()
     }
 
     private fun setupEqualizer() {
@@ -75,8 +85,6 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment) {
             .map { equalizer.getBandFreqRange(it.toShort())[0] }
             .mapTo(bandsLowerFreq) { it / 1000 }
 
-        val numberOfPresets = equalizer.numberOfPresets
-
         binding.tvDbMax.text = (upperBandLevel / 100).toString() + " dB"
         binding.tvDbMin.text = (lowestBandLevel / 100).toString() + " dB"
 
@@ -89,46 +97,76 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment) {
         binding.band1.apply {
             valueFrom = (lowestBandLevel / 100).toFloat()
             valueTo = (upperBandLevel / 100).toFloat()
+            stepSize = STEP_SIZE
         }.addOnChangeListener { slider, value, fromUser ->
             equalizer.setBandLevel(0, (value * 100).toInt().toShort())
         }
         binding.band2.apply {
             valueFrom = (lowestBandLevel / 100).toFloat()
             valueTo = (upperBandLevel / 100).toFloat()
+            stepSize = STEP_SIZE
         }.addOnChangeListener { slider, value, fromUser ->
             equalizer.setBandLevel(1, (value * 100).toInt().toShort())
         }
         binding.band3.apply {
             valueFrom = (lowestBandLevel / 100).toFloat()
             valueTo = (upperBandLevel / 100).toFloat()
+            stepSize = STEP_SIZE
         }.addOnChangeListener { slider, value, fromUser ->
             equalizer.setBandLevel(2, (value * 100).toInt().toShort())
         }
         binding.band4.apply {
             valueFrom = (lowestBandLevel / 100).toFloat()
             valueTo = (upperBandLevel / 100).toFloat()
+            stepSize = STEP_SIZE
         }.addOnChangeListener { slider, value, fromUser ->
             equalizer.setBandLevel(3, (value * 100).toInt().toShort())
         }
         binding.band5.apply {
             valueFrom = (lowestBandLevel / 100).toFloat()
             valueTo = (upperBandLevel / 100).toFloat()
+            stepSize = STEP_SIZE
         }.addOnChangeListener { slider, value, fromUser ->
             equalizer.setBandLevel(4, (value * 100).toInt().toShort())
         }
+    }
 
-//        val settings = Equalizer.Settings()
-//
-//        settings.bandLevels = shortArrayOf(1499, 1499, 1499, 1499, 1499)
-//        settings.numBands = numberOfBands
-//
-//        equalizer.properties = settings
-//
-//        equalizer.setBandLevel(0, 1499)
-//        equalizer.setBandLevel(1, 1499)
-//        equalizer.setBandLevel(2, 1499)
-//        equalizer.setBandLevel(3, 1499)
-//        equalizer.setBandLevel(4, 1499)
+    private fun setupPreset() {
+        val numOfPresets = (equalizer.numberOfPresets) - 1
+        val presets = mutableListOf<String>()
+        val presetAdapter = ArrayAdapter(requireContext(), R.layout.list_item, presets)
+
+        binding.acPreset.setAdapter(presetAdapter)
+
+        for (n in 0..numOfPresets) {
+            presets.add(equalizer.getPresetName(n.toShort()))
+        }
+
+        presetAdapter.notifyDataSetChanged()
+
+        binding.acPreset.setOnItemClickListener { adapterView, view, i, l ->
+            equalizer.usePreset(i.toShort())
+        }
+    }
+
+    private fun setupBassBoost() {
+        binding.bassBoostBand.apply {
+            valueFrom = 0f
+            valueTo = 10000f
+            stepSize = 1000f
+        }.addOnChangeListener { slider, value, fromUser ->
+            bassBoost.setStrength(value.toInt().toShort())
+        }
+    }
+
+    private fun setupVirtualizer() {
+        binding.surroundBand.apply {
+            valueFrom = 0f
+            valueTo = 10000f
+            stepSize = 1000f
+        }.addOnChangeListener { slider, value, fromUser ->
+            virtualizer.setStrength(value.toInt().toShort())
+        }
     }
 
     private fun isCorrectId(id: Int?): Boolean = (id != null || id != 0)

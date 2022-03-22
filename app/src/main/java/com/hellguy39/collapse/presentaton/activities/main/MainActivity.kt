@@ -3,6 +3,7 @@ package com.hellguy39.collapse.presentaton.activities.main
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.LayoutTransition
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.transition.AutoTransition
 import android.transition.TransitionManager
@@ -85,6 +86,13 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     private fun updateCardUI(metadata: MediaMetadata) {
         _binding.tvTrackName.text = if (metadata.title.isNullOrEmpty()) "Unknown" else metadata.title
         _binding.tvArtist.text  = if (metadata.artist.isNullOrEmpty()) "Unknown" else metadata.artist
+
+        val bytes = metadata.artworkData
+
+        if (bytes != null)
+            _binding.ivTrackImage.setImageBitmap(BitmapFactory.decodeByteArray(metadata.artworkData, 0, bytes.size))
+        else
+            _binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
     }
 
     private fun showTrackCard() {

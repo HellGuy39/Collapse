@@ -97,8 +97,8 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), TrackLis
         PlayerService.startService(requireContext(), ServiceContentWrapper(
             type = PlayerType.LocalTrack,
             position = pos,
-            trackList = tracks
-        )
+            trackList = tracks,
+            )
         )
     }
 

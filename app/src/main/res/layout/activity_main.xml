@@ -53,7 +53,7 @@
             android:padding="8dp">
 
             <ImageView
-                android:id="@+id/imageView"
+                android:id="@+id/ivTrackImage"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_weight="0"
