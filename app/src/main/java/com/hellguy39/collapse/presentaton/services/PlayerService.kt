@@ -39,14 +39,23 @@ class PlayerService : Service() {
 
     companion object {
 
+        private var isRunningService = false
+        private var playlistName: String? = null
+
         private lateinit var exoPlayer: ExoPlayer
 
         /*private var positionLiveData = MutableLiveData<Long>()*/
         private val mediaMetadataLiveData = MutableLiveData<MediaMetadata>()
         private val isPlayingLiveData = MutableLiveData<Boolean>()
         private val audioSessionIdLiveData = MutableLiveData<Int>()
+        private val playerTypeLiveData = MutableLiveData<Enum<PlayerType>>()
+        private val contentPositionLiveData = MutableLiveData<Int>()
 
         fun startService(context: Context, contentWrapper: ServiceContentWrapper) {
+
+            if (isRunningService)
+                stopService(context)
+
             val service = Intent(context, PlayerService::class.java)
             service.putExtra("track_list", contentWrapper)
             ContextCompat.startForegroundService(context, service)
@@ -60,10 +69,12 @@ class PlayerService : Service() {
         fun isPlaying(): LiveData<Boolean> = isPlayingLiveData
         fun getCurrentPosition(): Long = exoPlayer.currentPosition
         fun getCurrentMetadata(): LiveData<MediaMetadata> = mediaMetadataLiveData
+        fun getContentPosition(): LiveData<Int> = contentPositionLiveData
         fun getDuration(): Long = exoPlayer.duration
         fun getAudioSessionId(): LiveData<Int> = audioSessionIdLiveData
         fun isShuffle(): Boolean = exoPlayer.shuffleModeEnabled
         fun isRepeat(): Int = exoPlayer.repeatMode
+        fun getPlaylistName(): String? = playlistName
 
         //Control
         fun onPlay() = exoPlayer.play()
@@ -71,12 +82,14 @@ class PlayerService : Service() {
         fun onNext() { if (exoPlayer.hasNextMediaItem()) exoPlayer.seekToNextMediaItem() }
         fun onPrevious() { if (exoPlayer.hasPreviousMediaItem()) exoPlayer.seekToPreviousMediaItem() }
         fun onShuffle(b: Boolean) { exoPlayer.shuffleModeEnabled = b }
-        fun onRepeat(n: Int) = { exoPlayer.repeatMode = n }
+        fun onRepeat(n: Int) { exoPlayer.repeatMode = n }
         fun onSeekTo(pos: Long) = exoPlayer.seekTo(pos)
     }
 
     override fun onCreate() {
         super.onCreate()
+        isRunningService = true
+
         isPlayingLiveData.value = false
         createNotificationsChannel()
 
@@ -107,6 +120,9 @@ class PlayerService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val content = intent?.getParcelableExtra<ServiceContentWrapper>("track_list") as ServiceContentWrapper
 
+        playerTypeLiveData.value = content.type
+        playlistName = content.playlistName
+
         when(content.type) {
             PlayerType.LocalTrack -> initDefaultPlayer(content)
             PlayerType.Radio -> initRadioPlayer(content)
@@ -115,6 +131,7 @@ class PlayerService : Service() {
         exoPlayer.addListener(object : Player.Listener {
             override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
                 mediaMetadataLiveData.value = mediaMetadata
+                contentPositionLiveData.value = exoPlayer.currentMediaItemIndex
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -147,14 +164,13 @@ class PlayerService : Service() {
         }
 
         exoPlayer.seekToDefaultPosition(content.position)
-
     }
 
     private fun initRadioPlayer(content: ServiceContentWrapper) {
         val mediaDataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(this)
 
         val mediaSource = ProgressiveMediaSource.Factory(mediaDataSourceFactory).createMediaSource(MediaItem.fromUri(
-            Uri.parse(content.url)))
+            Uri.parse(content.radioStation?.url)))
 
         val mediaSourceFactory: MediaSource.Factory = DefaultMediaSourceFactory(mediaDataSourceFactory)
 
@@ -178,6 +194,7 @@ class PlayerService : Service() {
 
     override fun onDestroy() {
         exoPlayer.release()
+        isRunningService = false
         super.onDestroy()
     }
 
@@ -187,6 +204,7 @@ class PlayerService : Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
+        isRunningService = false
         //playerNotificationManager.setPlayer(null)
         stopSelf()
     }

@@ -10,4 +10,5 @@ data class Track(
     var artist: String = "Unknown",
     var path: String = "N/A",
     var embeddedPicture: ByteArray? = null,
+    var isPlaying: Boolean = false
 ) : Parcelable

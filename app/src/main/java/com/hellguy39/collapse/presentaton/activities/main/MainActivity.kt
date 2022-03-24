@@ -16,8 +16,10 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.google.android.exoplayer2.MediaMetadata
+import com.google.android.material.transition.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.ActivityMainBinding
+import com.hellguy39.collapse.presentaton.fragments.track.TrackFragment
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -54,10 +56,8 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         _binding.ibPlayPause.setOnClickListener {
             if (PlayerService.isPlaying().value == true) {
                 PlayerService.onPause()
-                _binding.ibPlayPause.setImageResource(R.drawable.ic_round_play_arrow_24)
             } else {
                 PlayerService.onPlay()
-                _binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
             }
         }
 
@@ -66,7 +66,11 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
 
     private fun setObservers() {
         PlayerService.isPlaying().observe(this) {
-
+            if (it) {
+                _binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
+            } else {
+                _binding.ibPlayPause.setImageResource(R.drawable.ic_round_play_arrow_24)
+            }
         }
 
         PlayerService.getCurrentMetadata().observe(this) {
@@ -115,9 +119,8 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     private fun hideTrackCard() {
         _binding.trackCard.apply {
             translationY = 0f
-
             animate().translationY(this.height.toFloat())
-                .setDuration(200)
+                .setDuration(0)
                 .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
                         super.onAnimationEnd(animation)
@@ -144,8 +147,26 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     ) {
         if (isBottomNavigationFragment(destination.id)) {
             showBottomNavigation()
+            checkTrackCard(true)
         } else {
             hideBottomNavigation()
+            checkTrackCard(false)
+        }
+    }
+
+    private fun checkTrackCard(enable: Boolean) {
+        if (enable) {
+            if (isNeedDisplayCard) {
+                if (_binding.trackCard.visibility == View.INVISIBLE) {
+                    showTrackCard()
+                }
+            }
+        } else {
+            if (!isNeedDisplayCard) {
+                if (_binding.trackCard.visibility == View.VISIBLE) {
+                    hideTrackCard()
+                }
+            }
         }
     }
 

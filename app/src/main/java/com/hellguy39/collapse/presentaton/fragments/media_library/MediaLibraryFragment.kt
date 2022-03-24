@@ -3,9 +3,11 @@ package com.hellguy39.collapse.presentaton.fragments.media_library
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -28,19 +30,50 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), TrackLis
         fun newInstance() = MediaLibraryFragment()
     }
 
-    private val _viewModel: MediaLibraryViewModel by viewModels()
-    private lateinit var _binding: MediaLibraryFragmentBinding
+    private lateinit var searchView: SearchView
+    private val viewModel: MediaLibraryViewModel by viewModels()
+    private lateinit var binding: MediaLibraryFragmentBinding
     private var tracks: MutableList<Track> = mutableListOf()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = MediaLibraryFragmentBinding.bind(view)
+        binding = MediaLibraryFragmentBinding.bind(view)
 
         tracks.clear()
 
-        _binding.rvTracks.apply {
+        binding.rvTracks.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = TrackListAdapter(trackList = tracks, resources = resources, this@MediaLibraryFragment)
+        }
+
+        val searchItem = binding.topAppBar.menu.findItem(R.id.search)
+
+        searchView = searchItem.actionView as SearchView
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(p0: String?): Boolean {
+
+                return false
+            }
+
+            override fun onQueryTextChange(p0: String?): Boolean {
+
+                return false
+            }
+
+        })
+
+
+        binding.topAppBar.setOnMenuItemClickListener {
+            when(it.itemId) {
+                R.id.search -> {
+                    true
+                }
+                R.id.filter -> {
+                    true
+                }
+                else -> false
+            }
         }
 
         setObservers()
@@ -48,8 +81,11 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), TrackLis
     }
 
     private fun setObservers() {
-        _viewModel.getTrackList().observe(viewLifecycleOwner) { receivedTracks ->
+        viewModel.getTrackList().observe(viewLifecycleOwner) { receivedTracks ->
             updateRvTracks(receivedTracks)
+        }
+        PlayerService.getContentPosition().observe(viewLifecycleOwner) {
+            Toast.makeText(requireContext(), "POS: $it", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -61,8 +97,8 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), TrackLis
             tracks.add(receivedTracks[n])
         }
 
-        val position = _binding.rvTracks.adapter?.itemCount ?: 0
-        _binding.rvTracks.adapter?.notifyItemInserted(position)
+        val position = binding.rvTracks.adapter?.itemCount ?: 0
+        binding.rvTracks.adapter?.notifyItemInserted(position)
     }
 
     private val requestPermission = registerForActivityResult(
@@ -79,7 +115,7 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), TrackLis
 
     private fun checkPermission() {
         if (isPermissionGranted()) {
-            _viewModel.updateTrackList()
+            viewModel.updateTrackList()
         } else {
             requestPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
@@ -93,7 +129,6 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), TrackLis
     }
 
     override fun onTrackClick(pos: Int) {
-        PlayerService.stopService(requireContext())
         PlayerService.startService(requireContext(), ServiceContentWrapper(
             type = PlayerType.LocalTrack,
             position = pos,

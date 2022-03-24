@@ -7,7 +7,8 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class ServiceContentWrapper(
     var type: Enum<PlayerType> = PlayerType.Undefined,
-    var url: String? = null,
+    var radioStation: RadioStation? = null,
     var position: Int = 0,
+    var playlistName: String? = null,
     var trackList: List<Track>? = null
 ) : Parcelable

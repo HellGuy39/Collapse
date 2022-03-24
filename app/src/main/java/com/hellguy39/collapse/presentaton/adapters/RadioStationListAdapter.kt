@@ -7,7 +7,8 @@ import com.hellguy39.collapse.R
 import com.hellguy39.domain.models.RadioStation
 
 class RadioStationListAdapter(
-    private val stations: List<RadioStation>
+    private val stations: List<RadioStation>,
+    private val listener: OnRadioStationListener
 ): RecyclerView.Adapter<RadioStationViewHolder>() {
 
     override fun onCreateViewHolder(
@@ -24,8 +25,16 @@ class RadioStationListAdapter(
         holder: RadioStationViewHolder,
         position: Int
     ) {
-        holder.bind()
+        holder.bind(
+            radioStation = stations[position],
+            listener = listener,
+            position = position
+        )
     }
 
     override fun getItemCount(): Int = stations.size
+
+    interface OnRadioStationListener {
+        fun onStationClick(pos: Int)
+    }
 }

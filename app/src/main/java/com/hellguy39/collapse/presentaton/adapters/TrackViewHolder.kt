@@ -32,5 +32,6 @@ class TrackViewHolder(v: View): RecyclerView.ViewHolder(v) {
         binding.root.setOnClickListener {
             listener.onTrackClick(position)
         }
+
     }
 }

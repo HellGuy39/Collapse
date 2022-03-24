@@ -8,11 +8,13 @@
         <entry key="app/src/main/res/layout/equalizer_fragment.xml" value="0.3100897526395494" />
         <entry key="app/src/main/res/layout/fragment_radio_list.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/list_item.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/layout/media_library_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/notification_player.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/radio_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/radio_item.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/track_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/track_item.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/menu/top_app_bar.xml" value="0.29739583333333336" />
       </map>
     </option>
   </component>
