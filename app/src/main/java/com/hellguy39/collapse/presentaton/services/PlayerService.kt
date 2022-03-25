@@ -50,6 +50,7 @@ class PlayerService : Service() {
         private val audioSessionIdLiveData = MutableLiveData<Int>()
         private val playerTypeLiveData = MutableLiveData<Enum<PlayerType>>()
         private val contentPositionLiveData = MutableLiveData<Int>()
+        private val isShuffleLiveData = MutableLiveData<Boolean>()
 
         fun startService(context: Context, contentWrapper: ServiceContentWrapper) {
 
@@ -66,13 +67,14 @@ class PlayerService : Service() {
             context.stopService(service)
         }
 
+        fun isShuffle(): LiveData<Boolean> = isShuffleLiveData
+
         fun isPlaying(): LiveData<Boolean> = isPlayingLiveData
         fun getCurrentPosition(): Long = exoPlayer.currentPosition
         fun getCurrentMetadata(): LiveData<MediaMetadata> = mediaMetadataLiveData
         fun getContentPosition(): LiveData<Int> = contentPositionLiveData
         fun getDuration(): Long = exoPlayer.duration
         fun getAudioSessionId(): LiveData<Int> = audioSessionIdLiveData
-        fun isShuffle(): Boolean = exoPlayer.shuffleModeEnabled
         fun isRepeat(): Int = exoPlayer.repeatMode
         fun getPlaylistName(): String? = playlistName
 
@@ -81,7 +83,10 @@ class PlayerService : Service() {
         fun onPause() = exoPlayer.pause()
         fun onNext() { if (exoPlayer.hasNextMediaItem()) exoPlayer.seekToNextMediaItem() }
         fun onPrevious() { if (exoPlayer.hasPreviousMediaItem()) exoPlayer.seekToPreviousMediaItem() }
-        fun onShuffle(b: Boolean) { exoPlayer.shuffleModeEnabled = b }
+        fun onShuffle(b: Boolean) {
+            isShuffleLiveData.value = b
+            exoPlayer.shuffleModeEnabled = b
+        }
         fun onRepeat(n: Int) { exoPlayer.repeatMode = n }
         fun onSeekTo(pos: Long) = exoPlayer.seekTo(pos)
     }

@@ -3,26 +3,23 @@ package com.hellguy39.collapse.presentaton.activities.main
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.LayoutTransition
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.transition.AutoTransition
 import android.transition.TransitionManager
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.google.android.exoplayer2.MediaMetadata
-import com.google.android.material.transition.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.ActivityMainBinding
-import com.hellguy39.collapse.presentaton.fragments.track.TrackFragment
+import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedListener {
@@ -49,8 +46,9 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         _binding.trackCard.visibility = View.INVISIBLE
 
         _binding.trackCard.setOnClickListener {
-            navController.navigate(R.id.trackFragment)
-            hideTrackCard()
+            //navController.navigate(R.id.trackFragment)
+            //hideTrackCard()
+            startActivity(Intent(this, TrackActivity::class.java))
         }
 
         _binding.ibPlayPause.setOnClickListener {
