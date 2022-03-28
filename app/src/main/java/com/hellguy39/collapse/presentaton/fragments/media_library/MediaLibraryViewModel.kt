@@ -17,20 +17,4 @@ class MediaLibraryViewModel @Inject constructor(
     private val getAllTracksUseCase: GetAllTracksUseCase
 ) : ViewModel() {
 
-    private val trackListLiveData = MutableLiveData<List<Track>>()
-
-    fun getTrackList(): LiveData<List<Track>> {
-        return trackListLiveData
-    }
-
-    fun updateTrackList() {
-        fetchTrackList()
-    }
-
-    private fun fetchTrackList() = viewModelScope.launch(Dispatchers.IO) {
-        val tracks = getAllTracksUseCase.invoke()
-        withContext(Dispatchers.Main) {
-            trackListLiveData.value = tracks
-        }
-    }
 }

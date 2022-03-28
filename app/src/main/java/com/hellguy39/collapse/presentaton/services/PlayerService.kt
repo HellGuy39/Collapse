@@ -15,16 +15,21 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.MediaMetadata
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.source.dash.DashMediaSource
+import com.google.android.exoplayer2.source.hls.HlsMediaSource
+import com.google.android.exoplayer2.source.rtsp.RtspMediaSource
+import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSource
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.hellguy39.collapse.presentaton.activities.main.DescriptionAdapter
-import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.models.ServiceContentWrapper
+import com.hellguy39.domain.utils.PlayerType
+import com.hellguy39.domain.utils.Protocol
 import dagger.hilt.android.AndroidEntryPoint
+
 
 @AndroidEntryPoint
 class PlayerService : Service() {
@@ -35,7 +40,7 @@ class PlayerService : Service() {
     private val channelId = "player_channel"
     private val channelName = "foreground_player_channel"
 
-    //private val mediaDataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(this)
+    private val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
 
     companion object {
 
@@ -128,6 +133,8 @@ class PlayerService : Service() {
         playerTypeLiveData.value = content.type
         playlistName = content.playlistName
 
+        exoPlayer = ExoPlayer.Builder(this).build()
+
         when(content.type) {
             PlayerType.LocalTrack -> initDefaultPlayer(content)
             PlayerType.Radio -> initRadioPlayer(content)
@@ -158,7 +165,6 @@ class PlayerService : Service() {
     }
 
     private fun initDefaultPlayer(content: ServiceContentWrapper) {
-        exoPlayer = ExoPlayer.Builder(this).build()
         val trackList = content.trackList
 
         if (trackList.isNullOrEmpty())
@@ -172,20 +178,38 @@ class PlayerService : Service() {
     }
 
     private fun initRadioPlayer(content: ServiceContentWrapper) {
-        val mediaDataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(this)
 
-        val mediaSource = ProgressiveMediaSource.Factory(mediaDataSourceFactory).createMediaSource(MediaItem.fromUri(
-            Uri.parse(content.radioStation?.url)))
+        val mediaItem = MediaItem.fromUri(Uri.parse(content.radioStation?.url))
 
-        val mediaSourceFactory: MediaSource.Factory = DefaultMediaSourceFactory(mediaDataSourceFactory)
+        when(content.radioStation?.protocol) {
+            Protocol.HLS -> {
+                val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(mediaItem)
+                exoPlayer.addMediaSource(mediaSource)
+            }
+            Protocol.DASH -> {
+                val mediaSource: MediaSource = DashMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(mediaItem)
+                exoPlayer.addMediaSource(mediaSource)
+            }
+            Protocol.Progressive -> {
+                val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(mediaItem)
+                exoPlayer.addMediaSource(mediaSource)
+            }
+            Protocol.RTSP -> {
+                val mediaSource: MediaSource = RtspMediaSource.Factory()
+                    .createMediaSource(mediaItem)
+                exoPlayer.addMediaSource(mediaSource)
+            }
+            Protocol.SmoothStreaming -> {
+                val mediaSource: MediaSource = SsMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(mediaItem)
+                exoPlayer.addMediaSource(mediaSource)
+            }
+        }
 
-        exoPlayer = ExoPlayer.Builder(this)
-            .setMediaSourceFactory(mediaSourceFactory)
-            .build()
-
-        exoPlayer.addMediaSource(mediaSource)
     }
-
     private fun createNotificationsChannel() {
         val channel = NotificationChannel(
             channelId,

@@ -3,6 +3,7 @@ package com.hellguy39.collapse.presentaton.activities.track
 import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import androidx.annotation.ColorInt
@@ -72,11 +73,11 @@ class TrackActivity : AppCompatActivity(), View.OnClickListener {
                 @ColorInt val colorPrimary = typedValue.data
                 binding.ibShuffle.imageTintList = ColorStateList.valueOf(colorPrimary)
             } else {
-                /*val typedValue = TypedValue()
+                val typedValue = TypedValue()
                 val theme = this.theme
-                theme.resolveAttribute(com.google.android.material.R.attr.icon, typedValue, true)
-                @ColorInt val colorPrimary = typedValue.data
-                binding.ibShuffle.imageTintList = ColorStateList.valueOf(colorPrimary)*/
+                theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValue, true)
+                @ColorInt val colorOnSurface = typedValue.data
+                binding.ibShuffle.imageTintList = ColorStateList.valueOf(colorOnSurface)
             }
         }
 

@@ -7,8 +7,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackItemBinding
 import com.hellguy39.domain.models.Track
+import com.hellguy39.domain.usecases.GetImageBitmapUseCase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
-class TrackViewHolder(v: View): RecyclerView.ViewHolder(v) {
+class TrackViewHolder(
+    v: View,
+    private val getImageBitmapUseCase: GetImageBitmapUseCase
+): RecyclerView.ViewHolder(v) {
 
     private val binding = TrackItemBinding.bind(v)
 
@@ -22,10 +28,10 @@ class TrackViewHolder(v: View): RecyclerView.ViewHolder(v) {
         binding.tvTrackName.text = track.name//.ifEmpty { "Unknown" }
         binding.tvAuthor.text = track.artist//.ifEmpty { "Unknown" }
 
-        val bytes = track.embeddedPicture
+        val bitmap = getImageBitmapUseCase.invoke(track.path)
 
-        if (bytes != null)
-            binding.ivTrackImage.setImageBitmap(BitmapFactory.decodeByteArray(track.embeddedPicture, 0, bytes.size))
+        if (bitmap != null)
+            binding.ivTrackImage.setImageBitmap(bitmap)
         else
             binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
 

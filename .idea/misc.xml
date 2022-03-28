@@ -4,18 +4,31 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/activity_main.xml" value="0.259375" />
+        <entry key="app/src/main/res/drawable/ic_round_repeat_24.xml" value="0.119" />
+        <entry key="app/src/main/res/drawable/ic_round_shuffle_24.xml" value="0.119" />
+        <entry key="app/src/main/res/drawable/ic_round_skip_next_24.xml" value="0.119" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/activity_track.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/layout/add_radio_station_fragment.xml" value="0.3194427490234375" />
+        <entry key="app/src/main/res/layout/create_playlist_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/equalizer_fragment.xml" value="0.3100897526395494" />
         <entry key="app/src/main/res/layout/fragment_radio_list.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/list_item.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/media_library_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/notification_player.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/layout/playlist_fragment.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/layout/playlist_item.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/layout/playlists_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/radio_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/radio_item.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/track_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/track_item.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/layout/track_list_fragment.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/menu/bottom_navigation_menu.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/menu/playlists_top_menu.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/menu/radio_stations_top_menu.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/menu/top_app_bar.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/menu/tracklist_top_menu.xml" value="0.29739583333333336" />
       </map>
     </option>
   </component>

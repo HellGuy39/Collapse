@@ -4,11 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".presentaton.fragments.playlist.PlaylistFragment">
+    tools:context=".presentaton.fragments.track_list.TrackListFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="128dp">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapseToolbar"
@@ -16,28 +16,38 @@
             android:layout_height="match_parent"
             app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
             tools:title="Playlist #6"
+            app:expandedTitleMarginStart="64dp"
+            app:expandedTitleMarginBottom="22dp"
             app:titleCollapseMode="fade">
 
-            <ImageView
-                android:layout_margin="48dp"
-                android:layout_width="256dp"
-                android:layout_height="256dp"
-                android:layout_gravity="center"/>
-
             <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
+                app:menu="@menu/tracklist_top_menu"
                 app:navigationIcon="@drawable/ic_round_arrow_back_ios_24"/>
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTrackList"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabPlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:visibility="gone"
+        android:src="@drawable/ic_round_play_arrow_24"
+        app:layout_anchor="@id/collapseToolbar"
+        app:layout_anchorGravity="bottom|end"/>
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

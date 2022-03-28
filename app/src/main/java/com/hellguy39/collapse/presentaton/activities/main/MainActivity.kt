@@ -14,6 +14,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
+import androidx.navigation.ui.setupWithNavController
 import com.google.android.exoplayer2.MediaMetadata
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.ActivityMainBinding
@@ -22,7 +23,7 @@ import com.hellguy39.collapse.presentaton.services.PlayerService
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedListener {
+class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedListener*/ {
 
     private lateinit var navController: NavController
     private lateinit var navHostFragment: NavHostFragment
@@ -39,9 +40,12 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         navController = navHostFragment.navController
 
         _binding.rootLayout.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-        NavigationUI.setupWithNavController(_binding.bottomNavigation,navController)
+        NavigationUI.setupWithNavController(
+            _binding.bottomNavigation,navController
+        )
 
-        navController.addOnDestinationChangedListener(this)
+
+        //navController.addOnDestinationChangedListener(this)
 
         _binding.trackCard.visibility = View.INVISIBLE
 
@@ -49,6 +53,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
             //navController.navigate(R.id.trackFragment)
             //hideTrackCard()
             startActivity(Intent(this, TrackActivity::class.java))
+            //overridePendingTransition(R.anim.slide_up_in, R.anim.slide_up_out)
         }
 
         _binding.ibPlayPause.setOnClickListener {
@@ -100,8 +105,8 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     private fun showTrackCard() {
         val id = navController.currentDestination?.id ?: return
 
-        if(!isBottomNavigationFragment(id))
-            return
+//        if(!isBottomNavigationFragment(id))
+//            return
 
         _binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
         _binding.trackCard.apply {
@@ -138,40 +143,40 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         _binding.bottomNavigation.visibility = View.VISIBLE
     }
 
-    override fun onDestinationChanged(
-        controller: NavController,
-        destination: NavDestination,
-        arguments: Bundle?
-    ) {
-        if (isBottomNavigationFragment(destination.id)) {
-            showBottomNavigation()
-            checkTrackCard(true)
-        } else {
-            hideBottomNavigation()
-            checkTrackCard(false)
-        }
-    }
+//    override fun onDestinationChanged(
+//        controller: NavController,
+//        destination: NavDestination,
+//        arguments: Bundle?
+//    ) {
+//        if (isBottomNavigationFragment(destination.id)) {
+//            showBottomNavigation()
+//            checkTrackCard(true)
+//        } else {
+//            hideBottomNavigation()
+//            checkTrackCard(false)
+//        }
+//    }
 
-    private fun checkTrackCard(enable: Boolean) {
-        if (enable) {
-            if (isNeedDisplayCard) {
-                if (_binding.trackCard.visibility == View.INVISIBLE) {
-                    showTrackCard()
-                }
-            }
-        } else {
-            if (!isNeedDisplayCard) {
-                if (_binding.trackCard.visibility == View.VISIBLE) {
-                    hideTrackCard()
-                }
-            }
-        }
-    }
-
-    private fun isBottomNavigationFragment(id: Int):Boolean {
-        return id == R.id.homeFragment ||
-                id == R.id.mediaLibraryFragment ||
-                id == R.id.radioFragment ||
-                id == R.id.equalizerFragment
-    }
+//    private fun checkTrackCard(enable: Boolean) {
+//        if (enable) {
+//            if (isNeedDisplayCard) {
+//                if (_binding.trackCard.visibility == View.INVISIBLE) {
+//                    showTrackCard()
+//                }
+//            }
+//        } else {
+//            if (!isNeedDisplayCard) {
+//                if (_binding.trackCard.visibility == View.VISIBLE) {
+//                    hideTrackCard()
+//                }
+//            }
+//        }
+//    }
+//
+//    private fun isBottomNavigationFragment(id: Int):Boolean {
+//        return id == R.id.homeFragment ||
+//                id == R.id.mediaLibraryFragment ||
+//                id == R.id.radioFragment ||
+//                id == R.id.equalizerFragment
+//    }
 }

@@ -10,9 +10,8 @@ class TracksRepositoryImpl(
     private val context: Context
 ): TracksRepository {
 
-    override suspend fun getAllTracks(): List<Track> {
+    override suspend fun getAllTracks(args: String?): List<Track> {
         val audioDataList: MutableList<Track> = mutableListOf()
-        val mmr = MediaMetadataRetriever()
         val contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
         val projection: Array<String> = arrayOf(
@@ -33,12 +32,20 @@ class TracksRepositoryImpl(
         ) ?: return mutableListOf()
 
         while (cursor.moveToNext()) {
-            mmr.setDataSource(cursor.getString(1))
+
+            val name = cursor.getString(0)
+            val artist = cursor.getString(3)
+
+            if (!args.isNullOrEmpty())
+                if (!name.contains(args, true))
+                    if (!artist.contains(args, true))
+                        continue
+
+
             audioDataList.add(Track(
-                name = cursor.getString(0),
+                name = name,
                 path = cursor.getString(1),
-                artist = cursor.getString(3),
-                embeddedPicture = mmr.embeddedPicture
+                artist = artist,
             ))
         }
 

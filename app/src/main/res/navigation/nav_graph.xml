@@ -13,28 +13,71 @@
 
     </fragment>
     <fragment
-        android:id="@+id/mediaLibraryFragment"
-        android:name="com.hellguy39.collapse.presentaton.fragments.media_library.MediaLibraryFragment"
-        android:label="media_library_fragment"
-        tools:layout="@layout/media_library_fragment" />
-    <fragment
-        android:id="@+id/trackFragment"
-        android:name="com.hellguy39.collapse.presentaton.fragments.track.TrackFragment"
-        android:label="track_fragment"
-        tools:layout="@layout/track_fragment" >
-        <argument
-            android:name="track"
-            app:argType="com.hellguy39.domain.models.Track" />
-    </fragment>
-    <fragment
-        android:id="@+id/radioFragment"
-        android:name="com.hellguy39.collapse.presentaton.fragments.radio.RadioFragment"
-        android:label="radio_fragment"
-        tools:layout="@layout/radio_fragment" />
-    <fragment
         android:id="@+id/equalizerFragment"
         android:name="com.hellguy39.collapse.presentaton.fragments.equalizer.EqualizerFragment"
         android:label="equalizer_fragment"
         tools:layout="@layout/equalizer_fragment" />
+    <navigation android:id="@+id/navigation_media_library"
+        app:startDestination="@id/mediaLibraryFragment">
+        <fragment
+            android:id="@+id/mediaLibraryFragment"
+            android:name="com.hellguy39.collapse.presentaton.fragments.media_library.MediaLibraryFragment"
+            android:label="media_library_fragment"
+            tools:layout="@layout/media_library_fragment">
+            <action
+                android:id="@+id/action_mediaLibraryFragment_to_playlistFragment"
+                app:destination="@id/playlistsFragment"
+                app:enterAnim="@anim/to_left_in"
+                app:exitAnim="@anim/to_left_out"
+                app:popEnterAnim="@anim/to_right_in"
+                app:popExitAnim="@anim/to_right_out" />
+            <action
+                android:id="@+id/action_mediaLibraryFragment_to_trackListFragment"
+                app:destination="@id/trackListFragment"
+                app:enterAnim="@anim/to_left_in"
+                app:exitAnim="@anim/to_left_out"
+                app:popEnterAnim="@anim/to_right_in"
+                app:popExitAnim="@anim/to_right_out" />
+        </fragment>
+        <fragment
+            android:id="@+id/trackListFragment"
+            android:name="com.hellguy39.collapse.presentaton.fragments.track_list.TrackListFragment"
+            android:label="track_list_fragment"
+            tools:layout="@layout/track_list_fragment">
+            <argument
+                android:name="playlist"
+                app:argType="com.hellguy39.domain.models.Playlist" />
+        </fragment>
+        <fragment
+            android:id="@+id/playlistsFragment"
+            android:name="com.hellguy39.collapse.presentaton.fragments.playlists.PlaylistsFragment"
+            android:label="playlists_fragment"
+            tools:layout="@layout/playlists_fragment">
+            <action
+                android:id="@+id/action_playlistsFragment_to_trackListFragment"
+                app:destination="@id/trackListFragment"
+                app:enterAnim="@anim/to_left_in"
+                app:exitAnim="@anim/to_left_out"
+                app:popEnterAnim="@anim/to_right_in"
+                app:popExitAnim="@anim/to_right_out" />
+        </fragment>
+    </navigation>
+    <navigation android:id="@+id/navigation_radio"
+        app:startDestination="@id/radioFragment">
+        <fragment
+            android:id="@+id/radioFragment"
+            android:name="com.hellguy39.collapse.presentaton.fragments.radio.RadioFragment"
+            android:label="radio_fragment"
+            tools:layout="@layout/radio_fragment">
+            <action
+                android:id="@+id/action_radioFragment_to_addRadioStationFragment"
+                app:destination="@id/addRadioStationFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/addRadioStationFragment"
+            android:name="com.hellguy39.collapse.presentaton.fragments.add_radio_station.AddRadioStationFragment"
+            android:label="add_radio_station_fragment"
+            tools:layout="@layout/add_radio_station_fragment" />
+    </navigation>
 
 </navigation>
