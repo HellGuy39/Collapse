@@ -21,6 +21,8 @@
         <entry key="app/src/main/res/layout/playlists_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/radio_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/radio_item.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/layout/select_tracks_fragment.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/layout/selectable_track_item.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/track_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/track_item.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/track_list_fragment.xml" value="0.29739583333333336" />

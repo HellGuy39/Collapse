@@ -2,6 +2,7 @@ package com.hellguy39.data.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.hellguy39.data.dao.RadioStationsDao
 import com.hellguy39.data.models.RadioStationDb
 
 @Database(

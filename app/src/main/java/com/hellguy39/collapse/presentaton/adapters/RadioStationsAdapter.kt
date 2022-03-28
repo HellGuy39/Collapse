@@ -4,9 +4,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
+import com.hellguy39.collapse.presentaton.view_holders.RadioStationViewHolder
 import com.hellguy39.domain.models.RadioStation
 
-class RadioStationListAdapter(
+class RadioStationsAdapter(
     private val stations: List<RadioStation>,
     private val listener: OnRadioStationListener
 ): RecyclerView.Adapter<RadioStationViewHolder>() {

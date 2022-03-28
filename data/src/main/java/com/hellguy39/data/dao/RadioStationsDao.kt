@@ -1,4 +1,4 @@
-package com.hellguy39.data.db
+package com.hellguy39.data.dao
 
 import androidx.room.*
 import com.hellguy39.data.models.RadioStationDb

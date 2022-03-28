@@ -1,15 +1,13 @@
-package com.hellguy39.collapse.presentaton.adapters
+package com.hellguy39.collapse.presentaton.view_holders
 
 import android.content.res.Resources
-import android.graphics.BitmapFactory
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackItemBinding
+import com.hellguy39.collapse.presentaton.adapters.TracksAdapter
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 
 class TrackViewHolder(
     v: View,
@@ -22,7 +20,7 @@ class TrackViewHolder(
         track: Track,
         resources: Resources,
         position: Int,
-        listener: TrackListAdapter.OnTrackListener
+        listener: TracksAdapter.OnTrackListener
     ) {
 
         binding.tvTrackName.text = track.name//.ifEmpty { "Unknown" }

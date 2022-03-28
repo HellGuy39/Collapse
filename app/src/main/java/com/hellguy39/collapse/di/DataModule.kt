@@ -3,13 +3,17 @@ package com.hellguy39.collapse.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import com.hellguy39.data.db.PlaylistsDatabase
 import com.hellguy39.data.db.RadioStationsDatabase
+import com.hellguy39.data.repositories.PlaylistsRepositoryImpl
 import com.hellguy39.data.repositories.RadioStationsRepositoryImpl
 import com.hellguy39.data.repositories.TracksRepositoryImpl
+import com.hellguy39.domain.repositories.PlaylistsRepository
 import com.hellguy39.domain.repositories.RadioStationsRepository
 import com.hellguy39.domain.repositories.TracksRepository
 import com.hellguy39.domain.usecases.GetAllTracksUseCase
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
+import com.hellguy39.domain.usecases.playlist.*
 import com.hellguy39.domain.usecases.radio.*
 import dagger.Module
 import dagger.Provides
@@ -60,6 +64,34 @@ class DataModule {
             getAllRadioStationsUseCase = GetAllRadioStationsUseCase(radioStationsRepository),
             getRadioStationByIdUseCase = GetRadioStationByIdUseCase(radioStationsRepository),
             getRadioStationsWithQueryUseCase = GetRadioStationsWithQueryUseCase(radioStationsRepository)
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providePlaylistsDatabase(app: Application): PlaylistsDatabase {
+        return Room.databaseBuilder(
+            app,
+            PlaylistsDatabase::class.java,
+            "playlists_db"
+        ).build()
+    }
+
+    @Singleton
+    @Provides
+    fun providePlaylistsRepository(playlistsDatabase: PlaylistsDatabase): PlaylistsRepositoryImpl {
+        return PlaylistsRepositoryImpl(playlistsDatabase.playlistsDao())
+    }
+
+    @Provides
+    @Singleton
+    fun providePlaylistUseCases(repository: PlaylistsRepositoryImpl): PlaylistUseCases {
+        return PlaylistUseCases(
+            addPlaylistUseCase = AddPlaylistUseCase(repository),
+            deletePlaylistUseCase = DeletePlaylistUseCase(repository),
+            updatePlaylistUseCase = UpdatePlaylistUseCase(repository),
+            getAllPlaylistsUseCase = GetAllPlaylistsUseCase(repository),
+            getPlaylistByIdUseCase = GetPlaylistByIdUseCase(repository)
         )
     }
 

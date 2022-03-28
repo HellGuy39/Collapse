@@ -1,8 +1,9 @@
-package com.hellguy39.collapse.presentaton.adapters
+package com.hellguy39.collapse.presentaton.view_holders
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.databinding.RadioItemBinding
+import com.hellguy39.collapse.presentaton.adapters.RadioStationsAdapter
 import com.hellguy39.domain.models.RadioStation
 
 class RadioStationViewHolder(v: View): RecyclerView.ViewHolder(v){
@@ -11,7 +12,7 @@ class RadioStationViewHolder(v: View): RecyclerView.ViewHolder(v){
 
     fun bind(
         radioStation: RadioStation,
-        listener: RadioStationListAdapter.OnRadioStationListener,
+        listener: RadioStationsAdapter.OnRadioStationListener,
         position: Int
     ) {
 

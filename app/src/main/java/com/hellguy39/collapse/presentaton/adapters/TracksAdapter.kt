@@ -5,10 +5,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
+import com.hellguy39.collapse.presentaton.view_holders.TrackViewHolder
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 
-class TrackListAdapter(
+class TracksAdapter(
     private val trackList: List<Track>,
     private val resources: Resources,
     private val listener: OnTrackListener,

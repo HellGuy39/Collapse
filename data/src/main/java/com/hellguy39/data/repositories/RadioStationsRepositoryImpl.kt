@@ -1,6 +1,6 @@
 package com.hellguy39.data.repositories
 
-import com.hellguy39.data.db.RadioStationsDao
+import com.hellguy39.data.dao.RadioStationsDao
 import com.hellguy39.data.models.RadioStationDb
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.repositories.RadioStationsRepository

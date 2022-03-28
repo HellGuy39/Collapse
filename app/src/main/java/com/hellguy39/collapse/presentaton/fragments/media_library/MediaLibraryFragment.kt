@@ -4,25 +4,18 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.MediaLibraryFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
-import com.hellguy39.collapse.presentaton.adapters.TrackListAdapter
-import com.hellguy39.collapse.presentaton.fragments.playlists.PlaylistsFragmentDirections
-import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.domain.models.Playlist
-import com.hellguy39.domain.models.ServiceContentWrapper
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
-import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -101,26 +94,6 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
         checkPermission()
     }
 
-//    private fun setObservers() {
-//        viewModel.getTrackList().observe(viewLifecycleOwner) { receivedTracks ->
-//            updateRvTracks(receivedTracks)
-//        }
-//        PlayerService.getContentPosition().observe(viewLifecycleOwner) {
-//
-//        }
-//    }
-
-    /*private fun updateRvTracks(receivedTracks: List<Track>) {
-
-        clearRecyclerView()
-
-        for (n in receivedTracks.indices) {
-            tracks.add(receivedTracks[n])
-        }
-
-        val position = binding.rvTracks.adapter?.itemCount ?: 0
-        binding.rvTracks.adapter?.notifyItemInserted(position)
-    }*/
 
     private fun showCardPermission(b: Boolean) {
         if (b) {
@@ -150,10 +123,6 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
         {
             checkPermission()
         }
-        /*else
-        {
-            Toast.makeText(requireContext(), "Access denied", Toast.LENGTH_LONG).show()
-        }*/
     }
 
     private fun checkPermission() {
@@ -196,20 +165,4 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
             }
         }
     }
-
-    /*override fun onTrackClick(pos: Int) {
-        PlayerService.startService(requireContext(), ServiceContentWrapper(
-            type = PlayerType.LocalTrack,
-            position = pos,
-            trackList = tracks,
-            )
-        )
-    }
-*/
-    /*private fun clearRecyclerView() {
-        val size = binding.rvTracks.adapter?.itemCount
-        tracks.clear()
-        binding.rvTracks.adapter?.notifyItemRangeRemoved(0, size ?: 0)
-    }
-*/
 }

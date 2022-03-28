@@ -3,15 +3,13 @@ package com.hellguy39.collapse.presentaton.fragments.track_list
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackListFragmentBinding
-import com.hellguy39.collapse.presentaton.adapters.TrackListAdapter
+import com.hellguy39.collapse.presentaton.adapters.TracksAdapter
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.ServiceContentWrapper
@@ -23,7 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TrackListFragment : Fragment(R.layout.track_list_fragment),TrackListAdapter.OnTrackListener {
+class TrackListFragment : Fragment(R.layout.track_list_fragment),TracksAdapter.OnTrackListener {
 
     companion object {
         fun newInstance() = TrackListFragment()
@@ -54,7 +52,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),TrackListAdapte
             LinearLayoutManager.VERTICAL,
             false
         )
-        binding.rvTrackList.adapter = TrackListAdapter(
+        binding.rvTrackList.adapter = TracksAdapter(
             trackList = tracks,
             resources = resources,
             listener = this,
@@ -66,18 +64,17 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),TrackListAdapte
             findNavController().popBackStack()
         }
 
-        update()
-    }
+        setObservers()
 
-    private fun update() {
         if (playlist.type == PlaylistType.AllTracks) {
             viewModel.updateTrackList()
-            viewModel.getTrackList().observe(viewLifecycleOwner) {
-                for (n in it.indices) {
-                    tracks.add(it[n])
-                }
-                binding.rvTrackList.adapter?.notifyItemInserted(tracks.size)
-            }
+        }
+    }
+
+    private fun setObservers() {
+        viewModel.getTrackList().observe(viewLifecycleOwner) { receiverTracks ->
+            clearRecyclerView()
+            updateRecyclerView(receiverTracks)
         }
     }
 
@@ -88,5 +85,19 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),TrackListAdapte
                 trackList = tracks,
             )
         )
+    }
+
+    private fun updateRecyclerView(receivedTracks: List<Track>) {
+        for (n in receivedTracks.indices) {
+            tracks.add(receivedTracks[n])
+        }
+        val position = binding.rvTrackList.adapter?.itemCount ?: 0
+        binding.rvTrackList.adapter?.notifyItemRangeInserted(position, tracks.size)
+    }
+
+    private fun clearRecyclerView() {
+        val size = binding.rvTrackList.adapter?.itemCount
+        tracks.clear()
+        binding.rvTrackList.adapter?.notifyItemRangeRemoved(0, size ?: 0)
     }
 }

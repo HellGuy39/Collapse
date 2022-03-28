@@ -9,7 +9,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.RadioFragmentBinding
-import com.hellguy39.collapse.presentaton.adapters.RadioStationListAdapter
+import com.hellguy39.collapse.presentaton.adapters.RadioStationsAdapter
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.models.ServiceContentWrapper
@@ -17,7 +17,7 @@ import com.hellguy39.domain.utils.PlayerType
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class RadioFragment : Fragment(R.layout.radio_fragment), RadioStationListAdapter.OnRadioStationListener {
+class RadioFragment : Fragment(R.layout.radio_fragment), RadioStationsAdapter.OnRadioStationListener {
 
     companion object {
         fun newInstance() = RadioFragment()
@@ -40,7 +40,7 @@ class RadioFragment : Fragment(R.layout.radio_fragment), RadioStationListAdapter
 
         binding.rvStations.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-            adapter = RadioStationListAdapter(stations = stations, this@RadioFragment)
+            adapter = RadioStationsAdapter(stations = stations, this@RadioFragment)
         }
 
         val searchItem = binding.topAppBar.menu.findItem(R.id.search)
