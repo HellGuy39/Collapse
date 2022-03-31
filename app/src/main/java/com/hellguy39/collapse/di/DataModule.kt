@@ -3,23 +3,23 @@ package com.hellguy39.collapse.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import com.hellguy39.data.db.FavouritesDatabase
 import com.hellguy39.data.db.PlaylistsDatabase
 import com.hellguy39.data.db.RadioStationsDatabase
+import com.hellguy39.data.repositories.FavouritesRepositoryImpl
 import com.hellguy39.data.repositories.PlaylistsRepositoryImpl
 import com.hellguy39.data.repositories.RadioStationsRepositoryImpl
 import com.hellguy39.data.repositories.TracksRepositoryImpl
-import com.hellguy39.domain.repositories.PlaylistsRepository
-import com.hellguy39.domain.repositories.RadioStationsRepository
 import com.hellguy39.domain.repositories.TracksRepository
-import com.hellguy39.domain.usecases.GetAllTracksUseCase
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
-import com.hellguy39.domain.usecases.playlist.*
-import com.hellguy39.domain.usecases.radio.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+
+private const val RADIO_STATIONS_DB_NAME = "radio_stations_db"
+private const val FAVOURITES_DB_NAME = "favourites_db"
+private const val PLAYLISTS_DB_NAME = "playlists_db"
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -27,44 +27,12 @@ class DataModule {
 
     @Provides
     @Singleton
-    fun provideContext(app: Application): Context {
-        return app.applicationContext
-    }
-
-    @Provides
-    @Singleton
-    fun provideRadioStationsDatabase(app: Application): RadioStationsDatabase {
+    fun provideFavouritesDatabase(app: Application): FavouritesDatabase {
         return Room.databaseBuilder(
             app,
-            RadioStationsDatabase::class.java,
-            "radio_stations_db"
+            FavouritesDatabase::class.java,
+            FAVOURITES_DB_NAME
         ).build()
-    }
-
-
-    @Provides
-    @Singleton
-    fun provideLocationRepository(context: Context) : TracksRepository {
-        return TracksRepositoryImpl(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideRadioStationRepository(radioStationsDatabase: RadioStationsDatabase): RadioStationsRepositoryImpl {
-        return RadioStationsRepositoryImpl(radioStationsDatabase.radioStationsDao())
-    }
-
-    @Singleton
-    @Provides
-    fun provideRadioStationUseCases(radioStationsRepository: RadioStationsRepositoryImpl): RadioStationUseCases {
-        return RadioStationUseCases(
-            addRadioStationUseCase = AddRadioStationUseCase(radioStationsRepository),
-            editRadioStationUseCase = EditRadioStationUseCase(radioStationsRepository),
-            deleteRadioStationUseCase = DeleteRadioStationUseCase(radioStationsRepository),
-            getAllRadioStationsUseCase = GetAllRadioStationsUseCase(radioStationsRepository),
-            getRadioStationByIdUseCase = GetRadioStationByIdUseCase(radioStationsRepository),
-            getRadioStationsWithQueryUseCase = GetRadioStationsWithQueryUseCase(radioStationsRepository)
-        )
     }
 
     @Singleton
@@ -73,9 +41,33 @@ class DataModule {
         return Room.databaseBuilder(
             app,
             PlaylistsDatabase::class.java,
-            "playlists_db"
+            PLAYLISTS_DB_NAME
         ).build()
     }
+
+    @Provides
+    @Singleton
+    fun provideRadioStationsDatabase(app: Application): RadioStationsDatabase {
+        return Room.databaseBuilder(
+            app,
+            RadioStationsDatabase::class.java,
+            RADIO_STATIONS_DB_NAME
+        ).build()
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideTracksRepository(context: Context) : TracksRepository {
+        return TracksRepositoryImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRadioStationRepository(database: RadioStationsDatabase): RadioStationsRepositoryImpl {
+        return RadioStationsRepositoryImpl(database.radioStationsDao())
+    }
+
 
     @Singleton
     @Provides
@@ -85,26 +77,8 @@ class DataModule {
 
     @Provides
     @Singleton
-    fun providePlaylistUseCases(repository: PlaylistsRepositoryImpl): PlaylistUseCases {
-        return PlaylistUseCases(
-            addPlaylistUseCase = AddPlaylistUseCase(repository),
-            deletePlaylistUseCase = DeletePlaylistUseCase(repository),
-            updatePlaylistUseCase = UpdatePlaylistUseCase(repository),
-            getAllPlaylistsUseCase = GetAllPlaylistsUseCase(repository),
-            getPlaylistByIdUseCase = GetPlaylistByIdUseCase(repository)
-        )
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetImageBitmapUseCase(): GetImageBitmapUseCase {
-        return GetImageBitmapUseCase()
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetAllTracksUseCase(tracksRepositoryImpl: TracksRepository): GetAllTracksUseCase {
-        return GetAllTracksUseCase(tracksRepositoryImpl)
+    fun provideFavouritesRepository(favouritesDatabase: FavouritesDatabase): FavouritesRepositoryImpl {
+        return FavouritesRepositoryImpl(favouritesDao = favouritesDatabase.favouritesDao())
     }
 
 }

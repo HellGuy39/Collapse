@@ -1,7 +1,6 @@
 package com.hellguy39.data.repositories
 
 import android.content.Context
-import android.media.MediaMetadataRetriever
 import android.provider.MediaStore
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.repositories.TracksRepository
@@ -10,7 +9,7 @@ class TracksRepositoryImpl(
     private val context: Context
 ): TracksRepository {
 
-    override suspend fun getAllTracks(args: String?): List<Track> {
+    override suspend fun getAllTracks(): List<Track> {
         val audioDataList: MutableList<Track> = mutableListOf()
         val contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
@@ -32,20 +31,10 @@ class TracksRepositoryImpl(
         ) ?: return mutableListOf()
 
         while (cursor.moveToNext()) {
-
-            val name = cursor.getString(0)
-            val artist = cursor.getString(3)
-
-            if (!args.isNullOrEmpty())
-                if (!name.contains(args, true))
-                    if (!artist.contains(args, true))
-                        continue
-
-
             audioDataList.add(Track(
-                name = name,
+                name = cursor.getString(0),
                 path = cursor.getString(1),
-                artist = artist,
+                artist = cursor.getString(3),
             ))
         }
 

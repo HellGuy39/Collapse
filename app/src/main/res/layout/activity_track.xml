@@ -15,8 +15,8 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            tools:title="Favourites"
-            app:titleCentered="true"
+            tools:title="Tittle"
+            tools:subtitle="Subtitle"
             app:navigationIcon="@drawable/ic_round_arrow_back_ios_24" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -32,18 +32,18 @@
             android:orientation="vertical">
 
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="350dp"
+                android:layout_height="350dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="16dp"
+                android:layout_gravity="center"
                 android:layout_margin="16dp"
                 app:strokeWidth="0dp">
 
                 <ImageView
                     android:id="@+id/ivCover"
-                    android:layout_width="384dp"
-                    android:layout_height="384dp"
-                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:scaleType="centerCrop"
                     tools:src="@drawable/ic_launcher_foreground" />
             </com.google.android.material.card.MaterialCardView>

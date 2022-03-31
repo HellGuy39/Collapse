@@ -8,19 +8,28 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.PlaylistsFragmentBinding
+import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.PlaylistsAdapter
+import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
+import com.hellguy39.collapse.utils.Action
 import com.hellguy39.domain.models.Playlist
+import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     PlaylistsAdapter.OnPlaylistListener {
 
+    @Inject
+    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
+
     companion object {
         fun newInstance() = PlaylistsFragment()
     }
 
-    private lateinit var viewModel: PlaylistsViewModel
+    private lateinit var dataViewModel: MediaLibraryDataViewModel
+
     private lateinit var binding: PlaylistsFragmentBinding
 
     private var playlists = mutableListOf<Playlist>()
@@ -28,8 +37,12 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this)[PlaylistsViewModel::class.java]
-        adapter = PlaylistsAdapter(playlists = playlists, listener = this)
+        dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
+        adapter = PlaylistsAdapter(
+            playlists = playlists,
+            listener = this,
+            convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -48,18 +61,25 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
             when(it?.itemId) {
                 R.id.add -> {
                     findNavController().navigate(
-                        PlaylistsFragmentDirections.actionPlaylistsFragmentToCreatePlaylistFragment()
+                        PlaylistsFragmentDirections.actionPlaylistsFragmentToCreatePlaylistFragment(
+                            Playlist(),
+                            Action.Create
+                        )
                     )
                     true
                 }
                 else -> false
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
         setObservers()
     }
 
     private  fun setObservers() {
-        viewModel.getPlaylists().observe(viewLifecycleOwner) {
+        dataViewModel.getAllPlaylists().observe(viewLifecycleOwner) {
             clearRecyclerView()
             updateRecyclerView(receivedList = it)
         }

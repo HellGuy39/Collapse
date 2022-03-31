@@ -19,11 +19,12 @@
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:layout_weight="0"
+            android:scaleType="centerCrop"
             app:layout_constraintBottom_toTopOf="@+id/tvTittle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_round_audiotrack_24" />
+            app:srcCompat="@drawable/ic_round_queue_music_24" />
 
 
             <TextView

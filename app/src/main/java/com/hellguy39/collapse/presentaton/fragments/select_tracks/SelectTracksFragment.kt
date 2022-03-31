@@ -2,16 +2,18 @@ package com.hellguy39.collapse.presentaton.fragments.select_tracks
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.SelectTracksFragmentBinding
+import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.SelectableTracksAdapter
-import com.hellguy39.collapse.presentaton.fragments.create_playlist.CreatePlaylistFragment
-import com.hellguy39.collapse.presentaton.fragments.create_playlist.CreatePlaylistViewModel
+import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,17 +30,19 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
         fun newInstance() = SelectTracksFragment()
     }
 
-    private lateinit var viewModel: SelectTracksViewModel
-    private val createPlaylistViewModel: CreatePlaylistViewModel by viewModels()
     private lateinit var binding: SelectTracksFragmentBinding
+
+    private lateinit var dataViewModel: MediaLibraryDataViewModel
 
     private lateinit var adapter: SelectableTracksAdapter
     private var allTracks = mutableListOf<Track>()
     private var positions = mutableListOf<Int>()
 
+    private val args: SelectTracksFragmentArgs by navArgs()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this)[SelectTracksViewModel::class.java]
+        dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
         adapter = SelectableTracksAdapter(
             tracks = allTracks,
             getImageBitmapUseCase = getImageBitmapUseCase,
@@ -58,12 +62,13 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
             LinearLayoutManager.VERTICAL,
             false
         )
+        binding.fabConfirm.setOnClickListener(this)
 
         setObservers()
     }
 
     private fun setObservers() {
-        viewModel.getTrackList().observe(viewLifecycleOwner) { receivedTracks ->
+        dataViewModel.getAllTracks().observe(viewLifecycleOwner) { receivedTracks ->
             clearRecyclerView()
             updateRecyclerView(receivedTracks)
         }
@@ -110,7 +115,8 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
     override fun onClick(p0: View?) {
         when(p0?.id) {
             R.id.fabConfirm -> {
-                createPlaylistViewModel.updateTrackList(collectTracks(positions = positions))
+                setFragmentResult("pick_tracks",
+                    bundleOf("tracks" to collectTracks(positions = positions)))
                 findNavController().popBackStack()
             }
         }

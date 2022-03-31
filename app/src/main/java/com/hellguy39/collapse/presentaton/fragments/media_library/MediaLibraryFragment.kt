@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnClickListener/*, TrackListAdapter.OnTrackListener*/ {
+class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnClickListener {
 
     companion object {
         fun newInstance() = MediaLibraryFragment()
@@ -31,56 +31,11 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
     @Inject
     lateinit var getImageBitmapUseCase: GetImageBitmapUseCase
 
-    private lateinit var searchView: SearchView
-    private val viewModel: MediaLibraryViewModel by viewModels()
     private lateinit var binding: MediaLibraryFragmentBinding
-    private var tracks: MutableList<Track> = mutableListOf()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = MediaLibraryFragmentBinding.bind(view)
-
-//        tracks.clear()
-//
-//        binding.rvTracks.apply {
-//            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-//            adapter = TrackListAdapter(
-//                trackList = tracks,
-//                resources = resources,
-//                listener = this@MediaLibraryFragment,
-//                getImageBitmapUseCase = getImageBitmapUseCase
-//            )
-//        }
-
-/*        val searchItem = binding.topAppBar.menu.findItem(R.id.search)
-
-        searchView = searchItem.actionView as SearchView
-
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(p0: String?): Boolean {
-                viewModel.updateTrackList(p0)
-                return false
-            }
-
-            override fun onQueryTextChange(p0: String?): Boolean {
-                viewModel.updateTrackList(p0)
-                return false
-            }
-
-        })
-
-
-        binding.topAppBar.setOnMenuItemClickListener {
-            when(it.itemId) {
-                R.id.search -> {
-                    true
-                }
-                R.id.filter -> {
-                    true
-                }
-                else -> false
-            }
-        }*/
 
         binding.cardAllTracks.setOnClickListener(this)
         binding.cardFavourites.setOnClickListener(this)
@@ -161,7 +116,14 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
                 findNavController().navigate(R.id.action_mediaLibraryFragment_to_playlistFragment)
             }
             R.id.cardFavourites -> {
-                findNavController()
+                findNavController().navigate(
+                    MediaLibraryFragmentDirections.actionMediaLibraryFragmentToTrackListFragment(
+                        Playlist(
+                            name = "Favourites",
+                            type = PlaylistType.Favourites
+                        )
+                    )
+                )
             }
         }
     }

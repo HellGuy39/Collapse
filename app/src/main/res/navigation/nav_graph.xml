@@ -47,6 +47,13 @@
             <argument
                 android:name="playlist"
                 app:argType="com.hellguy39.domain.models.Playlist" />
+            <action
+                android:id="@+id/action_trackListFragment_to_createPlaylistFragment"
+                app:destination="@id/createPlaylistFragment"
+                app:enterAnim="@anim/to_left_in"
+                app:exitAnim="@anim/to_left_out"
+                app:popEnterAnim="@anim/to_right_in"
+                app:popExitAnim="@anim/to_right_out" />
         </fragment>
         <fragment
             android:id="@+id/playlistsFragment"
@@ -75,13 +82,27 @@
             tools:layout="@layout/create_playlist_fragment" >
             <action
                 android:id="@+id/action_createPlaylistFragment_to_selectTracksFragment"
-                app:destination="@id/selectTracksFragment" />
+                app:destination="@id/selectTracksFragment"
+                app:enterAnim="@anim/to_left_in"
+                app:exitAnim="@anim/to_left_out"
+                app:popEnterAnim="@anim/to_right_in"
+                app:popExitAnim="@anim/to_right_out" />
+            <argument
+                android:name="playlist"
+                app:argType="com.hellguy39.domain.models.Playlist" />
+            <argument
+                android:name="action"
+                app:argType="com.hellguy39.collapse.utils.Action" />
         </fragment>
         <fragment
             android:id="@+id/selectTracksFragment"
             android:name="com.hellguy39.collapse.presentaton.fragments.select_tracks.SelectTracksFragment"
             android:label="select_tracks_fragment"
-            tools:layout="@layout/select_tracks_fragment" />
+            tools:layout="@layout/select_tracks_fragment" >
+            <argument
+                android:name="playlist"
+                app:argType="com.hellguy39.domain.models.Playlist" />
+        </fragment>
     </navigation>
     <navigation android:id="@+id/navigation_radio"
         app:startDestination="@id/radioFragment">

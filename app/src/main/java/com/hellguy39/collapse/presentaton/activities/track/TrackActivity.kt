@@ -96,14 +96,19 @@ class TrackActivity : AppCompatActivity(), View.OnClickListener {
                         valueTo = (duration).toFloat()
                         value = (position).toFloat()
                     }
+                    binding.tvCurrentTrackTime.text = SimpleDateFormat("m:ss", Locale.getDefault()).format(Date(position * 1000))
+                    binding.tvRemainingTrackTime.text = SimpleDateFormat("m:ss", Locale.getDefault())
+                        .format(Date((duration - position) * 1000))
                 }
-                delay(1000)
+                delay(500)
             }
         }
 
         binding.sliderTime.setLabelFormatter {
             SimpleDateFormat("m:ss", Locale.getDefault()).format(Date(it.toLong() * 1000))
         }
+
+        binding.topAppBar.title = PlayerService.getPlaylistName()
 
         binding.tvTrackName.text = mediaMetadata.title ?: "Unknown"
         binding.tvPerformer.text = mediaMetadata.artist ?: "Unknown"

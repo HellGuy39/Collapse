@@ -10,6 +10,7 @@ import android.util.Log
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.hellguy39.collapse.R
+import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
 
 class DescriptionAdapter(
     private val context: Context,
@@ -22,7 +23,7 @@ class DescriptionAdapter(
 
     override fun createCurrentContentIntent(player: Player): PendingIntent? {
         return PendingIntent.getActivity(
-            context, 0, Intent(context, MainActivity::class.java),
+            context, 0, Intent(context, TrackActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }

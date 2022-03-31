@@ -45,7 +45,7 @@ class PlayerService : Service() {
     companion object {
 
         private var isRunningService = false
-        private var playlistName: String? = null
+        private var playlistName: String = ""
 
         private lateinit var exoPlayer: ExoPlayer
 
@@ -81,7 +81,7 @@ class PlayerService : Service() {
         fun getDuration(): Long = exoPlayer.duration
         fun getAudioSessionId(): LiveData<Int> = audioSessionIdLiveData
         fun isRepeat(): Int = exoPlayer.repeatMode
-        fun getPlaylistName(): String? = playlistName
+        fun getPlaylistName(): String = playlistName
 
         //Control
         fun onPlay() = exoPlayer.play()
@@ -131,7 +131,7 @@ class PlayerService : Service() {
         val content = intent?.getParcelableExtra<ServiceContentWrapper>("track_list") as ServiceContentWrapper
 
         playerTypeLiveData.value = content.type
-        playlistName = content.playlistName
+        playlistName = content.playlist?.name ?: ""
 
         exoPlayer = ExoPlayer.Builder(this).build()
 
@@ -165,7 +165,7 @@ class PlayerService : Service() {
     }
 
     private fun initDefaultPlayer(content: ServiceContentWrapper) {
-        val trackList = content.trackList
+        val trackList = content.playlist?.tracks
 
         if (trackList.isNullOrEmpty())
             return

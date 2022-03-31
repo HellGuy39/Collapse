@@ -9,6 +9,5 @@ data class ServiceContentWrapper(
     var type: Enum<PlayerType> = PlayerType.Undefined,
     var radioStation: RadioStation? = null,
     var position: Int = 0,
-    var playlistName: String? = null,
-    var trackList: List<Track>? = null
+    var playlist: Playlist? = null
 ) : Parcelable

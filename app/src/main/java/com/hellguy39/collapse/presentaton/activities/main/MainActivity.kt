@@ -10,16 +10,16 @@ import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
-import androidx.navigation.ui.setupWithNavController
 import com.google.android.exoplayer2.MediaMetadata
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.ActivityMainBinding
 import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
 import com.hellguy39.collapse.presentaton.services.PlayerService
+import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -29,12 +29,15 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var _binding: ActivityMainBinding
 
+    private lateinit var mediaLibraryDataViewModel: MediaLibraryDataViewModel
+
     private var isNeedDisplayCard = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(_binding.root)
+        mediaLibraryDataViewModel = ViewModelProvider(this)[MediaLibraryDataViewModel::class.java]
 
         navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer) as NavHostFragment
         navController = navHostFragment.navController
@@ -46,8 +49,6 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
 
 
         //navController.addOnDestinationChangedListener(this)
-
-        _binding.trackCard.visibility = View.INVISIBLE
 
         _binding.trackCard.setOnClickListener {
             //navController.navigate(R.id.trackFragment)
@@ -65,6 +66,9 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
         }
 
         setObservers()
+
+        _binding.layoutCardPlayer.visibility = View.GONE
+        _binding.layoutCardPlayer.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
     }
 
     private fun setObservers() {
@@ -83,9 +87,7 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
                 isNeedDisplayCard = true
             }
 
-            if (isNeedDisplayCard)
-                if (_binding.trackCard.visibility == View.INVISIBLE)
-                    showTrackCard()
+            showTrackCard()
 
         }
     }
@@ -100,23 +102,26 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
             _binding.ivTrackImage.setImageBitmap(BitmapFactory.decodeByteArray(metadata.artworkData, 0, bytes.size))
         else
             _binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
+
     }
 
     private fun showTrackCard() {
-        val id = navController.currentDestination?.id ?: return
+//        val id = navController.currentDestination?.id ?: return
 
 //        if(!isBottomNavigationFragment(id))
 //            return
 
         _binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
-        _binding.trackCard.apply {
+        /*_binding.trackCard.apply {
             translationY = this.height.toFloat()
             visibility = View.VISIBLE
 
             animate().translationY(0f)
                 .setDuration(200)
                 .setListener(null)
-        }
+        }*/
+        TransitionManager.beginDelayedTransition(_binding.layoutCardPlayer, AutoTransition())
+        _binding.layoutCardPlayer.visibility = View.VISIBLE
     }
 
     private fun hideTrackCard() {
@@ -133,15 +138,15 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
         }
     }
 
-    private fun hideBottomNavigation() {
-        TransitionManager.beginDelayedTransition(_binding.rootLayout, AutoTransition())
-        _binding.bottomNavigation.visibility = View.GONE
-    }
-
-    private fun showBottomNavigation() {
-        TransitionManager.beginDelayedTransition(_binding.rootLayout, AutoTransition())
-        _binding.bottomNavigation.visibility = View.VISIBLE
-    }
+//    private fun hideBottomNavigation() {
+//        TransitionManager.beginDelayedTransition(_binding.rootLayout, AutoTransition())
+//        _binding.bottomNavigation.visibility = View.GONE
+//    }
+//
+//    private fun showBottomNavigation() {
+//        TransitionManager.beginDelayedTransition(_binding.rootLayout, AutoTransition())
+//        _binding.bottomNavigation.visibility = View.VISIBLE
+//    }
 
 //    override fun onDestinationChanged(
 //        controller: NavController,
