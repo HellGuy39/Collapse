@@ -1,8 +1,11 @@
 package com.hellguy39.collapse.presentaton.fragments.media_library
 
 import android.Manifest
+import android.animation.LayoutTransition
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.transition.AutoTransition
+import android.transition.TransitionManager
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.SearchView
@@ -37,20 +40,17 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
         super.onViewCreated(view, savedInstanceState)
         binding = MediaLibraryFragmentBinding.bind(view)
 
-        binding.cardAllTracks.setOnClickListener(this)
-        binding.cardFavourites.setOnClickListener(this)
-        binding.cardArtists.setOnClickListener(this)
-        binding.cardPlaylists.setOnClickListener(this)
-
         binding.btnGetPermission.setOnClickListener {
             requestPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
 
+        binding.layoutCardPermission.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
         checkPermission()
     }
 
 
     private fun showCardPermission(b: Boolean) {
+        TransitionManager.beginDelayedTransition(binding.layoutCardPermission, AutoTransition())
         if (b) {
             binding.cardPermission.visibility = View.VISIBLE
         } else {
@@ -58,17 +58,17 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
         }
     }
 
-    private fun showMediaLibraryCards(b: Boolean) {
+    private fun enableMediaLibraryCards(b: Boolean) {
         if (b) {
-            binding.cardPlaylists.visibility = View.VISIBLE
-            binding.cardArtists.visibility = View.VISIBLE
-            binding.cardFavourites.visibility = View.VISIBLE
-            binding.cardAllTracks.visibility = View.VISIBLE
+            binding.cardAllTracks.setOnClickListener(this)
+            binding.cardFavourites.setOnClickListener(this)
+            binding.cardArtists.setOnClickListener(this)
+            binding.cardPlaylists.setOnClickListener(this)
         } else {
-            binding.cardPlaylists.visibility = View.GONE
-            binding.cardArtists.visibility = View.GONE
-            binding.cardFavourites.visibility = View.GONE
-            binding.cardAllTracks.visibility = View.GONE
+            binding.cardAllTracks.setOnClickListener(null)
+            binding.cardFavourites.setOnClickListener(null)
+            binding.cardArtists.setOnClickListener(null)
+            binding.cardPlaylists.setOnClickListener(null)
         }
     }
 
@@ -83,10 +83,10 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
     private fun checkPermission() {
         if (isPermissionGranted()) {
             showCardPermission(false)
-            showMediaLibraryCards(true)
+            enableMediaLibraryCards(true)
         } else {
             showCardPermission(true)
-            showMediaLibraryCards(false)
+            enableMediaLibraryCards(false)
         }
     }
 

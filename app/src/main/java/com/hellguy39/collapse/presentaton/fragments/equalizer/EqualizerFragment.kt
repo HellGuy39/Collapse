@@ -1,5 +1,6 @@
 package com.hellguy39.collapse.presentaton.fragments.equalizer
 
+import android.content.SharedPreferences
 import android.media.audiofx.AudioEffect
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
@@ -16,7 +17,10 @@ import com.google.android.material.slider.Slider
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.EqualizerFragmentBinding
 import com.hellguy39.collapse.presentaton.services.PlayerService
+import com.hellguy39.domain.models.EqualizerSettings
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class EqualizerFragment : Fragment(R.layout.equalizer_fragment) {
 
     companion object {
@@ -30,6 +34,8 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment) {
     private lateinit var virtualizer: Virtualizer
     private lateinit var bassBoost: BassBoost
 
+    private lateinit var equalizerSettings: EqualizerSettings
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this)[EqualizerViewModel::class.java]
@@ -38,15 +44,41 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = EqualizerFragmentBinding.bind(view)
+
+        binding.eqSwitch.setOnCheckedChangeListener { compoundButton, b ->
+            enableEQ(b)
+        }
+
         setObservers()
     }
 
     private fun setObservers() {
         PlayerService.getAudioSessionId().observe(viewLifecycleOwner) {
-            if (isCorrectId(it))
+            if (isCorrectId(it)) {
                 initEQ(it)
+                enableBands(true)
+            }
         }
     }
+
+    private fun enableBands(b: Boolean) {
+
+        binding.band1.isEnabled = b
+        binding.band2.isEnabled = b
+        binding.band3.isEnabled = b
+        binding.band4.isEnabled = b
+        binding.band5.isEnabled = b
+
+        binding.acPreset.isEnabled = b
+
+        if (virtualizer.strengthSupported)
+            binding.surroundBand.isEnabled = b
+
+        if (bassBoost.strengthSupported)
+            binding.tvBand1CenterFreq.isEnabled = b
+    }
+
+    private fun enableEQ(b: Boolean) = equalizer.setEnabled(b)
 
     private fun initEQ(id: Int) {
         equalizer = Equalizer(0, id)
@@ -131,6 +163,10 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment) {
         }
     }
 
+    private fun setupBandListeners() {
+
+    }
+
     private fun setupPreset() {
         val numOfPresets = (equalizer.numberOfPresets) - 1
         val presets = mutableListOf<String>()
@@ -146,26 +182,32 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment) {
 
         binding.acPreset.setOnItemClickListener { adapterView, view, i, l ->
             equalizer.usePreset(i.toShort())
+            setupEqualizer()
         }
     }
 
     private fun setupBassBoost() {
         binding.bassBoostBand.apply {
             valueFrom = 0f
-            valueTo = 10000f
-            stepSize = 1000f
+            valueTo = 10f
+            stepSize = STEP_SIZE
         }.addOnChangeListener { slider, value, fromUser ->
-            bassBoost.setStrength(value.toInt().toShort())
+            bassBoost.setStrength((value * 1000).toInt().toShort())
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        //viewModel.saveEqualizerSettings()
     }
 
     private fun setupVirtualizer() {
         binding.surroundBand.apply {
             valueFrom = 0f
-            valueTo = 10000f
-            stepSize = 1000f
+            valueTo = 10f
+            stepSize = STEP_SIZE
         }.addOnChangeListener { slider, value, fromUser ->
-            virtualizer.setStrength(value.toInt().toShort())
+            virtualizer.setStrength((value * 1000).toInt().toShort())
         }
     }
 

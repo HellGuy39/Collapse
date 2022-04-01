@@ -3,6 +3,7 @@ package com.hellguy39.collapse.presentaton.activities.main
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.LayoutTransition
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -20,6 +21,7 @@ import com.hellguy39.collapse.databinding.ActivityMainBinding
 import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
+import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -30,6 +32,7 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
     private lateinit var _binding: ActivityMainBinding
 
     private lateinit var mediaLibraryDataViewModel: MediaLibraryDataViewModel
+    private lateinit var radioStationsDataViewModel: RadioStationsDataViewModel
 
     private var isNeedDisplayCard = false
 
@@ -38,6 +41,7 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(_binding.root)
         mediaLibraryDataViewModel = ViewModelProvider(this)[MediaLibraryDataViewModel::class.java]
+        radioStationsDataViewModel = ViewModelProvider(this)[RadioStationsDataViewModel::class.java]
 
         navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer) as NavHostFragment
         navController = navHostFragment.navController
@@ -46,9 +50,6 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
         NavigationUI.setupWithNavController(
             _binding.bottomNavigation,navController
         )
-
-
-        //navController.addOnDestinationChangedListener(this)
 
         _binding.trackCard.setOnClickListener {
             //navController.navigate(R.id.trackFragment)

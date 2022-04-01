@@ -8,6 +8,7 @@ import kotlinx.parcelize.Parcelize
 data class RadioStation(
     var id: Int = 0,
     var name: String = "Unknown",
+    var picture: ByteArray? = null,
     var url: String? = null,
     var genre: String? = null,
     var protocol: Enum<Protocol> = Protocol.HLS

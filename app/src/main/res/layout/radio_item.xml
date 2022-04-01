@@ -1,53 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:padding="8dp"
-    android:id="@+id/root">
-
-    <ImageView
-        android:id="@+id/ivTrackImage"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_round_audiotrack_24" />
+    android:id="@+id/root"
+    app:cardElevation="0dp"
+    style="@style/Widget.Material3.CardView.Elevated"
+    android:padding="8dp">
 
     <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/ibPlayPause"
-        app:layout_constraintStart_toEndOf="@+id/ivTrackImage"
-        app:layout_constraintTop_toTopOf="parent">
+        android:padding="12dp">
+
+        <ImageView
+            android:id="@+id/ivStationCover"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_weight="0"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toTopOf="@+id/tvTittle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_round_radio_24" />
+
 
         <TextView
-            android:id="@+id/tvStationName"
+            android:id="@+id/tvTittle"
+            android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            tools:text="BBC Radio 1"
             android:ellipsize="end"
-            android:fontFamily="@font/roboto_regular"
-            android:maxLines="1"
-            android:textSize="20sp"
-            tools:text="BBC Radio" />
+            android:maxLines="2"
+            android:layout_marginEnd="12dp"
+            android:layout_marginStart="8dp"
+            android:layout_gravity="center"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageButton
+            android:id="@+id/ibMore"
+            android:backgroundTint="@android:color/transparent"
+            android:layout_weight="0"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_round_more_vert_24" />
 
     </LinearLayout>
 
-    <ImageButton
-        android:id="@+id/ibPlayPause"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:backgroundTint="@android:color/transparent"
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="116dp"
+        android:background="?attr/colorOnSurface"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="?android:attr/colorPrimary" />
+        app:layout_constraintStart_toStartOf="parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

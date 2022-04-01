@@ -61,9 +61,11 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
 
         pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
-            val imageStream: InputStream? = context?.contentResolver?.openInputStream(it)
-            selectedImage = BitmapFactory.decodeStream(imageStream)
-            binding.ivImage.setImageBitmap(selectedImage)
+            if (it != null) {
+                val imageStream: InputStream? = context?.contentResolver?.openInputStream(it)
+                selectedImage = BitmapFactory.decodeStream(imageStream)
+                binding.ivImage.setImageBitmap(selectedImage)
+            }
         }
 
         when (args.action) {

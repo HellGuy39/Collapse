@@ -16,7 +16,7 @@
             android:layout_height="match_parent"
             app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
             tools:title="Playlist #6"
-            app:titleCollapseMode="fade">
+            app:titleCollapseMode="scale">
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="wrap_content"

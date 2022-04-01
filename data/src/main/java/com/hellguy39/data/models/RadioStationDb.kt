@@ -11,6 +11,7 @@ data class RadioStationDb(
     var name: String = "Unknown",
     var url: String? = null,
     var genre: String? = null,
+    var picture: ByteArray? = null,
     var protocol: String = Protocol.HLS.name
 ) {
     fun toDbModel(radioStation: RadioStation) : RadioStationDb{
@@ -19,6 +20,7 @@ data class RadioStationDb(
             name = radioStation.name,
             url = radioStation.url,
             genre = radioStation.genre,
+            picture = radioStation.picture,
             protocol = radioStation.protocol.name
         )
     }
@@ -29,6 +31,7 @@ data class RadioStationDb(
             name = this.name,
             url = this.url,
             genre = this.genre,
+            picture = this.picture,
             protocol = when(protocol) {
                 Protocol.HLS.name -> Protocol.HLS
                 Protocol.DASH.name -> Protocol.DASH

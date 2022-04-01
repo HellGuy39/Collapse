@@ -113,13 +113,24 @@
             tools:layout="@layout/radio_fragment">
             <action
                 android:id="@+id/action_radioFragment_to_addRadioStationFragment"
-                app:destination="@id/addRadioStationFragment" />
+                app:destination="@id/addRadioStationFragment"
+                app:enterAnim="@anim/to_left_in"
+                app:exitAnim="@anim/to_left_out"
+                app:popEnterAnim="@anim/to_right_in"
+                app:popExitAnim="@anim/to_right_out" />
         </fragment>
         <fragment
             android:id="@+id/addRadioStationFragment"
             android:name="com.hellguy39.collapse.presentaton.fragments.add_radio_station.AddRadioStationFragment"
             android:label="add_radio_station_fragment"
-            tools:layout="@layout/add_radio_station_fragment" />
+            tools:layout="@layout/add_radio_station_fragment" >
+            <argument
+                android:name="action"
+                app:argType="com.hellguy39.collapse.utils.Action" />
+            <argument
+                android:name="radioStation"
+                app:argType="com.hellguy39.domain.models.RadioStation" />
+        </fragment>
     </navigation>
 
 </navigation>

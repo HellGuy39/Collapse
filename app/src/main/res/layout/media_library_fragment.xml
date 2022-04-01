@@ -25,9 +25,11 @@
         android:layout_height="wrap_content"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
         <LinearLayout
+            android:id="@+id/layoutContent"
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true">
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardPermission"
@@ -38,14 +40,14 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="8dp"
-                android:visibility="gone"
-                app:cardElevation="4dp"
-                tools:visibility="visible">
+                app:cardElevation="4dp">
 
                 <LinearLayout
+                    android:id="@+id/layoutCardPermission"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
+                    android:animateLayoutChanges="true"
                     android:padding="12dp">
 
                     <LinearLayout
@@ -87,49 +89,47 @@
                 style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
                 app:cardCornerRadius="0dp"
-                app:cardElevation="0dp"
-                tools:visibility="visible">
+                app:cardElevation="0dp">
 
                 <View
-                    android:background="?attr/colorOnSurface"
                     android:layout_width="match_parent"
+                    android:layout_height="1dp"
                     android:layout_gravity="bottom"
                     android:layout_marginStart="16dp"
-                    android:layout_height="1dp"/>
+                    android:background="?attr/colorOnSurface" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingStart="16dp"
+                    android:paddingTop="16dp"
                     android:paddingEnd="12dp"
-                    android:paddingBottom="16dp"
-                    android:paddingTop="16dp">
+                    android:paddingBottom="16dp">
 
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        app:tint="?attr/colorPrimary"
                         android:layout_gravity="center"
                         android:layout_weight="0"
-                        android:src="@drawable/ic_round_favorite_24" />
+                        android:src="@drawable/ic_round_favorite_24"
+                        app:tint="?attr/colorPrimary" />
 
                     <TextView
                         android:id="@+id/tvFavourites"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_gravity="center"
                         android:layout_marginStart="12dp"
+                        android:layout_weight="1"
                         android:text="Favourites"
                         android:textSize="22sp" />
 
                     <ImageView
-                        android:layout_weight="0"
                         android:layout_width="24dp"
-                        android:layout_gravity="center"
                         android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="0"
                         android:src="@drawable/ic_round_arrow_forward_ios_24" />
 
                 </LinearLayout>
@@ -141,33 +141,31 @@
                 style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:cardElevation="0dp"
                 app:cardCornerRadius="0dp"
-                tools:visibility="visible">
+                app:cardElevation="0dp">
 
                 <View
-                    android:background="?attr/colorOnSurface"
                     android:layout_width="match_parent"
+                    android:layout_height="1dp"
                     android:layout_gravity="bottom"
                     android:layout_marginStart="16dp"
-                    android:layout_height="1dp"/>
+                    android:background="?attr/colorOnSurface" />
 
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingStart="16dp"
+                    android:paddingTop="16dp"
                     android:paddingEnd="12dp"
-                    android:paddingBottom="16dp"
-                    android:paddingTop="16dp">
+                    android:paddingBottom="16dp">
 
                     <ImageView
-                        app:tint="?attr/colorPrimary"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_weight="0"
-                        android:src="@drawable/ic_round_queue_music_24" />
+                        android:src="@drawable/ic_round_queue_music_24"
+                        app:tint="?attr/colorPrimary" />
 
                     <TextView
                         android:id="@+id/tvPlaylists"
@@ -175,15 +173,15 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="12dp"
-                        android:text="Playlists"
                         android:layout_weight="1"
+                        android:text="Playlists"
                         android:textSize="22sp" />
 
                     <ImageView
-                        android:layout_weight="0"
                         android:layout_width="24dp"
-                        android:layout_gravity="center"
                         android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="0"
                         android:src="@drawable/ic_round_arrow_forward_ios_24" />
 
                 </LinearLayout>
@@ -196,33 +194,31 @@
                 style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:cardElevation="0dp"
                 app:cardCornerRadius="0dp"
-                tools:visibility="visible">
+                app:cardElevation="0dp">
 
                 <View
-                    android:background="?attr/colorOnSurface"
                     android:layout_width="match_parent"
+                    android:layout_height="1dp"
                     android:layout_gravity="bottom"
                     android:layout_marginStart="16dp"
-                    android:layout_height="1dp"/>
+                    android:background="?attr/colorOnSurface" />
 
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingStart="16dp"
+                    android:paddingTop="16dp"
                     android:paddingEnd="12dp"
-                    android:paddingBottom="16dp"
-                    android:paddingTop="16dp">
+                    android:paddingBottom="16dp">
 
                     <ImageView
-                        app:tint="?attr/colorPrimary"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_weight="0"
-                        android:src="@drawable/ic_round_audiotrack_24" />
+                        android:src="@drawable/ic_round_audiotrack_24"
+                        app:tint="?attr/colorPrimary" />
 
                     <TextView
                         android:id="@+id/tvAllTracks"
@@ -230,15 +226,15 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="12dp"
-                        android:text="All tracks"
                         android:layout_weight="1"
+                        android:text="All tracks"
                         android:textSize="22sp" />
 
                     <ImageView
-                        android:layout_weight="0"
                         android:layout_width="24dp"
-                        android:layout_gravity="center"
                         android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="0"
                         android:src="@drawable/ic_round_arrow_forward_ios_24" />
 
 
@@ -252,33 +248,31 @@
                 style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:cardElevation="0dp"
                 app:cardCornerRadius="0dp"
-                tools:visibility="visible">
+                app:cardElevation="0dp">
 
                 <View
-                    android:background="?attr/colorOnSurface"
                     android:layout_width="match_parent"
+                    android:layout_height="1dp"
                     android:layout_gravity="bottom"
                     android:layout_marginStart="16dp"
-                    android:layout_height="1dp"/>
+                    android:background="?attr/colorOnSurface" />
 
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingStart="16dp"
+                    android:paddingTop="16dp"
                     android:paddingEnd="12dp"
-                    android:paddingBottom="16dp"
-                    android:paddingTop="16dp">
+                    android:paddingBottom="16dp">
 
                     <ImageView
-                        app:tint="?attr/colorPrimary"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_weight="0"
-                        android:src="@drawable/ic_round_recent_actors_24" />
+                        android:src="@drawable/ic_round_recent_actors_24"
+                        app:tint="?attr/colorPrimary" />
 
                     <TextView
                         android:id="@+id/tvArtists"
@@ -286,15 +280,15 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="12dp"
-                        android:text="Artists"
                         android:layout_weight="1"
+                        android:text="Artists"
                         android:textSize="22sp" />
 
                     <ImageView
-                        android:layout_weight="0"
                         android:layout_width="24dp"
-                        android:layout_gravity="center"
                         android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="0"
                         android:src="@drawable/ic_round_arrow_forward_ios_24" />
 
 

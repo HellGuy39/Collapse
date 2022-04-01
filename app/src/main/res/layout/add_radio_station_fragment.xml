@@ -31,13 +31,21 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/ivImage"
-                android:layout_marginTop="16dp"
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_width="256dp"
-                android:layout_height="256dp"
-                android:src="@drawable/ic_round_radio_24"/>
+                style="@style/Widget.Material3.CardView.Outlined"
+                android:layout_marginTop="16dp">
+
+                <ImageView
+                    android:id="@+id/ivImage"
+                    android:layout_width="256dp"
+                    android:layout_height="256dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_round_radio_24"/>
+
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tfName"

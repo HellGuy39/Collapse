@@ -2,14 +2,12 @@ package com.hellguy39.collapse.di
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.hellguy39.data.db.FavouritesDatabase
 import com.hellguy39.data.db.PlaylistsDatabase
 import com.hellguy39.data.db.RadioStationsDatabase
-import com.hellguy39.data.repositories.FavouritesRepositoryImpl
-import com.hellguy39.data.repositories.PlaylistsRepositoryImpl
-import com.hellguy39.data.repositories.RadioStationsRepositoryImpl
-import com.hellguy39.data.repositories.TracksRepositoryImpl
+import com.hellguy39.data.repositories.*
 import com.hellguy39.domain.repositories.TracksRepository
 import dagger.Module
 import dagger.Provides
@@ -20,10 +18,17 @@ import javax.inject.Singleton
 private const val RADIO_STATIONS_DB_NAME = "radio_stations_db"
 private const val FAVOURITES_DB_NAME = "favourites_db"
 private const val PLAYLISTS_DB_NAME = "playlists_db"
+private const val PREFS_NAME = "prefs_name"
 
 @Module
 @InstallIn(SingletonComponent::class)
 class DataModule {
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(app: Application): SharedPreferences {
+        return app.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
 
     @Provides
     @Singleton
@@ -55,6 +60,11 @@ class DataModule {
         ).build()
     }
 
+    @Provides
+    @Singleton
+    fun provideEqualizerSettingsRepository(sharedPreferences: SharedPreferences): EqualizerRepositoryImpl {
+        return EqualizerRepositoryImpl(sharedPreferences)
+    }
 
     @Provides
     @Singleton

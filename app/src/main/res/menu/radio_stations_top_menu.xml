@@ -15,11 +15,4 @@
         android:title="Add"
         app:showAsAction="ifRoom"
         />
-
-    <item
-        android:id="@+id/filter"
-        android:icon="@drawable/ic_round_filter_list_24"
-        android:title="Filter"
-        app:showAsAction="ifRoom"
-        />
 </menu>

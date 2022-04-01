@@ -1,5 +1,7 @@
 package com.hellguy39.collapse.di
 
+import android.content.SharedPreferences
+import com.hellguy39.data.repositories.EqualizerRepositoryImpl
 import com.hellguy39.data.repositories.FavouritesRepositoryImpl
 import com.hellguy39.data.repositories.PlaylistsRepositoryImpl
 import com.hellguy39.data.repositories.RadioStationsRepositoryImpl
@@ -7,6 +9,9 @@ import com.hellguy39.domain.repositories.TracksRepository
 import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
+import com.hellguy39.domain.usecases.eq_settings.EqualizerSettingsUseCases
+import com.hellguy39.domain.usecases.eq_settings.GetEqualizerSettingsUseCase
+import com.hellguy39.domain.usecases.eq_settings.SaveEqualizerSettingsUseCase
 import com.hellguy39.domain.usecases.favourites.AddFavouriteTrackUseCase
 import com.hellguy39.domain.usecases.favourites.DeleteFavouriteTrackUseCase
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
@@ -23,6 +28,15 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class DomainModule {
+
+    @Provides
+    @Singleton
+    fun provideEqualizerSettingsUseCases(repository: EqualizerRepositoryImpl): EqualizerSettingsUseCases {
+        return EqualizerSettingsUseCases(
+            getEqualizerSettings = GetEqualizerSettingsUseCase(repository),
+            saveEqualizerSettingsUseCase = SaveEqualizerSettingsUseCase(repository)
+        )
+    }
 
     @Provides
     @Singleton
