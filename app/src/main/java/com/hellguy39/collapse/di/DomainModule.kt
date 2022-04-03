@@ -1,6 +1,5 @@
 package com.hellguy39.collapse.di
 
-import android.content.SharedPreferences
 import com.hellguy39.data.repositories.EqualizerRepositoryImpl
 import com.hellguy39.data.repositories.FavouritesRepositoryImpl
 import com.hellguy39.data.repositories.PlaylistsRepositoryImpl
@@ -9,9 +8,7 @@ import com.hellguy39.domain.repositories.TracksRepository
 import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
-import com.hellguy39.domain.usecases.eq_settings.EqualizerSettingsUseCases
-import com.hellguy39.domain.usecases.eq_settings.GetEqualizerSettingsUseCase
-import com.hellguy39.domain.usecases.eq_settings.SaveEqualizerSettingsUseCase
+import com.hellguy39.domain.usecases.eq_settings.*
 import com.hellguy39.domain.usecases.favourites.AddFavouriteTrackUseCase
 import com.hellguy39.domain.usecases.favourites.DeleteFavouriteTrackUseCase
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
@@ -34,7 +31,12 @@ class DomainModule {
     fun provideEqualizerSettingsUseCases(repository: EqualizerRepositoryImpl): EqualizerSettingsUseCases {
         return EqualizerSettingsUseCases(
             getEqualizerSettings = GetEqualizerSettingsUseCase(repository),
-            saveEqualizerSettingsUseCase = SaveEqualizerSettingsUseCase(repository)
+            saveEqualizerSettingsUseCase = SaveEqualizerSettingsUseCase(repository),
+            savePresetEqualizerSettingsUseCase = SavePresetEQSettingsUseCase(repository),
+            saveIsEnabledEQSettingsUseCase = SaveIsEnabledEQSettingsUseCase(repository),
+            saveBandsLevelEQSettingsUseCase = SaveBandsLevelEQSettingsUseCase(repository),
+            saveBassBoostEQSettingsUseCase = SaveBassBoostEQSettingsUseCase(repository),
+            saveVirtualizerEQSettingsUseCase = SaveVirtualizerEQSettingsUseCase(repository)
         )
     }
 

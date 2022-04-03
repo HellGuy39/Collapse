@@ -6,8 +6,12 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.media.audiofx.BassBoost
+import android.media.audiofx.Equalizer
+import android.media.audiofx.Virtualizer
 import android.net.Uri
 import android.os.IBinder
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -26,13 +30,22 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.hellguy39.collapse.presentaton.activities.main.DescriptionAdapter
 import com.hellguy39.domain.models.ServiceContentWrapper
+import com.hellguy39.domain.usecases.eq_settings.EqualizerSettingsUseCases
 import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.utils.Protocol
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class PlayerService : Service() {
+
+    @Inject
+    lateinit var equalizerSettingsUseCases: EqualizerSettingsUseCases
 
     private lateinit var playerNotificationManager: PlayerNotificationManager
 
@@ -44,6 +57,18 @@ class PlayerService : Service() {
 
     companion object {
 
+        private lateinit var equalizer: Equalizer
+        private lateinit var virtualizer: Virtualizer
+        private lateinit var bassBoost: BassBoost
+
+        private var numberOfPresets: Short = 0
+        private var presetNames = mutableListOf<String>()
+
+        private var lowestBandLevel: Short = -1500
+        private var upperBandLevel: Short = 1500
+        private var numberOfBands: Short = 5
+        private val bandsCenterFreq = ArrayList<Int>(0)
+
         private var isRunningService = false
         private var playlistName: String = ""
 
@@ -52,6 +77,7 @@ class PlayerService : Service() {
         /*private var positionLiveData = MutableLiveData<Long>()*/
         private val mediaMetadataLiveData = MutableLiveData<MediaMetadata>()
         private val isPlayingLiveData = MutableLiveData<Boolean>()
+        private val isEqualizerInitializedLiveData = MutableLiveData<Boolean>(false)
         private val audioSessionIdLiveData = MutableLiveData<Int>()
         private val playerTypeLiveData = MutableLiveData<Enum<PlayerType>>()
         private val contentPositionLiveData = MutableLiveData<Int>()
@@ -79,7 +105,8 @@ class PlayerService : Service() {
         fun getCurrentMetadata(): LiveData<MediaMetadata> = mediaMetadataLiveData
         fun getContentPosition(): LiveData<Int> = contentPositionLiveData
         fun getDuration(): Long = exoPlayer.duration
-        fun getAudioSessionId(): LiveData<Int> = audioSessionIdLiveData
+        //fun getAudioSessionId(): LiveData<Int> = audioSessionIdLiveData
+        fun isEqualizerInitialized(): LiveData<Boolean> = isEqualizerInitializedLiveData
         fun isRepeat(): Int = exoPlayer.repeatMode
         fun getPlaylistName(): String = playlistName
 
@@ -94,6 +121,33 @@ class PlayerService : Service() {
         }
         fun onRepeat(n: Int) { exoPlayer.repeatMode = n }
         fun onSeekTo(pos: Long) = exoPlayer.seekTo(pos)
+
+        //Equalizer
+        fun enableEq(b: Boolean) = equalizer.setEnabled(b)
+
+        fun setBandLevel(band: Short, value: Short) = equalizer.setBandLevel(band, value)
+        fun setBassBoostBandLevel(value: Short) = bassBoost.setStrength(value)
+        fun setVirtualizerBandLevel(value: Short) = virtualizer.setStrength(value)
+
+        fun getLowestBandLevel(): Short = lowestBandLevel
+        fun getUpperBandLevel(): Short = upperBandLevel
+        fun getNumberOfBands(): Short = numberOfBands
+        fun getBandsCenterFreq(): ArrayList<Int> = bandsCenterFreq
+
+        fun getNumberOfPresets(): Short = numberOfPresets
+        fun getPresetNames(): List<String> = presetNames
+        fun usePreset(preset: Short) = equalizer.usePreset(preset)
+
+        fun getBandsLevels(): List<Short> {
+            val returnableList = mutableListOf<Short>()
+            (0 until numberOfBands).forEach {
+                returnableList.add(equalizer.getBandLevel(it.toShort()))
+            }
+            return returnableList
+        }
+
+        fun isBassBoostSupported(): Boolean = bassBoost.strengthSupported
+        fun isVirtualizerSupported(): Boolean = virtualizer.strengthSupported
     }
 
     override fun onCreate() {
@@ -155,13 +209,72 @@ class PlayerService : Service() {
             }
         })
 
-        audioSessionIdLiveData.value = exoPlayer.audioSessionId
         playerNotificationManager.setPlayer(exoPlayer)
 
         exoPlayer.playWhenReady = true
         exoPlayer.prepare()
 
+        initEQ()
+        setupEqSettings()
+
         return START_STICKY
+    }
+
+    private fun setupEqSettings() {
+
+        val settings = equalizerSettingsUseCases.getEqualizerSettings.invoke()
+
+        equalizer.enabled = settings.isEnabled
+
+        if(settings.preset == -1) {
+            equalizer.setBandLevel(0, (settings.band1Level).toInt().toShort())
+            equalizer.setBandLevel(1, (settings.band2Level).toInt().toShort())
+            equalizer.setBandLevel(2, (settings.band3Level).toInt().toShort())
+            equalizer.setBandLevel(3, (settings.band4Level).toInt().toShort())
+            equalizer.setBandLevel(4, (settings.band5Level).toInt().toShort())
+        } else {
+            equalizer.usePreset(settings.preset.toShort())
+        }
+
+        if(virtualizer.strengthSupported)
+            virtualizer.setStrength((settings.bandVirtualizer).toInt().toShort())
+
+        if(bassBoost.strengthSupported)
+            bassBoost.setStrength((settings.bandVirtualizer).toInt().toShort())
+
+    }
+
+    private fun initEQ() {
+
+        equalizer = Equalizer(1, exoPlayer.audioSessionId)
+        virtualizer = Virtualizer(1, exoPlayer.audioSessionId)
+        bassBoost = BassBoost(1, exoPlayer.audioSessionId)
+
+        if (bassBoost.strengthSupported)
+            bassBoost.enabled = true
+
+        if (virtualizer.strengthSupported)
+            virtualizer.enabled = true
+
+        numberOfBands = equalizer.numberOfBands
+        lowestBandLevel = equalizer.bandLevelRange[0]
+        upperBandLevel = equalizer.bandLevelRange[1]
+
+        (0 until numberOfBands)
+            .map { equalizer.getCenterFreq(it.toShort()) }
+            .mapTo(bandsCenterFreq) { it / 1000 }
+
+        numberOfPresets = equalizer.numberOfPresets
+
+        presetNames.clear()
+
+        (0 until numberOfPresets).forEach { n ->
+            presetNames.add(equalizer.getPresetName(n.toShort()))
+        }
+
+        presetNames.add("Custom")
+
+        isEqualizerInitializedLiveData.value = true
     }
 
     private fun initDefaultPlayer(content: ServiceContentWrapper) {

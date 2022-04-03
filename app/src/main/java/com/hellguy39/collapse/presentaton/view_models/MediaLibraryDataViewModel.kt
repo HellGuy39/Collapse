@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
-import com.hellguy39.domain.usecases.favourites.GetAllFavouriteTracksUseCase
 import com.hellguy39.domain.usecases.tracks.GetAllTracksUseCase
 import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +27,10 @@ class MediaLibraryDataViewModel @Inject constructor(
     private val allFavouriteTracksLiveData = MutableLiveData<List<Track>>()
 
     init {
+        initSetup()
+    }
+
+    fun initSetup() {
         fetchAllTrackList()
         fetchAllPlaylists()
         fetchAllFavouriteTracks()
@@ -50,6 +53,14 @@ class MediaLibraryDataViewModel @Inject constructor(
     fun addToFavourites(track: Track) = viewModelScope.launch(Dispatchers.IO) {
         favouriteTracksUseCase.addFavouriteTrackUseCase.invoke(track = track)
         updateFavouriteTracks()
+    }
+
+    fun deleteFromPlaylist(track: Track, playlist: Playlist) = viewModelScope.launch(Dispatchers.IO) {
+        val updatedList = mutableListOf<Track>()
+        updatedList.addAll(playlist.tracks)
+        updatedList.remove(track)
+        playlist.tracks = updatedList
+        playlistUseCases.updatePlaylistUseCase.invoke(playlist)
     }
 
     fun addNewPlaylist(playlist: Playlist) = viewModelScope.launch(Dispatchers.IO) {
@@ -99,5 +110,21 @@ class MediaLibraryDataViewModel @Inject constructor(
 
         return returnableList
     }
+
+    fun searchWithQueryInPlaylists(query: String = "", playlists: List<Playlist>?): List<Playlist> {
+        if (playlists.isNullOrEmpty())
+            return listOf()
+
+        val returnableList = mutableListOf<Playlist>()
+
+        for (n in playlists.indices) {
+            if (playlists[n].name.contains(query, true)) {
+                returnableList.add(playlists[n])
+            }
+        }
+
+        return returnableList
+    }
+
 
 }

@@ -67,15 +67,6 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
                 binding.ivImage.setImageBitmap(selectedImage)
             }
         }
-
-        when (args.action) {
-            Action.Create -> {
-
-            }
-            Action.Update -> {
-                updateUI(args.playlist)
-            }
-        }
     }
 
     private fun updateUI(playlist: Playlist) {
@@ -89,7 +80,7 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
             selectedImage = bitmap
             binding.ivImage.setImageBitmap(bitmap)
         } else
-            binding.ivImage.setImageResource(R.drawable.ic_round_audiotrack_24)
+            binding.ivImage.setImageResource(R.drawable.ic_round_queue_music_24)
 
         updateTracksCounter(playlist.tracks.size)
     }
@@ -102,6 +93,15 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
         binding.fabAdd.setOnClickListener(this)
         binding.cardSelectTracks.setOnClickListener(this)
         binding.ivImage.setOnClickListener(this)
+
+        when (args.action) {
+            Action.Create -> {
+
+            }
+            Action.Update -> {
+                updateUI(args.playlist)
+            }
+        }
 
         setFragmentResultListener("pick_tracks") { requestKey, bundle ->
             tracks = bundle.get("tracks") as List<Track>

@@ -12,11 +12,31 @@ class EqualizerViewModel @Inject constructor(
 ) : ViewModel() {
 
     fun saveEqualizerSettings(equalizerSettings: EqualizerSettings) {
-        equalizerSettingsUseCases.saveEqualizerSettingsUseCase.invoke(equalizerSettings)
+        equalizerSettingsUseCases.saveEqualizerSettingsUseCase.invoke(equalizerSettings = equalizerSettings)
     }
 
     fun getEqualizerSettings(): EqualizerSettings {
         return equalizerSettingsUseCases.getEqualizerSettings.invoke()
+    }
+
+    fun savePreset(preset: Int) {
+        equalizerSettingsUseCases.savePresetEqualizerSettingsUseCase.invoke(preset = preset)
+    }
+
+    fun saveIsEnabled(isEnabled: Boolean) {
+        equalizerSettingsUseCases.saveIsEnabledEQSettingsUseCase.invoke(isEnabled = isEnabled)
+    }
+
+    fun saveBandsLevel(levels: List<Short>) {
+        equalizerSettingsUseCases.saveBandsLevelEQSettingsUseCase.invoke(levels = levels)
+    }
+
+    fun saveBassBoost(bass: Float) {
+        equalizerSettingsUseCases.saveBassBoostEQSettingsUseCase.invoke(bass = bass)
+    }
+
+    fun saveVirtualizer(virtualize: Float) {
+        equalizerSettingsUseCases.saveVirtualizerEQSettingsUseCase.invoke(virtualize = virtualize)
     }
 
 }

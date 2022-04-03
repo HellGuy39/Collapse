@@ -14,6 +14,7 @@ import com.hellguy39.collapse.presentaton.adapters.TracksAdapter
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
+import com.hellguy39.domain.utils.PlaylistType
 
 class TrackViewHolder(
     v: View,
@@ -28,6 +29,7 @@ class TrackViewHolder(
         track: Track,
         resources: Resources,
         position: Int,
+        type: Enum<PlaylistType>,
         listener: TracksAdapter.OnTrackListener
     ) {
 
@@ -46,7 +48,18 @@ class TrackViewHolder(
         }
 
         binding.ibMore.setOnClickListener {
-            showMenu(it, R.menu.track_item_menu, listener, track)
+            showMenu(
+                v = it,
+                menuRes = R.menu.track_item_menu,
+                listener = listener,
+                track = track,
+                type = type,
+                position = position
+            )
+        }
+
+        if(track.isPlaying) {
+            binding.root.cardElevation = 4f
         }
 
     }
@@ -55,18 +68,54 @@ class TrackViewHolder(
         v: View,
         @MenuRes menuRes: Int,
         listener: TracksAdapter.OnTrackListener,
-        track: Track
+        track: Track,
+        type: Enum<PlaylistType>,
+        position: Int
     ) {
         val popup = PopupMenu(context,v)
         popup.menuInflater.inflate(menuRes, popup.menu)
 
-        popup.setOnMenuItemClickListener { menuItem: MenuItem ->
-            when(menuItem.itemId) {
-                R.id.addToFavourites -> {
-                    listener.onAddToFavourites(track = track)
-                    true
+        when(type) {
+            PlaylistType.Custom -> {
+                popup.setOnMenuItemClickListener { menuItem: MenuItem ->
+                    when(menuItem.itemId) {
+                        R.id.deleteFromPlaylist -> {
+                            listener.onDeleteFromPlaylist(track = track, position = position)
+                            true
+                        }
+                        R.id.addToFavourites -> {
+                            listener.onAddToFavourites(track = track)
+                            true
+                        }
+                        else -> false
+                    }
                 }
-                else -> false
+            }
+            PlaylistType.Favourites -> {
+                popup.menu.findItem(R.id.addToFavourites).isVisible = false
+                popup.setOnMenuItemClickListener { menuItem: MenuItem ->
+                    when(menuItem.itemId) {
+                        R.id.deleteFromPlaylist -> {
+                            listener.onDeleteFromPlaylist(track = track, position = position)
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
+            }
+            PlaylistType.AllTracks -> {
+                popup.menu.findItem(R.id.deleteFromPlaylist).isVisible = false
+                popup.setOnMenuItemClickListener { menuItem: MenuItem ->
+                    when(menuItem.itemId) {
+                        R.id.addToFavourites -> {
+                            listener.onAddToFavourites(track = track)
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
             }
         }
         popup.setOnDismissListener {

@@ -1,6 +1,7 @@
 package com.hellguy39.collapse.presentaton.fragments.track_list
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
@@ -25,6 +26,10 @@ import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -81,37 +86,55 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
         searchView = searchItem.actionView as SearchView
         searchView.setOnQueryTextListener(this)
 
-        when (receivedPlaylist.type) {
-            PlaylistType.AllTracks -> {
-                binding.toolbarImage.visibility = View.GONE//setImageResource(R.drawable.ic_round_audiotrack_24)
-            }
-            PlaylistType.Custom -> {
-                val bytes = receivedPlaylist.picture
-                if (bytes != null)
-                    binding.toolbarImage.setImageBitmap(convertByteArrayToBitmapUseCase.invoke(bytes))
-                else
-                    binding.toolbarImage.visibility = View.GONE
+        setupToolbarImage(receivedPlaylist.type)
+        setupToolbarMenu(receivedPlaylist.type)
 
-                binding.toolbar.setOnMenuItemClickListener {
-                    when(it.itemId) {
-                        R.id.edit -> {
-                            navigateToEditPlaylist()
-                            true
-                        }
-                        R.id.delete -> {
-                            showDeleteDialog()
-                            true
-                        }
-                        else -> false
+    }
+
+    private fun setupToolbarMenu(type: Enum<PlaylistType>) = when(type) {
+        PlaylistType.AllTracks -> {
+            binding.toolbar.menu.findItem(R.id.edit).isVisible = false
+            binding.toolbar.menu.findItem(R.id.delete).isVisible = false
+        }
+        PlaylistType.Favourites -> {
+            binding.toolbar.menu.findItem(R.id.edit).isVisible = false
+            binding.toolbar.menu.findItem(R.id.delete).isVisible = false
+        }
+        PlaylistType.Custom -> {
+            binding.toolbar.setOnMenuItemClickListener {
+                when(it.itemId) {
+                    R.id.edit -> {
+                        navigateToEditPlaylist()
+                        true
                     }
+                    R.id.delete -> {
+                        showDeleteDialog()
+                        true
+                    }
+                    else -> false
                 }
             }
-            PlaylistType.Favourites -> {
-                binding.toolbarImage.visibility = View.GONE
-                //binding.toolbarImage.setImageResource(R.drawable.ic_round_favorite_24)
-            }
         }
+        else -> {}
     }
+
+    private fun setupToolbarImage(type: Enum<PlaylistType>) = when(type) {
+        PlaylistType.AllTracks -> {
+            binding.toolbarImage.visibility = View.GONE
+        }
+        PlaylistType.Favourites -> {
+            binding.toolbarImage.visibility = View.GONE
+        }
+        PlaylistType.Custom -> {
+            val bytes = receivedPlaylist.picture
+            if (bytes != null)
+                binding.toolbarImage.setImageBitmap(convertByteArrayToBitmapUseCase.invoke(bytes))
+            else
+                binding.toolbarImage.visibility = View.GONE
+        }
+        else -> {}
+    }
+
 
     private fun navigateToEditPlaylist() = findNavController().navigate(
         TrackListFragmentDirections.actionTrackListFragmentToCreatePlaylistFragment(
@@ -122,18 +145,21 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
 
     override fun onResume() {
         super.onResume()
-        when (receivedPlaylist.type) {
-            PlaylistType.AllTracks -> {
-                setAllTracksObserver()
+//        CoroutineScope(Dispatchers.Main).launch {
+//            delay(400)
+            when (receivedPlaylist.type) {
+                PlaylistType.AllTracks -> {
+                    setAllTracksObserver()
+                }
+                PlaylistType.Custom -> {
+                    clearRecyclerView()
+                    updateRecyclerView(receivedPlaylist.tracks)
+                }
+                PlaylistType.Favourites -> {
+                    setFavouritesTracksObserver()
+                }
             }
-            PlaylistType.Custom -> {
-                clearRecyclerView()
-                updateRecyclerView(receivedPlaylist.tracks)
-            }
-            PlaylistType.Favourites -> {
-                setFavouritesTracksObserver()
-            }
-        }
+        //}
     }
 
     private fun setupRecyclerView() {
@@ -148,7 +174,8 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
             listener = this,
             getImageBitmapUseCase = getImageBitmapUseCase,
             context = requireContext(),
-            favouriteTracksUseCases = favouriteTracksUseCases
+            favouriteTracksUseCases = favouriteTracksUseCases,
+            playlistType = receivedPlaylist.type
         )
     }
 
@@ -203,6 +230,18 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
 
     override fun onAddToFavourites(track: Track) {
         dataViewModel.addToFavourites(track = track)
+    }
+
+    override fun onDeleteFromPlaylist(track: Track, position: Int) {
+        dataViewModel.deleteFromPlaylist(track = track, playlist = receivedPlaylist)
+
+        val updatedList = mutableListOf<Track>()
+        updatedList.addAll(receivedPlaylist.tracks)
+        updatedList.removeAt(position)
+        receivedPlaylist.tracks = updatedList
+        recyclerTracks.removeAt(position)
+
+        binding.rvTrackList.adapter?.notifyItemRemoved(position)
     }
 
     private fun updateRecyclerView(receivedTracks: List<Track>) {

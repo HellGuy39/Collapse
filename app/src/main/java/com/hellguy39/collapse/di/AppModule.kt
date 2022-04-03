@@ -2,6 +2,7 @@ package com.hellguy39.collapse.di
 
 import android.app.Application
 import android.content.Context
+import com.google.android.exoplayer2.ExoPlayer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

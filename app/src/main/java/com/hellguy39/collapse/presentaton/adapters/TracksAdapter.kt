@@ -10,6 +10,7 @@ import com.hellguy39.collapse.presentaton.view_holders.TrackViewHolder
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
+import com.hellguy39.domain.utils.PlaylistType
 
 class TracksAdapter(
     private val trackList: List<Track>,
@@ -17,7 +18,8 @@ class TracksAdapter(
     private val listener: OnTrackListener,
     private val context: Context,
     private val getImageBitmapUseCase: GetImageBitmapUseCase,
-    private val favouriteTracksUseCases: FavouriteTracksUseCases
+    private val favouriteTracksUseCases: FavouriteTracksUseCases,
+    private val playlistType: Enum<PlaylistType>
 ): RecyclerView.Adapter<TrackViewHolder>() {
 
     override fun onCreateViewHolder(
@@ -41,7 +43,8 @@ class TracksAdapter(
             track = trackList[position],
             resources = resources,
             position = position,
-            listener = listener
+            listener = listener,
+            type = playlistType
         )
     }
 
@@ -50,5 +53,6 @@ class TracksAdapter(
     interface OnTrackListener {
         fun onTrackClick(track: Track)
         fun onAddToFavourites(track: Track)
+        fun onDeleteFromPlaylist(track: Track, position: Int)
     }
 }

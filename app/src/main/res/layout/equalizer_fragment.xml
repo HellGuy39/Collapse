@@ -16,12 +16,55 @@
             android:orientation="vertical">
 
 
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardEqMessage"
+                style="@style/Widget.Material3.CardView.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="0dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:id="@+id/layoutCardEqMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:animateLayoutChanges="true"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_round_error_outline_24" />
+
+                        <TextView
+                            android:id="@+id/tvEqTittle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginStart="12dp"
+                            android:text="Equalizer cannot be initialized without an audio session"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/eqSwitch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="4dp"
                 android:fontFamily="@font/roboto_regular"

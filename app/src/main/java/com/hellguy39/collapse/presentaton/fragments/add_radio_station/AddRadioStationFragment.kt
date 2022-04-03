@@ -146,23 +146,23 @@ class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
 
                 when(args.radioStation.protocol) {
                     Protocol.HLS -> {
-                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(0).toString())
+                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(0).toString(), false)
                         selectedProtocol = Protocol.HLS
                     }
                     Protocol.SmoothStreaming -> {
-                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(1).toString())
+                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(1).toString(), false)
                         selectedProtocol = Protocol.SmoothStreaming
                     }
                     Protocol.RTSP -> {
-                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(2).toString())
+                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(2).toString(), false)
                         selectedProtocol = Protocol.RTSP
                     }
                     Protocol.Progressive -> {
-                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(3).toString())
+                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(3).toString(), false)
                         selectedProtocol = Protocol.Progressive
                     }
                     Protocol.DASH -> {
-                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(4).toString())
+                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(4).toString(), false)
                         selectedProtocol = Protocol.DASH
                     }
                 }

@@ -36,6 +36,9 @@ class SelectableTrackViewHolder(
             else
                 listener.onUnselectTrack(position = position)
         }
+
+        if (track.isChecked)
+            binding.cbSelect.isChecked = true
     }
 
 }

@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
-    SelectableTracksAdapter.OnSelectableTrackListener, View.OnClickListener {
+    SelectableTracksAdapter.OnSelectableTrackListener {
 
     @Inject
     lateinit var getImageBitmapUseCase: GetImageBitmapUseCase
@@ -62,7 +62,6 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
             LinearLayoutManager.VERTICAL,
             false
         )
-        binding.fabConfirm.setOnClickListener(this)
 
         setObservers()
     }
@@ -83,6 +82,14 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
     private fun updateRecyclerView(receivedTracks: List<Track>) {
         for (n in receivedTracks.indices) {
             allTracks.add(receivedTracks[n])
+        }
+
+        val selectedTracks = args.playlist.tracks
+
+        for (n in allTracks.indices) {
+            if (selectedTracks.contains(allTracks[n])) {
+                allTracks[n].isChecked = true
+            }
         }
 
         val position = binding.rvTracks.adapter?.itemCount ?: 0
@@ -112,13 +119,9 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
         return returnableList
     }
 
-    override fun onClick(p0: View?) {
-        when(p0?.id) {
-            R.id.fabConfirm -> {
-                setFragmentResult("pick_tracks",
-                    bundleOf("tracks" to collectTracks(positions = positions)))
-                findNavController().popBackStack()
-            }
-        }
+    override fun onPause() {
+        super.onPause()
+        setFragmentResult("pick_tracks",
+            bundleOf("tracks" to collectTracks(positions = positions)))
     }
 }

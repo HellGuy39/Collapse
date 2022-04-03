@@ -77,6 +77,7 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
         if (permission == true)
         {
             checkPermission()
+            (activity as MainActivity).initSetupMediaLibraryDataViewModel()
         }
     }
 

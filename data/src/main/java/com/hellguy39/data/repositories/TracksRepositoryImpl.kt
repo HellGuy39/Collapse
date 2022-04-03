@@ -13,6 +13,12 @@ class TracksRepositoryImpl(
         val audioDataList: MutableList<Track> = mutableListOf()
         val contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//            MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+//        } else {
+//            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+//        }
+
         val projection: Array<String> = arrayOf(
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.DATA,

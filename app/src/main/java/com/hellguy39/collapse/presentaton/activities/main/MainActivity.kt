@@ -93,6 +93,10 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
         }
     }
 
+    fun initSetupMediaLibraryDataViewModel() {
+        mediaLibraryDataViewModel.initSetup()
+    }
+
     private fun updateCardUI(metadata: MediaMetadata) {
         _binding.tvTrackName.text = if (metadata.title.isNullOrEmpty()) "Unknown" else metadata.title
         _binding.tvArtist.text  = if (metadata.artist.isNullOrEmpty()) "Unknown" else metadata.artist
@@ -107,82 +111,15 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
     }
 
     private fun showTrackCard() {
-//        val id = navController.currentDestination?.id ?: return
-
-//        if(!isBottomNavigationFragment(id))
-//            return
 
         _binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
-        /*_binding.trackCard.apply {
-            translationY = this.height.toFloat()
-            visibility = View.VISIBLE
 
-            animate().translationY(0f)
-                .setDuration(200)
-                .setListener(null)
-        }*/
         TransitionManager.beginDelayedTransition(_binding.layoutCardPlayer, AutoTransition())
         _binding.layoutCardPlayer.visibility = View.VISIBLE
     }
 
     private fun hideTrackCard() {
-        _binding.trackCard.apply {
-            translationY = 0f
-            animate().translationY(this.height.toFloat())
-                .setDuration(0)
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
-                        super.onAnimationEnd(animation)
-                        _binding.trackCard.visibility = View.INVISIBLE
-                    }
-                })
-        }
+        TransitionManager.beginDelayedTransition(_binding.layoutCardPlayer, AutoTransition())
+        _binding.layoutCardPlayer.visibility = View.GONE
     }
-
-//    private fun hideBottomNavigation() {
-//        TransitionManager.beginDelayedTransition(_binding.rootLayout, AutoTransition())
-//        _binding.bottomNavigation.visibility = View.GONE
-//    }
-//
-//    private fun showBottomNavigation() {
-//        TransitionManager.beginDelayedTransition(_binding.rootLayout, AutoTransition())
-//        _binding.bottomNavigation.visibility = View.VISIBLE
-//    }
-
-//    override fun onDestinationChanged(
-//        controller: NavController,
-//        destination: NavDestination,
-//        arguments: Bundle?
-//    ) {
-//        if (isBottomNavigationFragment(destination.id)) {
-//            showBottomNavigation()
-//            checkTrackCard(true)
-//        } else {
-//            hideBottomNavigation()
-//            checkTrackCard(false)
-//        }
-//    }
-
-//    private fun checkTrackCard(enable: Boolean) {
-//        if (enable) {
-//            if (isNeedDisplayCard) {
-//                if (_binding.trackCard.visibility == View.INVISIBLE) {
-//                    showTrackCard()
-//                }
-//            }
-//        } else {
-//            if (!isNeedDisplayCard) {
-//                if (_binding.trackCard.visibility == View.VISIBLE) {
-//                    hideTrackCard()
-//                }
-//            }
-//        }
-//    }
-//
-//    private fun isBottomNavigationFragment(id: Int):Boolean {
-//        return id == R.id.homeFragment ||
-//                id == R.id.mediaLibraryFragment ||
-//                id == R.id.radioFragment ||
-//                id == R.id.equalizerFragment
-//    }
 }
