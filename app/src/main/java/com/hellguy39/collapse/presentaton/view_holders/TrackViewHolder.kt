@@ -117,6 +117,19 @@ class TrackViewHolder(
                     }
                 }
             }
+            PlaylistType.Artist -> {
+                popup.menu.findItem(R.id.deleteFromPlaylist).isVisible = false
+                popup.setOnMenuItemClickListener { menuItem: MenuItem ->
+                    when(menuItem.itemId) {
+                        R.id.addToFavourites -> {
+                            listener.onAddToFavourites(track = track)
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
+            }
         }
         popup.setOnDismissListener {
 

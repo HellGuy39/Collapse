@@ -113,7 +113,10 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
 
     override fun onPlaylistClick(playlist: Playlist) {
         findNavController().navigate(
-            PlaylistsFragmentDirections.actionPlaylistsFragmentToTrackListFragment(playlist)
+            PlaylistsFragmentDirections.actionPlaylistsFragmentToTrackListFragment(
+                playlist,
+                null
+            )
         )
     }
 
@@ -128,7 +131,7 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     }
 
     private fun onSearchViewChangeQuery(query: String?) {
-        val queryList  = dataViewModel.searchWithQueryInPlaylists(
+        val queryList = dataViewModel.searchWithQueryInPlaylists(
             query = query?: "",
             dataViewModel.getAllPlaylists().value
         )

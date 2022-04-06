@@ -1,7 +1,6 @@
 package com.hellguy39.collapse.presentaton.fragments.track_list
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
@@ -17,6 +16,7 @@ import com.hellguy39.collapse.presentaton.adapters.TracksAdapter
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.Action
+import com.hellguy39.domain.models.Artist
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.ServiceContentWrapper
 import com.hellguy39.domain.models.Track
@@ -26,10 +26,6 @@ import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -56,6 +52,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
     private lateinit var searchView: SearchView
 
     private lateinit var receivedPlaylist: Playlist
+    private var receivedArtist: Artist = Artist()
 
     private var allTracksFromCurrentPlaylist = listOf<Track>()
     private var recyclerTracks = mutableListOf<Track>()
@@ -66,8 +63,9 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
 
         receivedPlaylist = args.playlist
 
-        allTracksFromCurrentPlaylist = receivedPlaylist.tracks
-        recyclerTracks = receivedPlaylist.tracks.toMutableList()
+        if (args.artist != null) {
+            receivedArtist = args.artist!!
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -82,8 +80,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
             findNavController().popBackStack()
         }
 
-        val searchItem = binding.toolbar.menu.findItem(R.id.search)
-        searchView = searchItem.actionView as SearchView
+        searchView = binding.toolbar.menu.findItem(R.id.search).actionView as SearchView
         searchView.setOnQueryTextListener(this)
 
         setupToolbarImage(receivedPlaylist.type)
@@ -115,6 +112,10 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
                 }
             }
         }
+        PlaylistType.Artist -> {
+            binding.toolbar.menu.findItem(R.id.edit).isVisible = false
+            binding.toolbar.menu.findItem(R.id.delete).isVisible = false
+        }
         else -> {}
     }
 
@@ -126,6 +127,13 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
             binding.toolbarImage.visibility = View.GONE
         }
         PlaylistType.Custom -> {
+            val bytes = receivedPlaylist.picture
+            if (bytes != null)
+                binding.toolbarImage.setImageBitmap(convertByteArrayToBitmapUseCase.invoke(bytes))
+            else
+                binding.toolbarImage.visibility = View.GONE
+        }
+        PlaylistType.Artist -> {
             val bytes = receivedPlaylist.picture
             if (bytes != null)
                 binding.toolbarImage.setImageBitmap(convertByteArrayToBitmapUseCase.invoke(bytes))
@@ -152,14 +160,55 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
                     setAllTracksObserver()
                 }
                 PlaylistType.Custom -> {
-                    clearRecyclerView()
-                    updateRecyclerView(receivedPlaylist.tracks)
+                    onTracksReceived(receivedPlaylist.tracks, PlaylistType.Custom, receivedPlaylist.name)
                 }
                 PlaylistType.Favourites -> {
                     setFavouritesTracksObserver()
                 }
+                PlaylistType.Artist -> {
+                    onTracksReceived(receivedPlaylist.tracks, PlaylistType.Artist, receivedPlaylist.name)
+                }
             }
         //}
+    }
+
+
+    private fun showDeleteDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Are you sure want to delete this playlist?")
+            .setNeutralButton("Cancel") { dialog, which ->
+                dialog.cancel()
+            }
+            .setPositiveButton("Yes") { dialog, which ->
+                dataViewModel.deletePlaylist(playlist = receivedPlaylist)
+                findNavController().popBackStack()
+            }
+            .show()
+    }
+
+    private fun setAllTracksObserver() {
+        dataViewModel.getAllTracks().observe(viewLifecycleOwner) { receivedTracks ->
+            onTracksReceived(receivedTracks, PlaylistType.AllTracks, "All tracks")
+        }
+    }
+
+    private fun setFavouritesTracksObserver() {
+        dataViewModel.getAllFavouriteTracks().observe(viewLifecycleOwner) { receivedTracks ->
+            onTracksReceived(receivedTracks, PlaylistType.Favourites, "Favourites")
+        }
+    }
+
+    private fun onTracksReceived(receivedTracks: List<Track>, playlistType: PlaylistType, name: String) {
+        allTracksFromCurrentPlaylist = receivedTracks
+        if (playlistType != PlaylistType.Custom || playlistType != PlaylistType.Artist) {
+            receivedPlaylist = Playlist(
+                name = name,
+                type = playlistType,
+                tracks = receivedTracks
+            )
+        }
+        clearRecyclerView()
+        updateRecyclerView(receivedTracks)
     }
 
     private fun setupRecyclerView() {
@@ -177,46 +226,6 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
             favouriteTracksUseCases = favouriteTracksUseCases,
             playlistType = receivedPlaylist.type
         )
-    }
-
-    private fun showDeleteDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Are you sure want to delete this playlist?")
-            .setNeutralButton("Cancel") { dialog, which ->
-                dialog.cancel()
-            }
-            .setPositiveButton("Yes") { dialog, which ->
-                dataViewModel.deletePlaylist(playlist = receivedPlaylist)
-                findNavController().popBackStack()
-
-            }
-            .show()
-    }
-
-    private fun setAllTracksObserver() {
-        dataViewModel.getAllTracks().observe(viewLifecycleOwner) { receivedTracks ->
-            allTracksFromCurrentPlaylist = receivedTracks
-            receivedPlaylist = Playlist(
-                name = "All tracks",
-                type = PlaylistType.AllTracks,
-                tracks = receivedTracks
-            )
-            clearRecyclerView()
-            updateRecyclerView(receivedTracks)
-        }
-    }
-
-    private fun setFavouritesTracksObserver() {
-        dataViewModel.getAllFavouriteTracks().observe(viewLifecycleOwner) { receivedTracks ->
-            allTracksFromCurrentPlaylist = receivedTracks
-            receivedPlaylist = Playlist(
-                name = "Favourites",
-                type = PlaylistType.Favourites,
-                tracks = receivedTracks
-            )
-            clearRecyclerView()
-            updateRecyclerView(receivedTracks)
-        }
     }
 
     override fun onTrackClick(track: Track) {
@@ -288,6 +297,12 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
                 queryList = dataViewModel.searchWithQueryInTrackList(
                     query = query?: "",
                     dataViewModel.getAllFavouriteTracks().value
+                )
+            }
+            PlaylistType.Artist -> {
+                queryList = dataViewModel.searchWithQueryInTrackList(
+                    query = query?: "",
+                    dataViewModel.getTrackListFromArtist(artist = receivedArtist)
                 )
             }
         }

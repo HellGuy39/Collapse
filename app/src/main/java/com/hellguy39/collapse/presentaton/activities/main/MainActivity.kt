@@ -1,9 +1,6 @@
 package com.hellguy39.collapse.presentaton.activities.main
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.animation.LayoutTransition
-import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -22,43 +19,54 @@ import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
+import com.hellguy39.domain.models.RadioStation
+import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
+import com.hellguy39.domain.usecases.state.SavedServiceStateUseCases
+import com.hellguy39.domain.utils.PlayerType
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedListener*/ {
+class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var savedServiceStateUseCases: SavedServiceStateUseCases
+
+    @Inject
+    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
 
     private lateinit var navController: NavController
     private lateinit var navHostFragment: NavHostFragment
-    private lateinit var _binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
     private lateinit var mediaLibraryDataViewModel: MediaLibraryDataViewModel
     private lateinit var radioStationsDataViewModel: RadioStationsDataViewModel
 
-    private var isNeedDisplayCard = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        _binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(_binding.root)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         mediaLibraryDataViewModel = ViewModelProvider(this)[MediaLibraryDataViewModel::class.java]
         radioStationsDataViewModel = ViewModelProvider(this)[RadioStationsDataViewModel::class.java]
 
         navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer) as NavHostFragment
         navController = navHostFragment.navController
 
-        _binding.rootLayout.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        binding.rootLayout.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+
         NavigationUI.setupWithNavController(
-            _binding.bottomNavigation,navController
+            binding.bottomNavigation,navController
         )
 
-        _binding.trackCard.setOnClickListener {
-            //navController.navigate(R.id.trackFragment)
-            //hideTrackCard()
+        binding.trackCard.setOnClickListener {
             startActivity(Intent(this, TrackActivity::class.java))
-            //overridePendingTransition(R.anim.slide_up_in, R.anim.slide_up_out)
         }
 
-        _binding.ibPlayPause.setOnClickListener {
+        binding.ibPlayPause.setOnClickListener {
             if (PlayerService.isPlaying().value == true) {
                 PlayerService.onPause()
             } else {
@@ -68,28 +76,48 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
 
         setObservers()
 
-        _binding.layoutCardPlayer.visibility = View.GONE
-        _binding.layoutCardPlayer.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        binding.layoutCardPlayer.visibility = View.GONE
+        binding.layoutCardPlayer.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+
+        checkServiceSavedState()
     }
 
     private fun setObservers() {
         PlayerService.isPlaying().observe(this) {
             if (it) {
-                _binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
+                binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
             } else {
-                _binding.ibPlayPause.setImageResource(R.drawable.ic_round_play_arrow_24)
+                binding.ibPlayPause.setImageResource(R.drawable.ic_round_play_arrow_24)
             }
         }
 
-        PlayerService.getCurrentMetadata().observe(this) {
+        PlayerService.isRunningService().observe(this) { isRunning ->
+            if (isRunning) {
+                val type = PlayerService.getPlayerType().value
 
-            if (it != null) {
-                updateCardUI(it)
-                isNeedDisplayCard = true
+                if (type == PlayerType.LocalTrack) {
+
+                    val metadata = PlayerService.getCurrentMetadata().value
+
+                    if (metadata != null)
+                        updateCardUIWithMetadata(metadata)
+
+                    showTrackCard()
+                } else if (type == PlayerType.Radio) {
+                    updateCardUIWithRadioStation(PlayerService.getRadioStation())
+
+                    showTrackCard()
+                }
+            } else {
+                hideTrackCard()
             }
+        }
 
-            showTrackCard()
+        PlayerService.getCurrentMetadata().observe(this) { metadata ->
+            val type = PlayerService.getPlayerType().value
 
+            if (type == PlayerType.LocalTrack)
+                updateCardUIWithMetadata(metadata)
         }
     }
 
@@ -97,29 +125,60 @@ class MainActivity : AppCompatActivity()/*, NavController.OnDestinationChangedLi
         mediaLibraryDataViewModel.initSetup()
     }
 
-    private fun updateCardUI(metadata: MediaMetadata) {
-        _binding.tvTrackName.text = if (metadata.title.isNullOrEmpty()) "Unknown" else metadata.title
-        _binding.tvArtist.text  = if (metadata.artist.isNullOrEmpty()) "Unknown" else metadata.artist
+
+    private fun checkServiceSavedState() = CoroutineScope(Dispatchers.IO).launch {
+        val state = savedServiceStateUseCases.getSavedServiceStateUseCase.invoke()
+
+        withContext(Dispatchers.Main) {
+            if (state.radioStation != null || state.playlist != null) {
+
+                if(state.radioStation != null)
+                    return@withContext //this is a temporary solution
+
+                PlayerService.startService(
+                    context = this@MainActivity,
+                    contentWrapper = state
+                )
+            }
+        }
+    }
+
+    private fun updateCardUIWithMetadata(metadata: MediaMetadata) {
+        binding.tvTrackName.text = if (metadata.title.isNullOrEmpty()) "Unknown" else metadata.title
+        binding.tvArtist.text  = if (metadata.artist.isNullOrEmpty()) "Unknown" else metadata.artist
 
         val bytes = metadata.artworkData
 
         if (bytes != null)
-            _binding.ivTrackImage.setImageBitmap(BitmapFactory.decodeByteArray(metadata.artworkData, 0, bytes.size))
+            binding.ivTrackImage.setImageBitmap(convertByteArrayToBitmapUseCase.invoke(bytes))
         else
-            _binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
+            binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
+
+    }
+
+    private fun updateCardUIWithRadioStation(radioStation: RadioStation) {
+        binding.tvTrackName.text = radioStation.name
+        binding.tvArtist.text = ""
+
+        val bytes = radioStation.picture
+
+        if (bytes != null)
+            binding.ivTrackImage.setImageBitmap(convertByteArrayToBitmapUseCase.invoke(bytes))
+        else
+            binding.ivTrackImage.setImageResource(R.drawable.ic_round_radio_24)
 
     }
 
     private fun showTrackCard() {
 
-        _binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
+        binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
 
-        TransitionManager.beginDelayedTransition(_binding.layoutCardPlayer, AutoTransition())
-        _binding.layoutCardPlayer.visibility = View.VISIBLE
+        TransitionManager.beginDelayedTransition(binding.layoutCardPlayer, AutoTransition())
+        binding.layoutCardPlayer.visibility = View.VISIBLE
     }
 
     private fun hideTrackCard() {
-        TransitionManager.beginDelayedTransition(_binding.layoutCardPlayer, AutoTransition())
-        _binding.layoutCardPlayer.visibility = View.GONE
+        TransitionManager.beginDelayedTransition(binding.layoutCardPlayer, AutoTransition())
+        binding.layoutCardPlayer.visibility = View.GONE
     }
 }

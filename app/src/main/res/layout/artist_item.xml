@@ -17,21 +17,21 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:id="@+id/ivTrackImage"
+            android:id="@+id/ivArtistImage"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_weight="0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_round_audiotrack_24" />
+            app:srcCompat="@drawable/ic_round_person_24" />
 
         <LinearLayout
             android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_gravity="center"
             android:layout_weight="1"
+            android:layout_gravity="center"
             android:orientation="vertical"
             app:layout_constraintBottom_toTopOf="@+id/view"
             app:layout_constraintEnd_toEndOf="parent"
@@ -39,34 +39,23 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                android:id="@+id/tvTrackName"
+                android:id="@+id/tvArtistName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:fontFamily="@font/roboto_regular"
                 android:maxLines="1"
                 android:textSize="20sp"
-                tools:text="Smells Like Teen Spirit" />
-
-            <TextView
-                android:id="@+id/tvAuthor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:fontFamily="@font/roboto_light"
-                android:maxLines="1"
-                android:textSize="16sp"
-                tools:text="Nirvana" />
+                tools:text="Billie Eilish" />
 
         </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/ibMore"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
             android:layout_weight="0"
-            android:backgroundTint="@android:color/transparent"
-            android:src="@drawable/ic_round_more_vert_24" />
+            android:src="@drawable/ic_round_arrow_forward_ios_24" />
 
     </LinearLayout>
 

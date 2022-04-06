@@ -101,7 +101,9 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
     override fun onClick(p0: View?) {
         when(p0?.id) {
             R.id.cardArtists -> {
-                findNavController()
+                findNavController().navigate(
+                    MediaLibraryFragmentDirections.actionMediaLibraryFragmentToArtistsListFragment()
+                )
             }
             R.id.cardAllTracks -> {
                 findNavController().navigate(
@@ -109,12 +111,14 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
                         Playlist(
                             name = "All tracks",
                             type = PlaylistType.AllTracks
-                        )
+                        ), null
                     )
                 )
             }
             R.id.cardPlaylists -> {
-                findNavController().navigate(R.id.action_mediaLibraryFragment_to_playlistFragment)
+                findNavController().navigate(
+                    MediaLibraryFragmentDirections.actionMediaLibraryFragmentToPlaylistFragment()
+                )
             }
             R.id.cardFavourites -> {
                 findNavController().navigate(
@@ -122,7 +126,7 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
                         Playlist(
                             name = "Favourites",
                             type = PlaylistType.Favourites
-                        )
+                        ), null
                     )
                 )
             }

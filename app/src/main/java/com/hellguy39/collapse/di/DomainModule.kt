@@ -1,9 +1,6 @@
 package com.hellguy39.collapse.di
 
-import com.hellguy39.data.repositories.EqualizerRepositoryImpl
-import com.hellguy39.data.repositories.FavouritesRepositoryImpl
-import com.hellguy39.data.repositories.PlaylistsRepositoryImpl
-import com.hellguy39.data.repositories.RadioStationsRepositoryImpl
+import com.hellguy39.data.repositories.*
 import com.hellguy39.domain.repositories.TracksRepository
 import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
@@ -15,6 +12,9 @@ import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.usecases.favourites.GetAllFavouriteTracksUseCase
 import com.hellguy39.domain.usecases.playlist.*
 import com.hellguy39.domain.usecases.radio.*
+import com.hellguy39.domain.usecases.state.GetSavedServiceStateUseCase
+import com.hellguy39.domain.usecases.state.InsertSavedServiceStateUseCase
+import com.hellguy39.domain.usecases.state.SavedServiceStateUseCases
 import com.hellguy39.domain.usecases.tracks.GetAllTracksUseCase
 import dagger.Module
 import dagger.Provides
@@ -25,6 +25,15 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class DomainModule {
+
+    @Provides
+    @Singleton
+    fun provideSavedServiceStateUseCases(repository: SavedServiceStateRepositoryImpl): SavedServiceStateUseCases {
+        return SavedServiceStateUseCases(
+            getSavedServiceStateUseCase = GetSavedServiceStateUseCase(repository),
+            insertSavedServiceStateUseCase = InsertSavedServiceStateUseCase(repository)
+        )
+    }
 
     @Provides
     @Singleton

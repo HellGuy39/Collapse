@@ -4,11 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hellguy39.domain.models.Artist
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
-import com.hellguy39.domain.usecases.tracks.GetAllTracksUseCase
 import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
+import com.hellguy39.domain.usecases.tracks.GetAllTracksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,15 +26,17 @@ class MediaLibraryDataViewModel @Inject constructor(
     private val allTracksLiveData = MutableLiveData<List<Track>>()
     private val allPlaylistsLiveData = MutableLiveData<List<Playlist>>()
     private val allFavouriteTracksLiveData = MutableLiveData<List<Track>>()
+    private val allArtistsLiveData = MutableLiveData<List<Artist>>()
 
     init {
         initSetup()
     }
 
-    fun initSetup() {
+    fun initSetup() = viewModelScope.launch(Dispatchers.IO) {
         fetchAllTrackList()
         fetchAllPlaylists()
         fetchAllFavouriteTracks()
+        fetchAllArtists()
     }
 
     fun getAllTracks(): LiveData<List<Track>> = allTracksLiveData
@@ -42,11 +45,23 @@ class MediaLibraryDataViewModel @Inject constructor(
 
     fun getAllFavouriteTracks(): LiveData<List<Track>> = allFavouriteTracksLiveData
 
-    fun updatePlaylists() {
+    fun getAllArtists(): LiveData<List<Artist>> = allArtistsLiveData
+
+    fun getTrackListFromArtist(artist: Artist): List<Track> {
+        val artists = getAllArtists().value ?: return listOf()
+        val index = artists.indexOf(artist)
+
+        return if (index != -1) {
+            artists[index].trackList
+        } else
+            listOf()
+    }
+
+    private fun updatePlaylists() = viewModelScope.launch(Dispatchers.IO) {
         fetchAllPlaylists()
     }
 
-    fun updateFavouriteTracks(){
+    private fun updateFavouriteTracks() = viewModelScope.launch(Dispatchers.IO) {
         fetchAllFavouriteTracks()
     }
 
@@ -73,25 +88,53 @@ class MediaLibraryDataViewModel @Inject constructor(
         updatePlaylists()
     }
 
-    private fun fetchAllTrackList() = viewModelScope.launch(Dispatchers.IO) {
+    private suspend fun fetchAllTrackList() {
         val tracks = getAllTracksUseCase.invoke()
-        withContext(Dispatchers.Main) {
-            allTracksLiveData.value = tracks
-        }
+
+        updateValue(allTracksLiveData, tracks)
     }
 
-    private fun fetchAllPlaylists() = viewModelScope.launch(Dispatchers.IO) {
+    private suspend fun fetchAllPlaylists() {
         val playlists = playlistUseCases.getAllPlaylistsUseCase.invoke()
-        withContext(Dispatchers.Main) {
-            allPlaylistsLiveData.value = playlists
-        }
+
+        updateValue(allPlaylistsLiveData, playlists)
     }
 
-    private fun fetchAllFavouriteTracks() = viewModelScope.launch(Dispatchers.IO) {
+    private suspend fun fetchAllFavouriteTracks()  {
         val favouriteTracks = favouriteTracksUseCase.getAllFavouriteTracksUseCase.invoke()
-        withContext(Dispatchers.Main) {
-            allFavouriteTracksLiveData.value = favouriteTracks
+
+        updateValue(allFavouriteTracksLiveData, favouriteTracks)
+    }
+
+    private suspend fun fetchAllArtists()  {
+        val tracks = allTracksLiveData.value
+        val artists = mutableListOf<Artist>()
+        val artistsName = mutableListOf<String>()
+
+        if (tracks != null) {
+            for (n in tracks.indices) {
+                if (!artistsName.contains(tracks[n].artist)) {
+                    val newList = mutableListOf(tracks[n])
+                    artistsName.add(tracks[n].artist)
+                    artists.add(Artist(name = tracks[n].artist, trackList = newList))
+                } else {
+                    for (n2 in artists.indices) {
+                        if (artists[n2].name == tracks[n].artist) {
+                            artists[n2].trackList.add(tracks[n])
+                        }
+                    }
+                }
+            }
         }
+
+        updateValue(allArtistsLiveData, artists)
+    }
+
+    private suspend fun updateValue(
+        variable: MutableLiveData<*>,
+        value: Any
+    ) = withContext(Dispatchers.Main) {
+        variable.value = value
     }
 
     fun searchWithQueryInTrackList(query: String = "", trackList: List<Track>?): List<Track> {
@@ -105,6 +148,21 @@ class MediaLibraryDataViewModel @Inject constructor(
                 trackList[n].artist.contains(query, true)) {
 
                 returnableList.add(trackList[n])
+            }
+        }
+
+        return returnableList
+    }
+
+    fun searchWithQueryInArtists(query: String = "", artists: List<Artist>?): List<Artist> {
+        if (artists.isNullOrEmpty())
+            return listOf()
+
+        val returnableList = mutableListOf<Artist>()
+
+        for (n in artists.indices) {
+            if (artists[n].name.contains(query, true)) {
+                returnableList.add(artists[n])
             }
         }
 
@@ -125,6 +183,4 @@ class MediaLibraryDataViewModel @Inject constructor(
 
         return returnableList
     }
-
-
 }

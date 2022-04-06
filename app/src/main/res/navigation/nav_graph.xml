@@ -38,6 +38,13 @@
                 app:exitAnim="@anim/to_left_out"
                 app:popEnterAnim="@anim/to_right_in"
                 app:popExitAnim="@anim/to_right_out" />
+            <action
+                android:id="@+id/action_mediaLibraryFragment_to_artistsListFragment"
+                app:destination="@id/artistsListFragment"
+                app:enterAnim="@anim/to_left_in"
+                app:exitAnim="@anim/to_left_out"
+                app:popEnterAnim="@anim/to_right_in"
+                app:popExitAnim="@anim/to_right_out" />
         </fragment>
         <fragment
             android:id="@+id/trackListFragment"
@@ -54,6 +61,10 @@
                 app:exitAnim="@anim/to_left_out"
                 app:popEnterAnim="@anim/to_right_in"
                 app:popExitAnim="@anim/to_right_out" />
+            <argument
+                android:name="artist"
+                app:argType="com.hellguy39.domain.models.Artist"
+                app:nullable="true" />
         </fragment>
         <fragment
             android:id="@+id/playlistsFragment"
@@ -102,6 +113,19 @@
             <argument
                 android:name="playlist"
                 app:argType="com.hellguy39.domain.models.Playlist" />
+        </fragment>
+        <fragment
+            android:id="@+id/artistsListFragment"
+            android:name="com.hellguy39.collapse.presentaton.fragments.artists.ArtistsListFragment"
+            android:label="fragment_artists_list"
+            tools:layout="@layout/fragment_artists_list" >
+            <action
+                android:id="@+id/action_artistsListFragment_to_trackListFragment"
+                app:destination="@id/trackListFragment"
+                app:enterAnim="@anim/to_left_in"
+                app:exitAnim="@anim/to_left_out"
+                app:popEnterAnim="@anim/to_right_in"
+                app:popExitAnim="@anim/to_right_out" />
         </fragment>
     </navigation>
     <navigation android:id="@+id/navigation_radio"

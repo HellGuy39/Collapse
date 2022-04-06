@@ -18,6 +18,7 @@ import javax.inject.Singleton
 private const val RADIO_STATIONS_DB_NAME = "radio_stations_db"
 private const val FAVOURITES_DB_NAME = "favourites_db"
 private const val PLAYLISTS_DB_NAME = "playlists_db"
+private const val SAVED_STATE_DB_NAME = "saved_state_db"
 private const val PREFS_NAME = "prefs_name"
 
 @Module
@@ -60,10 +61,20 @@ class DataModule {
         ).build()
     }
 
+//    @Provides
+//    @Singleton
+//    fun provideSavedServiceStateDatabase(app: Application): SavedServiceStateDatabase {
+//        return Room.databaseBuilder(
+//            app,
+//            SavedServiceStateDatabase::class.java,
+//            SAVED_STATE_DB_NAME
+//        ).build()
+//    }
+
     @Provides
     @Singleton
-    fun provideEqualizerSettingsRepository(sharedPreferences: SharedPreferences): EqualizerRepositoryImpl {
-        return EqualizerRepositoryImpl(sharedPreferences)
+    fun provideEqualizerSettingsRepository(prefs: SharedPreferences): EqualizerRepositoryImpl {
+        return EqualizerRepositoryImpl(prefs)
     }
 
     @Provides
@@ -81,14 +92,20 @@ class DataModule {
 
     @Singleton
     @Provides
-    fun providePlaylistsRepository(playlistsDatabase: PlaylistsDatabase): PlaylistsRepositoryImpl {
-        return PlaylistsRepositoryImpl(playlistsDatabase.playlistsDao())
+    fun providePlaylistsRepository(database: PlaylistsDatabase): PlaylistsRepositoryImpl {
+        return PlaylistsRepositoryImpl(database.playlistsDao())
     }
 
     @Provides
     @Singleton
-    fun provideFavouritesRepository(favouritesDatabase: FavouritesDatabase): FavouritesRepositoryImpl {
-        return FavouritesRepositoryImpl(favouritesDao = favouritesDatabase.favouritesDao())
+    fun provideFavouritesRepository(database: FavouritesDatabase): FavouritesRepositoryImpl {
+        return FavouritesRepositoryImpl(favouritesDao = database.favouritesDao())
+    }
+
+    @Provides
+    @Singleton
+    fun provideSavedServiceStateRepository(prefs: SharedPreferences): SavedServiceStateRepositoryImpl {
+        return SavedServiceStateRepositoryImpl(prefs = prefs)
     }
 
 }

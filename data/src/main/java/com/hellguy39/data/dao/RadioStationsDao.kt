@@ -13,7 +13,7 @@ interface RadioStationsDao {
     suspend fun getRadioStationsWithQuery(query: String = ""): List<RadioStationDb>
 
     @Query("SELECT * FROM RadioStationDb WHERE id = :id")
-    suspend fun getRadioStationById(id: Int): RadioStationDb
+    fun getRadioStationById(id: Int): RadioStationDb
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRadioStation(radioStationDb: RadioStationDb)

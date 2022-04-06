@@ -1,20 +1,16 @@
-package com.hellguy39.collapse.presentaton.activities.main
+package com.hellguy39.collapse.presentaton.adapters
 
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
-import com.hellguy39.collapse.R
 import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
 
 class DescriptionAdapter(
-    private val context: Context,
-    private val resources: Resources
+    private val context: Context
     ): PlayerNotificationManager.MediaDescriptionAdapter {
 
     override fun getCurrentContentTitle(player: Player): CharSequence {

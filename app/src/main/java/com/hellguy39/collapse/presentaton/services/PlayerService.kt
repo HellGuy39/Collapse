@@ -12,13 +12,11 @@ import android.media.audiofx.Virtualizer
 import android.net.Uri
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.MediaMetadata
-import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.dash.DashMediaSource
@@ -28,16 +26,25 @@ import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import com.hellguy39.collapse.presentaton.activities.main.DescriptionAdapter
+import com.hellguy39.collapse.presentaton.adapters.DescriptionAdapter
+import com.hellguy39.collapse.presentaton.adapters.DescriptorAdapterForRadioStations
+import com.hellguy39.domain.models.Playlist
+import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.models.ServiceContentWrapper
 import com.hellguy39.domain.usecases.eq_settings.EqualizerSettingsUseCases
+import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
+import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
+import com.hellguy39.domain.usecases.radio.RadioStationUseCases
+import com.hellguy39.domain.usecases.state.SavedServiceStateUseCases
+import com.hellguy39.domain.usecases.tracks.GetAllTracksUseCase
 import com.hellguy39.domain.utils.PlayerType
+import com.hellguy39.domain.utils.PlaylistType
 import com.hellguy39.domain.utils.Protocol
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -46,6 +53,21 @@ class PlayerService : Service() {
 
     @Inject
     lateinit var equalizerSettingsUseCases: EqualizerSettingsUseCases
+
+    @Inject
+    lateinit var savedServiceStateUseCases: SavedServiceStateUseCases
+
+    @Inject
+    lateinit var playlistUseCases: PlaylistUseCases
+
+    @Inject
+    lateinit var radioStationUseCases: RadioStationUseCases
+
+    @Inject
+    lateinit var favouriteTracksUseCases: FavouriteTracksUseCases
+
+    @Inject
+    lateinit var getAllTracksUseCases: GetAllTracksUseCase
 
     private lateinit var playerNotificationManager: PlayerNotificationManager
 
@@ -69,10 +91,13 @@ class PlayerService : Service() {
         private var numberOfBands: Short = 5
         private val bandsCenterFreq = ArrayList<Int>(0)
 
-        private var isRunningService = false
+        private var isRunningService = MutableLiveData<Boolean>(false)
         private var playlistName: String = ""
 
         private lateinit var exoPlayer: ExoPlayer
+
+        private lateinit var serviceContentWrapper: ServiceContentWrapper
+        private lateinit var radioStation: RadioStation
 
         /*private var positionLiveData = MutableLiveData<Long>()*/
         private val mediaMetadataLiveData = MutableLiveData<MediaMetadata>()
@@ -85,7 +110,7 @@ class PlayerService : Service() {
 
         fun startService(context: Context, contentWrapper: ServiceContentWrapper) {
 
-            if (isRunningService)
+            if (isRunningService.value == true)
                 stopService(context)
 
             val service = Intent(context, PlayerService::class.java)
@@ -98,21 +123,44 @@ class PlayerService : Service() {
             context.stopService(service)
         }
 
-        fun isShuffle(): LiveData<Boolean> = isShuffleLiveData
+        fun getServiceContent(): ServiceContentWrapper {
+            return ServiceContentWrapper(
+                type = serviceContentWrapper.type,
+                radioStation = serviceContentWrapper.radioStation,
+                position = exoPlayer.currentMediaItemIndex,
+                playlist = serviceContentWrapper.playlist,
+                playerPosition = exoPlayer.contentPosition
+            )
+        }
 
+        fun isRunningService(): LiveData<Boolean> = isRunningService
+
+        fun isShuffle(): LiveData<Boolean> = isShuffleLiveData
         fun isPlaying(): LiveData<Boolean> = isPlayingLiveData
         fun getCurrentPosition(): Long = exoPlayer.currentPosition
         fun getCurrentMetadata(): LiveData<MediaMetadata> = mediaMetadataLiveData
         fun getContentPosition(): LiveData<Int> = contentPositionLiveData
         fun getDuration(): Long = exoPlayer.duration
+        fun getPlayerType(): LiveData<Enum<PlayerType>> = playerTypeLiveData
         //fun getAudioSessionId(): LiveData<Int> = audioSessionIdLiveData
         fun isEqualizerInitialized(): LiveData<Boolean> = isEqualizerInitializedLiveData
         fun isRepeat(): Int = exoPlayer.repeatMode
         fun getPlaylistName(): String = playlistName
+        fun getRadioStation(): RadioStation = radioStation
 
         //Control
-        fun onPlay() = exoPlayer.play()
-        fun onPause() = exoPlayer.pause()
+        fun onPlay() {
+            if (playerTypeLiveData.value == PlayerType.Radio)
+                exoPlayer.playWhenReady = true
+            else
+                exoPlayer.play()
+        }
+        fun onPause() {
+            if (playerTypeLiveData.value == PlayerType.Radio)
+                exoPlayer.playWhenReady = false
+            else
+                exoPlayer.pause()
+        }
         fun onNext() { if (exoPlayer.hasNextMediaItem()) exoPlayer.seekToNextMediaItem() }
         fun onPrevious() { if (exoPlayer.hasPreviousMediaItem()) exoPlayer.seekToPreviousMediaItem() }
         fun onShuffle(b: Boolean) {
@@ -152,38 +200,30 @@ class PlayerService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        isRunningService = true
+        isRunningService.value = true
 
         isPlayingLiveData.value = false
         createNotificationsChannel()
-
-        playerNotificationManager = PlayerNotificationManager.Builder(
-            this,
-            notificationId,
-            channelId
-        ).setMediaDescriptionAdapter(DescriptionAdapter(this, resources))
-            .setNotificationListener(object : PlayerNotificationManager.NotificationListener {
-                override fun onNotificationPosted(
-                    notificationId: Int,
-                    notification: Notification,
-                    ongoing: Boolean
-                ) {
-                    startForeground(notificationId, notification)
-                }
-
-                override fun onNotificationCancelled(
-                    notificationId: Int,
-                    dismissedByUser: Boolean
-                ) {
-                    stopSelf()
-                }
-            })
-            .build()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val content = intent?.getParcelableExtra<ServiceContentWrapper>("track_list") as ServiceContentWrapper
 
+        setupPlayerNotificationManager(content.type, content.radioStation)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            setupContent(content)
+            withContext(Dispatchers.Main) {
+                setupExoPlayer(serviceContentWrapper)
+                initEQ()
+                setupEqSettings()
+                isRunningService.value = true
+            }
+        }
+        return START_STICKY
+    }
+
+    private fun setupExoPlayer(content: ServiceContentWrapper) {
         playerTypeLiveData.value = content.type
         playlistName = content.playlist?.name ?: ""
 
@@ -207,17 +247,109 @@ class PlayerService : Service() {
             override fun onAudioSessionIdChanged(audioSessionId: Int) {
                 audioSessionIdLiveData.value = audioSessionId
             }
+
+            override fun onPlayerError(error: PlaybackException) {
+                super.onPlayerError(error)
+                Toast.makeText(this@PlayerService, "Error: ${error.errorCodeName}", Toast.LENGTH_SHORT).show()
+                stopSelf()
+            }
         })
 
         playerNotificationManager.setPlayer(exoPlayer)
 
-        exoPlayer.playWhenReady = true
+        if (content.fromSavedState) {
+            val pos = content.playerPosition
+            exoPlayer.seekTo(pos)
+            exoPlayer.playWhenReady = false
+        } else {
+            exoPlayer.playWhenReady = true
+        }
+
         exoPlayer.prepare()
+    }
 
-        initEQ()
-        setupEqSettings()
+    private suspend fun setupContent(content: ServiceContentWrapper) {
 
-        return START_STICKY
+        if (content.radioStation != null && content.radioStation?.id != -1)
+            radioStation = content.radioStation!!
+
+        if (content.fromSavedState) {
+            val radioStationId = content.radioStation?.id
+            val playlistId = content.playlist?.id
+
+            if (radioStationId != null && radioStationId != -1)
+                content.radioStation = radioStationUseCases.getRadioStationByIdUseCase.invoke(
+                    radioStationId
+                )
+
+
+            if (playlistId != null && playlistId != -1) {
+
+                if(content.playlist == null)
+                    return
+
+                val type = content.playlist!!.type
+
+                when(type) {
+                    PlaylistType.AllTracks -> {
+                        content.playlist = Playlist(
+                            name = "All tracks",
+                            type = PlaylistType.AllTracks,
+                            tracks = getAllTracksUseCases.invoke()
+                        )
+                    }
+                    PlaylistType.Favourites -> {
+                        content.playlist = Playlist(
+                            name = "Favourites",
+                            type = PlaylistType.Favourites,
+                            tracks = favouriteTracksUseCases.getAllFavouriteTracksUseCase.invoke()
+                        )
+                    }
+                    PlaylistType.Custom -> {
+                        content.playlist = playlistUseCases.getPlaylistByIdUseCase.invoke(
+                            playlistId
+                        )
+                    }
+                    PlaylistType.Artist -> {
+                        //stopSelf()
+                    }
+                    PlaylistType.Undefined -> {
+                        //stopSelf()
+                    }
+                }
+            }
+        }
+
+        serviceContentWrapper = content
+    }
+
+    private fun setupPlayerNotificationManager(type: Enum<PlayerType>, radioStation: RadioStation?) {
+        playerNotificationManager = PlayerNotificationManager.Builder(
+            this,
+            notificationId,
+            channelId
+        ).setMediaDescriptionAdapter(
+            if (type == PlayerType.Radio)
+                DescriptorAdapterForRadioStations(this, radioStation ?: RadioStation())
+            else
+                DescriptionAdapter(this)
+        ).setNotificationListener(object : PlayerNotificationManager.NotificationListener {
+                override fun onNotificationPosted(
+                    notificationId: Int,
+                    notification: Notification,
+                    ongoing: Boolean
+                ) {
+                    startForeground(notificationId, notification)
+                }
+
+                override fun onNotificationCancelled(
+                    notificationId: Int,
+                    dismissedByUser: Boolean
+                ) {
+                    stopSelf()
+                }
+            })
+            .build()
     }
 
     private fun setupEqSettings() {
@@ -323,6 +455,7 @@ class PlayerService : Service() {
         }
 
     }
+
     private fun createNotificationsChannel() {
         val channel = NotificationChannel(
             channelId,
@@ -334,10 +467,17 @@ class PlayerService : Service() {
         service.createNotificationChannel(channel)
     }
 
+    private fun saveState() = CoroutineScope(Dispatchers.Main).launch {
+        savedServiceStateUseCases.insertSavedServiceStateUseCase.invoke(
+            serviceContentWrapper = getServiceContent()
+        )
+    }
+
     override fun onDestroy() {
-        exoPlayer.release()
-        isRunningService = false
         super.onDestroy()
+        exoPlayer.release()
+        isRunningService.value = false
+        saveState()
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -346,7 +486,8 @@ class PlayerService : Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        isRunningService = false
+        isRunningService.value = false
+        saveState()
         //playerNotificationManager.setPlayer(null)
         stopSelf()
     }
