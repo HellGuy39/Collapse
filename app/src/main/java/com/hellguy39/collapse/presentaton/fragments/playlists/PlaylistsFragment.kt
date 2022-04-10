@@ -1,6 +1,7 @@
 package com.hellguy39.collapse.presentaton.fragments.playlists
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment

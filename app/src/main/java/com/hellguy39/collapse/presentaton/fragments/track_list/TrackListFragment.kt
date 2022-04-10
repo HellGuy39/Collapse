@@ -1,6 +1,7 @@
 package com.hellguy39.collapse.presentaton.fragments.track_list
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
@@ -26,6 +27,10 @@ import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -56,6 +61,10 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
 
     private var allTracksFromCurrentPlaylist = listOf<Track>()
     private var recyclerTracks = mutableListOf<Track>()
+
+    private lateinit var adapter: TracksAdapter
+
+    private var playingPosition = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -153,23 +162,21 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
 
     override fun onResume() {
         super.onResume()
-//        CoroutineScope(Dispatchers.Main).launch {
-//            delay(400)
-            when (receivedPlaylist.type) {
-                PlaylistType.AllTracks -> {
-                    setAllTracksObserver()
-                }
-                PlaylistType.Custom -> {
-                    onTracksReceived(receivedPlaylist.tracks, PlaylistType.Custom, receivedPlaylist.name)
-                }
-                PlaylistType.Favourites -> {
-                    setFavouritesTracksObserver()
-                }
-                PlaylistType.Artist -> {
-                    onTracksReceived(receivedPlaylist.tracks, PlaylistType.Artist, receivedPlaylist.name)
-                }
+
+        when (receivedPlaylist.type) {
+            PlaylistType.AllTracks -> {
+                setAllTracksObserver()
             }
-        //}
+            PlaylistType.Custom -> {
+                onTracksReceived(receivedPlaylist.tracks, PlaylistType.Custom, receivedPlaylist.name)
+            }
+            PlaylistType.Favourites -> {
+                setFavouritesTracksObserver()
+            }
+            PlaylistType.Artist -> {
+                onTracksReceived(receivedPlaylist.tracks, PlaylistType.Artist, receivedPlaylist.name)
+            }
+        }
     }
 
 
@@ -198,9 +205,48 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
         }
     }
 
+    private fun setContentObserver() {
+        PlayerService.getContentPosition().observe(viewLifecycleOwner) {
+            val serviceType = PlayerService.getServiceContent().playlist?.type
+
+            if (receivedPlaylist.type == serviceType) {
+                when(serviceType) {
+                    PlaylistType.Custom -> {
+
+                        Log.d("DEBUG", "ID: ${receivedPlaylist.id}\n" +
+                                "SERVICE ID: ${PlayerService.getServiceContent().playlist?.id}")
+
+                        if (receivedPlaylist.id == PlayerService.getServiceContent().playlist?.id) {
+                            updateListPlayingPosition(position = it)
+                        }
+                    }
+                    PlaylistType.Favourites -> {
+                        updateListPlayingPosition(position = it)
+                    }
+                    PlaylistType.AllTracks -> {
+                        updateListPlayingPosition(position = it)
+                    }
+                    PlaylistType.Artist -> {
+                        if (PlayerService.getServiceContent().artist == receivedArtist)
+                            updateListPlayingPosition(position = it)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateListPlayingPosition(position: Int) {
+        recyclerTracks[playingPosition].isPlaying = false
+        binding.rvTrackList.adapter?.notifyItemChanged(playingPosition)
+
+        recyclerTracks[position].isPlaying = true
+        binding.rvTrackList.adapter?.notifyItemChanged(position)
+        playingPosition = position
+    }
+
     private fun onTracksReceived(receivedTracks: List<Track>, playlistType: PlaylistType, name: String) {
         allTracksFromCurrentPlaylist = receivedTracks
-        if (playlistType != PlaylistType.Custom || playlistType != PlaylistType.Artist) {
+        if (playlistType == PlaylistType.AllTracks || playlistType == PlaylistType.Favourites) {
             receivedPlaylist = Playlist(
                 name = name,
                 type = playlistType,
@@ -217,7 +263,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
             LinearLayoutManager.VERTICAL,
             false
         )
-        binding.rvTrackList.adapter = TracksAdapter(
+        adapter = TracksAdapter(
             trackList = recyclerTracks,
             resources = resources,
             listener = this,
@@ -226,13 +272,21 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
             favouriteTracksUseCases = favouriteTracksUseCases,
             playlistType = receivedPlaylist.type
         )
+        binding.rvTrackList.adapter = adapter
     }
 
-    override fun onTrackClick(track: Track) {
+    override fun onTrackClick(track: Track, position: Int) {
+//        if (PlayerService.isPlaying().value != false) {
+//            if (PlayerService.getContentPosition().value == position) {
+//                PlayerService.onPause()
+//            }
+//        }
+
         PlayerService.startService(requireContext(), ServiceContentWrapper(
                 type = PlayerType.LocalTrack,
-                position = allTracksFromCurrentPlaylist.indexOf(track),
+                position = position,//allTracksFromCurrentPlaylist.indexOf(track),
                 playlist = receivedPlaylist,
+                artist = receivedArtist
             )
         )
     }
@@ -253,12 +307,15 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
         binding.rvTrackList.adapter?.notifyItemRemoved(position)
     }
 
-    private fun updateRecyclerView(receivedTracks: List<Track>) {
+    private fun updateRecyclerView(receivedTracks: List<Track>) = CoroutineScope(Dispatchers.IO).launch {
         for (n in receivedTracks.indices) {
             recyclerTracks.add(receivedTracks[n])
         }
-        val position = binding.rvTrackList.adapter?.itemCount ?: 0
-        binding.rvTrackList.adapter?.notifyItemRangeInserted(position, recyclerTracks.size)
+        withContext(Dispatchers.Main) {
+            val position = binding.rvTrackList.adapter?.itemCount ?: 0
+            binding.rvTrackList.adapter?.notifyItemRangeInserted(position, recyclerTracks.size)
+            setContentObserver()
+        }
     }
 
     private fun clearRecyclerView() {

@@ -1,7 +1,6 @@
 package com.hellguy39.collapse.presentaton.view_holders
 
 import android.content.Context
-import android.content.res.Resources
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.MenuRes
@@ -9,7 +8,6 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackItemBinding
-import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.TracksAdapter
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
@@ -27,7 +25,6 @@ class TrackViewHolder(
 
     fun bind(
         track: Track,
-        resources: Resources,
         position: Int,
         type: Enum<PlaylistType>,
         listener: TracksAdapter.OnTrackListener
@@ -44,7 +41,7 @@ class TrackViewHolder(
             binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
 
         binding.root.setOnClickListener {
-            listener.onTrackClick(track)
+            listener.onTrackClick(track, position)
         }
 
         binding.ibMore.setOnClickListener {
@@ -59,7 +56,9 @@ class TrackViewHolder(
         }
 
         if(track.isPlaying) {
-            binding.root.cardElevation = 4f
+            binding.root.cardElevation = 8f
+        } else {
+            binding.root.cardElevation = 0f
         }
 
     }
@@ -75,64 +74,31 @@ class TrackViewHolder(
         val popup = PopupMenu(context,v)
         popup.menuInflater.inflate(menuRes, popup.menu)
 
-        when(type) {
-            PlaylistType.Custom -> {
-                popup.setOnMenuItemClickListener { menuItem: MenuItem ->
-                    when(menuItem.itemId) {
-                        R.id.deleteFromPlaylist -> {
-                            listener.onDeleteFromPlaylist(track = track, position = position)
-                            true
-                        }
-                        R.id.addToFavourites -> {
-                            listener.onAddToFavourites(track = track)
-                            true
-                        }
-                        else -> false
-                    }
+        popup.setOnMenuItemClickListener { menuItem: MenuItem ->
+            when(menuItem.itemId) {
+                R.id.deleteFromPlaylist -> {
+                    listener.onDeleteFromPlaylist(track = track, position = position)
+                    true
                 }
+                R.id.addToFavourites -> {
+                    listener.onAddToFavourites(track = track)
+                    true
+                }
+                else -> false
             }
+        }
+
+        when(type) {
+            PlaylistType.Custom -> { }
             PlaylistType.Favourites -> {
                 popup.menu.findItem(R.id.addToFavourites).isVisible = false
-                popup.setOnMenuItemClickListener { menuItem: MenuItem ->
-                    when(menuItem.itemId) {
-                        R.id.deleteFromPlaylist -> {
-                            listener.onDeleteFromPlaylist(track = track, position = position)
-                            true
-                        }
-
-                        else -> false
-                    }
-                }
             }
             PlaylistType.AllTracks -> {
                 popup.menu.findItem(R.id.deleteFromPlaylist).isVisible = false
-                popup.setOnMenuItemClickListener { menuItem: MenuItem ->
-                    when(menuItem.itemId) {
-                        R.id.addToFavourites -> {
-                            listener.onAddToFavourites(track = track)
-                            true
-                        }
-
-                        else -> false
-                    }
-                }
             }
             PlaylistType.Artist -> {
                 popup.menu.findItem(R.id.deleteFromPlaylist).isVisible = false
-                popup.setOnMenuItemClickListener { menuItem: MenuItem ->
-                    when(menuItem.itemId) {
-                        R.id.addToFavourites -> {
-                            listener.onAddToFavourites(track = track)
-                            true
-                        }
-
-                        else -> false
-                    }
-                }
             }
-        }
-        popup.setOnDismissListener {
-
         }
 
         popup.show()

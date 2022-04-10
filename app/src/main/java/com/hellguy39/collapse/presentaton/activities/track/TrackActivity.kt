@@ -108,7 +108,7 @@ class TrackActivity : AppCompatActivity(), View.OnClickListener {
             SimpleDateFormat("m:ss", Locale.getDefault()).format(Date(it.toLong() * 1000))
         }
 
-        binding.topAppBar.title = PlayerService.getPlaylistName()
+        binding.topAppBar.title = PlayerService.getServiceContent().playlist?.name
 
         binding.tvTrackName.text = mediaMetadata.title ?: "Unknown"
         binding.tvPerformer.text = mediaMetadata.artist ?: "Unknown"

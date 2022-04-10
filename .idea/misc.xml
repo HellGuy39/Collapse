@@ -4,6 +4,10 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/activity_main.xml" value="0.259375" />
+        <entry key="app/src/main/res/drawable/ic_round_pause_24.xml" value="0.248" />
+        <entry key="app/src/main/res/drawable/ic_round_pause_24_small.xml" value="0.248" />
+        <entry key="app/src/main/res/drawable/ic_round_play_arrow_24.xml" value="0.248" />
+        <entry key="app/src/main/res/drawable/ic_round_play_arrow_24_small.xml" value="0.248" />
         <entry key="app/src/main/res/drawable/ic_round_repeat_24.xml" value="0.119" />
         <entry key="app/src/main/res/drawable/ic_round_shuffle_24.xml" value="0.119" />
         <entry key="app/src/main/res/drawable/ic_round_skip_next_24.xml" value="0.119" />

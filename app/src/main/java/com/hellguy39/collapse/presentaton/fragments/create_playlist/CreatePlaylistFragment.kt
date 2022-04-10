@@ -96,9 +96,10 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
 
         when (args.action) {
             Action.Create -> {
-
+                binding.topAppBar.title = "New playlist"
             }
             Action.Update -> {
+                binding.topAppBar.title = "Edit"
                 updateUI(args.playlist)
             }
         }
@@ -114,13 +115,14 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
     override fun onClick(p0: View?) {
         when(p0?.id) {
             R.id.fabAdd -> {
-                dataViewModel.addNewPlaylist(Playlist(
-                    name = binding.etName.text.toString(),
-                    description = binding.etDesc.text.toString(),
-                    tracks = tracks,
-                    picture = convertBitmapToByteArrayUseCase.invoke(selectedImage),
-                    type = PlaylistType.Custom
-                ))
+                when(args.action) {
+                    Action.Update -> {
+                        updatePlaylist()
+                    }
+                    Action.Create -> {
+                        createNewPlaylist()
+                    }
+                }
                 findNavController().popBackStack()
             }
             R.id.cardSelectTracks -> {
@@ -134,5 +136,26 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
                 pickImage.launch("image/*")
             }
         }
+    }
+
+    private fun createNewPlaylist() {
+        dataViewModel.addNewPlaylist(Playlist(
+            name = binding.etName.text.toString(),
+            description = binding.etDesc.text.toString(),
+            tracks = tracks,
+            picture = convertBitmapToByteArrayUseCase.invoke(selectedImage),
+            type = PlaylistType.Custom
+        ))
+    }
+
+    private fun updatePlaylist() {
+        dataViewModel.updateExistingPlaylist(Playlist(
+            id = args.playlist.id,
+            name = binding.etName.text.toString(),
+            description = binding.etDesc.text.toString(),
+            tracks = tracks,
+            picture = convertBitmapToByteArrayUseCase.invoke(selectedImage),
+            type = PlaylistType.Custom
+        ))
     }
 }

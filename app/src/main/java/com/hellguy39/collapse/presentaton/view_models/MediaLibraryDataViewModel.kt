@@ -1,5 +1,6 @@
 package com.hellguy39.collapse.presentaton.view_models
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,7 +10,7 @@ import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
-import com.hellguy39.domain.usecases.tracks.GetAllTracksUseCase
+import com.hellguy39.domain.usecases.tracks.TracksUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,9 +19,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MediaLibraryDataViewModel @Inject constructor(
-    private val getAllTracksUseCase: GetAllTracksUseCase,
+    private val tracksUseCases: TracksUseCases,
     private val playlistUseCases: PlaylistUseCases,
-    private val favouriteTracksUseCase: FavouriteTracksUseCases
+    private val favouriteTracksUseCase: FavouriteTracksUseCases,
 ) : ViewModel() {
 
     private val allTracksLiveData = MutableLiveData<List<Track>>()
@@ -88,45 +89,28 @@ class MediaLibraryDataViewModel @Inject constructor(
         updatePlaylists()
     }
 
-    private suspend fun fetchAllTrackList() {
-        val tracks = getAllTracksUseCase.invoke()
+    fun updateExistingPlaylist(playlist: Playlist) = viewModelScope.launch(Dispatchers.IO) {
+        playlistUseCases.updatePlaylistUseCase.invoke(playlist = playlist)
+        updatePlaylists()
+    }
 
+    private suspend fun fetchAllTrackList() {
+        val tracks = tracksUseCases.getAllTracksUseCase.invoke()
         updateValue(allTracksLiveData, tracks)
     }
 
     private suspend fun fetchAllPlaylists() {
         val playlists = playlistUseCases.getAllPlaylistsUseCase.invoke()
-
         updateValue(allPlaylistsLiveData, playlists)
     }
 
     private suspend fun fetchAllFavouriteTracks()  {
         val favouriteTracks = favouriteTracksUseCase.getAllFavouriteTracksUseCase.invoke()
-
         updateValue(allFavouriteTracksLiveData, favouriteTracks)
     }
 
     private suspend fun fetchAllArtists()  {
-        val tracks = allTracksLiveData.value
-        val artists = mutableListOf<Artist>()
-        val artistsName = mutableListOf<String>()
-
-        if (tracks != null) {
-            for (n in tracks.indices) {
-                if (!artistsName.contains(tracks[n].artist)) {
-                    val newList = mutableListOf(tracks[n])
-                    artistsName.add(tracks[n].artist)
-                    artists.add(Artist(name = tracks[n].artist, trackList = newList))
-                } else {
-                    for (n2 in artists.indices) {
-                        if (artists[n2].name == tracks[n].artist) {
-                            artists[n2].trackList.add(tracks[n])
-                        }
-                    }
-                }
-            }
-        }
-
+        val artists = tracksUseCases.getAllArtistsUseCase.invoke()
         updateValue(allArtistsLiveData, artists)
     }
 

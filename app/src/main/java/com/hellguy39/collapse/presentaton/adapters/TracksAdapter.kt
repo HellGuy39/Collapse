@@ -41,7 +41,6 @@ class TracksAdapter(
     ) {
         holder.bind(
             track = trackList[position],
-            resources = resources,
             position = position,
             listener = listener,
             type = playlistType
@@ -51,8 +50,9 @@ class TracksAdapter(
     override fun getItemCount(): Int = trackList.size
 
     interface OnTrackListener {
-        fun onTrackClick(track: Track)
+        fun onTrackClick(track: Track, position: Int)
         fun onAddToFavourites(track: Track)
         fun onDeleteFromPlaylist(track: Track, position: Int)
     }
+
 }

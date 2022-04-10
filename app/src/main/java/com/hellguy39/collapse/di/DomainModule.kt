@@ -15,7 +15,7 @@ import com.hellguy39.domain.usecases.radio.*
 import com.hellguy39.domain.usecases.state.GetSavedServiceStateUseCase
 import com.hellguy39.domain.usecases.state.InsertSavedServiceStateUseCase
 import com.hellguy39.domain.usecases.state.SavedServiceStateUseCases
-import com.hellguy39.domain.usecases.tracks.GetAllTracksUseCase
+import com.hellguy39.domain.usecases.tracks.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -82,10 +82,14 @@ class DomainModule {
 
     @Provides
     @Singleton
-    fun provideGetAllTracksUseCase(tracksRepositoryImpl: TracksRepository): GetAllTracksUseCase {
-        return GetAllTracksUseCase(tracksRepositoryImpl)
+    fun provideTracksUseCases(repository: TracksRepository): TracksUseCases {
+        return TracksUseCases(
+            getAllTracksUseCase = GetAllTracksUseCase(repository),
+            getTracksByArtistUseCase = GetTracksByArtistUseCase(repository),
+            getAllArtistsUseCase = GetAllArtistsUseCase(repository),
+            getAllTrackByArtistUseCase = GetAllTrackByArtistUseCase(repository)
+        )
     }
-
 
     @Provides
     @Singleton

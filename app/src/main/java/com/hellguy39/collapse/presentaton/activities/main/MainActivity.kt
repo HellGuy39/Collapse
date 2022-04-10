@@ -31,7 +31,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     @Inject
     lateinit var savedServiceStateUseCases: SavedServiceStateUseCases
@@ -62,24 +62,16 @@ class MainActivity : AppCompatActivity() {
             binding.bottomNavigation,navController
         )
 
-        binding.trackCard.setOnClickListener {
-            startActivity(Intent(this, TrackActivity::class.java))
-        }
+        binding.trackCard.setOnClickListener(this)
 
-        binding.ibPlayPause.setOnClickListener {
-            if (PlayerService.isPlaying().value == true) {
-                PlayerService.onPause()
-            } else {
-                PlayerService.onPlay()
-            }
-        }
+        binding.ibPlayPause.setOnClickListener(this)
 
         setObservers()
 
         binding.layoutCardPlayer.visibility = View.GONE
         binding.layoutCardPlayer.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
-        checkServiceSavedState()
+        //checkServiceSavedState()
     }
 
     private fun setObservers() {
@@ -93,31 +85,36 @@ class MainActivity : AppCompatActivity() {
 
         PlayerService.isRunningService().observe(this) { isRunning ->
             if (isRunning) {
-                val type = PlayerService.getPlayerType().value
+                when(PlayerService.getServiceContent().type) {
+                    PlayerType.LocalTrack -> {
+                        val metadata = PlayerService.getCurrentMetadata().value
+                        if (metadata != null)
+                            updateCardUIWithMetadata(metadata)
+                    }
+                    PlayerType.Radio -> {
+                        val radioStation = PlayerService.getServiceContent().radioStation
 
-                if (type == PlayerType.LocalTrack) {
-
-                    val metadata = PlayerService.getCurrentMetadata().value
-
-                    if (metadata != null)
-                        updateCardUIWithMetadata(metadata)
-
-                    showTrackCard()
-                } else if (type == PlayerType.Radio) {
-                    updateCardUIWithRadioStation(PlayerService.getRadioStation())
-
-                    showTrackCard()
+                        if (radioStation != null)
+                            updateCardUIWithRadioStation(radioStation)
+                    }
                 }
+                showTrackCard()
             } else {
                 hideTrackCard()
             }
         }
 
         PlayerService.getCurrentMetadata().observe(this) { metadata ->
-            val type = PlayerService.getPlayerType().value
+            val type = PlayerService.getServiceContent().type
 
-            if (type == PlayerType.LocalTrack)
-                updateCardUIWithMetadata(metadata)
+            when (type) {
+                PlayerType.Radio -> {
+
+                }
+                PlayerType.LocalTrack -> {
+                    updateCardUIWithMetadata(metadata)
+                }
+            }
         }
     }
 
@@ -144,6 +141,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateCardUIWithMetadata(metadata: MediaMetadata) {
+
+        if (PlayerService.isPlaying().value == true)
+            binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
+        else
+            binding.ibPlayPause.setImageResource(R.drawable.ic_round_play_arrow_24)
+
         binding.tvTrackName.text = if (metadata.title.isNullOrEmpty()) "Unknown" else metadata.title
         binding.tvArtist.text  = if (metadata.artist.isNullOrEmpty()) "Unknown" else metadata.artist
 
@@ -157,6 +160,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateCardUIWithRadioStation(radioStation: RadioStation) {
+
+        if (PlayerService.isPlaying().value == true)
+            binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
+        else
+            binding.ibPlayPause.setImageResource(R.drawable.ic_round_play_arrow_24)
+
         binding.tvTrackName.text = radioStation.name
         binding.tvArtist.text = ""
 
@@ -180,5 +189,20 @@ class MainActivity : AppCompatActivity() {
     private fun hideTrackCard() {
         TransitionManager.beginDelayedTransition(binding.layoutCardPlayer, AutoTransition())
         binding.layoutCardPlayer.visibility = View.GONE
+    }
+
+    override fun onClick(p0: View?) {
+        when(p0?.id) {
+            binding.trackCard.id -> {
+                startActivity(Intent(this, TrackActivity::class.java))
+            }
+            binding.ibPlayPause.id -> {
+                if (PlayerService.isPlaying().value == true) {
+                    PlayerService.onPause()
+                } else {
+                    PlayerService.onPlay()
+                }
+            }
+        }
     }
 }

@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Playlist(
-    var id: Int = 0,
+    var id: Int? = null,
     var name: String = "",
     var description: String = "",
     var picture: ByteArray? = null,

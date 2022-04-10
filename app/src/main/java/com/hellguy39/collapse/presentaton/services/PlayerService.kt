@@ -3,7 +3,6 @@ package com.hellguy39.collapse.presentaton.services
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.audiofx.BassBoost
@@ -14,6 +13,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.exoplayer2.*
@@ -27,29 +27,26 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.hellguy39.collapse.presentaton.adapters.DescriptionAdapter
-import com.hellguy39.collapse.presentaton.adapters.DescriptorAdapterForRadioStations
-import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.models.ServiceContentWrapper
+import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.eq_settings.EqualizerSettingsUseCases
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
 import com.hellguy39.domain.usecases.radio.RadioStationUseCases
 import com.hellguy39.domain.usecases.state.SavedServiceStateUseCases
-import com.hellguy39.domain.usecases.tracks.GetAllTracksUseCase
+import com.hellguy39.domain.usecases.tracks.TracksUseCases
 import com.hellguy39.domain.utils.PlayerType
-import com.hellguy39.domain.utils.PlaylistType
 import com.hellguy39.domain.utils.Protocol
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class PlayerService : Service() {
+class PlayerService : LifecycleService() {
 
     @Inject
     lateinit var equalizerSettingsUseCases: EqualizerSettingsUseCases
@@ -67,7 +64,7 @@ class PlayerService : Service() {
     lateinit var favouriteTracksUseCases: FavouriteTracksUseCases
 
     @Inject
-    lateinit var getAllTracksUseCases: GetAllTracksUseCase
+    lateinit var tracksUseCases: TracksUseCases
 
     private lateinit var playerNotificationManager: PlayerNotificationManager
 
@@ -82,40 +79,34 @@ class PlayerService : Service() {
         private lateinit var equalizer: Equalizer
         private lateinit var virtualizer: Virtualizer
         private lateinit var bassBoost: BassBoost
-
         private var numberOfPresets: Short = 0
         private var presetNames = mutableListOf<String>()
-
         private var lowestBandLevel: Short = -1500
         private var upperBandLevel: Short = 1500
         private var numberOfBands: Short = 5
         private val bandsCenterFreq = ArrayList<Int>(0)
 
         private var isRunningService = MutableLiveData<Boolean>(false)
-        private var playlistName: String = ""
-
         private lateinit var exoPlayer: ExoPlayer
-
-        private lateinit var serviceContentWrapper: ServiceContentWrapper
-        private lateinit var radioStation: RadioStation
-
+        private val serviceContentLiveData = MutableLiveData<ServiceContentWrapper>()
         /*private var positionLiveData = MutableLiveData<Long>()*/
         private val mediaMetadataLiveData = MutableLiveData<MediaMetadata>()
         private val isPlayingLiveData = MutableLiveData<Boolean>()
         private val isEqualizerInitializedLiveData = MutableLiveData<Boolean>(false)
         private val audioSessionIdLiveData = MutableLiveData<Int>()
-        private val playerTypeLiveData = MutableLiveData<Enum<PlayerType>>()
+        //private val playerTypeLiveData = MutableLiveData<Enum<PlayerType>>()
         private val contentPositionLiveData = MutableLiveData<Int>()
         private val isShuffleLiveData = MutableLiveData<Boolean>()
 
         fun startService(context: Context, contentWrapper: ServiceContentWrapper) {
 
-            if (isRunningService.value == true)
-                stopService(context)
+            updateContent(contentWrapper)
 
-            val service = Intent(context, PlayerService::class.java)
-            service.putExtra("track_list", contentWrapper)
-            ContextCompat.startForegroundService(context, service)
+            if (isRunningService.value != true) {
+                val service = Intent(context, PlayerService::class.java)
+                //service.putExtra("track_list", contentWrapper)
+                ContextCompat.startForegroundService(context, service)
+            }
         }
 
         fun stopService(context: Context) {
@@ -123,12 +114,16 @@ class PlayerService : Service() {
             context.stopService(service)
         }
 
+        private fun updateContent(content: ServiceContentWrapper) {
+            serviceContentLiveData.value = content
+        }
+
         fun getServiceContent(): ServiceContentWrapper {
             return ServiceContentWrapper(
-                type = serviceContentWrapper.type,
-                radioStation = serviceContentWrapper.radioStation,
+                type = serviceContentLiveData.value?.type ?: PlayerType.Undefined,
+                radioStation = serviceContentLiveData.value?.radioStation,
                 position = exoPlayer.currentMediaItemIndex,
-                playlist = serviceContentWrapper.playlist,
+                playlist = serviceContentLiveData.value?.playlist,
                 playerPosition = exoPlayer.contentPosition
             )
         }
@@ -141,22 +136,18 @@ class PlayerService : Service() {
         fun getCurrentMetadata(): LiveData<MediaMetadata> = mediaMetadataLiveData
         fun getContentPosition(): LiveData<Int> = contentPositionLiveData
         fun getDuration(): Long = exoPlayer.duration
-        fun getPlayerType(): LiveData<Enum<PlayerType>> = playerTypeLiveData
-        //fun getAudioSessionId(): LiveData<Int> = audioSessionIdLiveData
         fun isEqualizerInitialized(): LiveData<Boolean> = isEqualizerInitializedLiveData
         fun isRepeat(): Int = exoPlayer.repeatMode
-        fun getPlaylistName(): String = playlistName
-        fun getRadioStation(): RadioStation = radioStation
 
         //Control
         fun onPlay() {
-            if (playerTypeLiveData.value == PlayerType.Radio)
+            if (serviceContentLiveData.value?.type == PlayerType.Radio)
                 exoPlayer.playWhenReady = true
             else
                 exoPlayer.play()
         }
         fun onPause() {
-            if (playerTypeLiveData.value == PlayerType.Radio)
+            if (serviceContentLiveData.value?.type == PlayerType.Radio)
                 exoPlayer.playWhenReady = false
             else
                 exoPlayer.pause()
@@ -200,39 +191,7 @@ class PlayerService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        isRunningService.value = true
-
-        isPlayingLiveData.value = false
-        createNotificationsChannel()
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val content = intent?.getParcelableExtra<ServiceContentWrapper>("track_list") as ServiceContentWrapper
-
-        setupPlayerNotificationManager(content.type, content.radioStation)
-
-        CoroutineScope(Dispatchers.IO).launch {
-            setupContent(content)
-            withContext(Dispatchers.Main) {
-                setupExoPlayer(serviceContentWrapper)
-                initEQ()
-                setupEqSettings()
-                isRunningService.value = true
-            }
-        }
-        return START_STICKY
-    }
-
-    private fun setupExoPlayer(content: ServiceContentWrapper) {
-        playerTypeLiveData.value = content.type
-        playlistName = content.playlist?.name ?: ""
-
         exoPlayer = ExoPlayer.Builder(this).build()
-
-        when(content.type) {
-            PlayerType.LocalTrack -> initDefaultPlayer(content)
-            PlayerType.Radio -> initRadioPlayer(content)
-        }
 
         exoPlayer.addListener(object : Player.Listener {
             override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
@@ -255,84 +214,134 @@ class PlayerService : Service() {
             }
         })
 
-        playerNotificationManager.setPlayer(exoPlayer)
-
-        if (content.fromSavedState) {
-            val pos = content.playerPosition
-            exoPlayer.seekTo(pos)
-            exoPlayer.playWhenReady = false
-        } else {
-            exoPlayer.playWhenReady = true
-        }
-
-        exoPlayer.prepare()
+        isPlayingLiveData.value = false
+        createNotificationsChannel()
     }
 
-    private suspend fun setupContent(content: ServiceContentWrapper) {
-
-        if (content.radioStation != null && content.radioStation?.id != -1)
-            radioStation = content.radioStation!!
-
-        if (content.fromSavedState) {
-            val radioStationId = content.radioStation?.id
-            val playlistId = content.playlist?.id
-
-            if (radioStationId != null && radioStationId != -1)
-                content.radioStation = radioStationUseCases.getRadioStationByIdUseCase.invoke(
-                    radioStationId
-                )
-
-
-            if (playlistId != null && playlistId != -1) {
-
-                if(content.playlist == null)
-                    return
-
-                val type = content.playlist!!.type
-
-                when(type) {
-                    PlaylistType.AllTracks -> {
-                        content.playlist = Playlist(
-                            name = "All tracks",
-                            type = PlaylistType.AllTracks,
-                            tracks = getAllTracksUseCases.invoke()
-                        )
-                    }
-                    PlaylistType.Favourites -> {
-                        content.playlist = Playlist(
-                            name = "Favourites",
-                            type = PlaylistType.Favourites,
-                            tracks = favouriteTracksUseCases.getAllFavouriteTracksUseCase.invoke()
-                        )
-                    }
-                    PlaylistType.Custom -> {
-                        content.playlist = playlistUseCases.getPlaylistByIdUseCase.invoke(
-                            playlistId
-                        )
-                    }
-                    PlaylistType.Artist -> {
-                        //stopSelf()
-                    }
-                    PlaylistType.Undefined -> {
-                        //stopSelf()
-                    }
-                }
+    private fun updateContent(content: ServiceContentWrapper) {
+        setupPlayerNotificationManager(content.type, content.radioStation)
+        when(content.type) {
+            PlayerType.LocalTrack -> {
+                val trackList = content.playlist?.tracks
+                if (!trackList.isNullOrEmpty())
+                    initDefaultPlayer(trackList)
+            }
+            PlayerType.Radio -> {
+                val radioStation = content.radioStation
+                if (radioStation != null)
+                    initRadioPlayer(radioStation)
             }
         }
-
-        serviceContentWrapper = content
     }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
+
+        initEQ()
+        setupEqSettings()
+        isRunningService.value = true
+
+        serviceContentLiveData.observe(this) {
+            //setupExoPlayer(serviceContentWrapper)
+            updateContent(it)
+            exoPlayer.seekToDefaultPosition(it.position)
+            exoPlayer.playWhenReady = true
+            exoPlayer.prepare()
+        }
+
+//        CoroutineScope(Dispatchers.IO).launch {
+//            //setupContent(content)
+//            withContext(Dispatchers.Main) {
+//                setupExoPlayer(serviceContentWrapper)
+//                initEQ()
+//                setupEqSettings()
+//                isRunningService.value = true
+//            }
+//        }
+
+        return START_STICKY
+    }
+
+//    private fun setupExoPlayer(content: ServiceContentWrapper) {
+//
+//        when(content.type) {
+//            PlayerType.LocalTrack -> initDefaultPlayer(content.playlist?.tracks ?: listOf())
+//            PlayerType.Radio -> initRadioPlayer(content.radioStation ?: RadioStation())
+//        }
+//        exoPlayer.seekToDefaultPosition(content.position)
+//
+////        if (content.fromSavedState) {
+////            val pos = content.playerPosition
+////            exoPlayer.seekTo(pos)
+////            exoPlayer.playWhenReady = false
+////        } else {
+////            exoPlayer.playWhenReady = true
+////        }
+//
+//        exoPlayer.prepare()
+//    }
+
+//    private suspend fun setupContent(content: ServiceContentWrapper) {
+//
+//        if (content.radioStation != null && content.radioStation?.id != -1)
+//            radioStation = content.radioStation!!
+//
+//        if (content.fromSavedState) {
+//            val radioStationId = content.radioStation?.id
+//            val playlistId = content.playlist?.id
+//
+//            if (radioStationId != null && radioStationId != -1)
+//                content.radioStation = radioStationUseCases.getRadioStationByIdUseCase.invoke(
+//                    radioStationId
+//                )
+//
+//
+//            if (playlistId != null && playlistId != -1) {
+//
+//                if(content.playlist == null)
+//                    return
+//
+//                val type = content.playlist!!.type
+//
+//                when(type) {
+//                    PlaylistType.AllTracks -> {
+//                        content.playlist = Playlist(
+//                            name = "All tracks",
+//                            type = PlaylistType.AllTracks,
+//                            tracks = tracksUseCases.getAllTracksUseCase.invoke()
+//                        )
+//                    }
+//                    PlaylistType.Favourites -> {
+//                        content.playlist = Playlist(
+//                            name = "Favourites",
+//                            type = PlaylistType.Favourites,
+//                            tracks = favouriteTracksUseCases.getAllFavouriteTracksUseCase.invoke()
+//                        )
+//                    }
+//                    PlaylistType.Custom -> {
+//                        content.playlist = playlistUseCases.getPlaylistByIdUseCase.invoke(
+//                            playlistId
+//                        )
+//                    }
+//                    PlaylistType.Artist -> {
+//                        //stopSelf()
+//                    }
+//                    PlaylistType.Undefined -> {
+//                        //stopSelf()
+//                    }
+//                }
+//            }
+//        }
+//
+//        serviceContentWrapper = content
+//    }
 
     private fun setupPlayerNotificationManager(type: Enum<PlayerType>, radioStation: RadioStation?) {
         playerNotificationManager = PlayerNotificationManager.Builder(
             this,
             notificationId,
             channelId
-        ).setMediaDescriptionAdapter(
-            if (type == PlayerType.Radio)
-                DescriptorAdapterForRadioStations(this, radioStation ?: RadioStation())
-            else
-                DescriptionAdapter(this)
+        ).setMediaDescriptionAdapter(DescriptionAdapter(context = this, type = type, radioStation = radioStation)
         ).setNotificationListener(object : PlayerNotificationManager.NotificationListener {
                 override fun onNotificationPosted(
                     notificationId: Int,
@@ -350,6 +359,7 @@ class PlayerService : Service() {
                 }
             })
             .build()
+        playerNotificationManager.setPlayer(exoPlayer)
     }
 
     private fun setupEqSettings() {
@@ -409,24 +419,24 @@ class PlayerService : Service() {
         isEqualizerInitializedLiveData.value = true
     }
 
-    private fun initDefaultPlayer(content: ServiceContentWrapper) {
-        val trackList = content.playlist?.tracks
+    private fun initDefaultPlayer(trackList: List<Track>) {
 
         if (trackList.isNullOrEmpty())
             return
+
+        exoPlayer.clearMediaItems()
 
         for (n in trackList.indices) {
             exoPlayer.addMediaItem(MediaItem.fromUri(trackList[n].path))
         }
 
-        exoPlayer.seekToDefaultPosition(content.position)
     }
 
-    private fun initRadioPlayer(content: ServiceContentWrapper) {
+    private fun initRadioPlayer(radioStation: RadioStation) {
 
-        val mediaItem = MediaItem.fromUri(Uri.parse(content.radioStation?.url))
+        val mediaItem = MediaItem.fromUri(Uri.parse(radioStation.url))
 
-        when(content.radioStation?.protocol) {
+        when(radioStation.protocol) {
             Protocol.HLS -> {
                 val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(mediaItem)
@@ -481,6 +491,7 @@ class PlayerService : Service() {
     }
 
     override fun onBind(intent: Intent): IBinder? {
+        super.onBind(intent)
         return null
     }
 

@@ -10,7 +10,7 @@ import com.hellguy39.domain.utils.PlaylistType
 
 @Entity
 data class PlaylistDb(
-    @PrimaryKey(autoGenerate = true) var id: Int = 0,
+    @PrimaryKey(autoGenerate = true) var id: Int? = null,
     var name: String = "",
     var description: String = "",
     var picture: ByteArray? = null,
