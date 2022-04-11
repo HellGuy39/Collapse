@@ -8,16 +8,13 @@ import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.MediaLibraryFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.domain.models.Playlist
-import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
@@ -111,7 +108,7 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
                         Playlist(
                             name = "All tracks",
                             type = PlaylistType.AllTracks
-                        ), null
+                        )
                     )
                 )
             }
@@ -126,7 +123,7 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
                         Playlist(
                             name = "Favourites",
                             type = PlaylistType.Favourites
-                        ), null
+                        )
                     )
                 )
             }

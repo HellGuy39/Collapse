@@ -1,11 +1,9 @@
 package com.hellguy39.collapse.presentaton.view_models
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hellguy39.domain.models.Artist
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
@@ -27,7 +25,7 @@ class MediaLibraryDataViewModel @Inject constructor(
     private val allTracksLiveData = MutableLiveData<List<Track>>()
     private val allPlaylistsLiveData = MutableLiveData<List<Playlist>>()
     private val allFavouriteTracksLiveData = MutableLiveData<List<Track>>()
-    private val allArtistsLiveData = MutableLiveData<List<Artist>>()
+    private val allArtistsLiveData = MutableLiveData<List<Playlist>>()
 
     init {
         initSetup()
@@ -46,17 +44,17 @@ class MediaLibraryDataViewModel @Inject constructor(
 
     fun getAllFavouriteTracks(): LiveData<List<Track>> = allFavouriteTracksLiveData
 
-    fun getAllArtists(): LiveData<List<Artist>> = allArtistsLiveData
+    fun getAllArtists(): LiveData<List<Playlist>> = allArtistsLiveData
 
-    fun getTrackListFromArtist(artist: Artist): List<Track> {
-        val artists = getAllArtists().value ?: return listOf()
-        val index = artists.indexOf(artist)
-
-        return if (index != -1) {
-            artists[index].trackList
-        } else
-            listOf()
-    }
+//    fun getTrackListFromArtist(artist: Artist): List<Track> {
+//        val artists = getAllArtists().value ?: return listOf()
+//        val index = artists.indexOf(artist)
+//
+//        return if (index != -1) {
+//            artists[index].trackList
+//        } else
+//            listOf()
+//    }
 
     private fun updatePlaylists() = viewModelScope.launch(Dispatchers.IO) {
         fetchAllPlaylists()
@@ -138,11 +136,11 @@ class MediaLibraryDataViewModel @Inject constructor(
         return returnableList
     }
 
-    fun searchWithQueryInArtists(query: String = "", artists: List<Artist>?): List<Artist> {
+    fun searchWithQueryInArtists(query: String = "", artists: List<Playlist>?): List<Playlist> {
         if (artists.isNullOrEmpty())
             return listOf()
 
-        val returnableList = mutableListOf<Artist>()
+        val returnableList = mutableListOf<Playlist>()
 
         for (n in artists.indices) {
             if (artists[n].name.contains(query, true)) {

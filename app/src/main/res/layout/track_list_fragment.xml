@@ -16,25 +16,80 @@
             android:layout_height="match_parent"
             app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
             tools:title="Playlist #6"
-            app:titleCollapseMode="scale">
+            app:expandedTitleTextColor="@android:color/transparent"
+            app:titleCollapseMode="fade">
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="16dp"
-                android:layout_margin="64dp"
-                android:layout_gravity="center"
-                app:strokeWidth="0dp">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-                <ImageView
-                    android:id="@+id/toolbarImage"
-                    android:layout_width="256dp"
-                    android:layout_height="256dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_round_queue_music_24" />
+                <LinearLayout
+                    android:id="@+id/linearLayout3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvPlaylistName">
 
-            </com.google.android.material.card.MaterialCardView>
+                    <Button
+                        android:id="@+id/btnPlay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:text="Play    "
+                        app:icon="@drawable/ic_round_play_arrow_24" />
+
+                    <Button
+                        android:id="@+id/btnShuffle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+
+                        android:layout_weight="1"
+                        android:text="Shuffle"
+                        app:icon="@drawable/ic_round_shuffle_24" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvPlaylistName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textSize="24sp"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/materialCardView2"
+                    tools:text="Songs of innocence" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/materialCardView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="64dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:strokeWidth="0dp">
+
+                    <ImageView
+                        android:id="@+id/toolbarImage"
+                        android:layout_width="256dp"
+                        android:layout_height="256dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_round_queue_music_24" />
+
+                </com.google.android.material.card.MaterialCardView>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"

@@ -9,10 +9,11 @@ data class ServiceContentWrapper(
     var type: Enum<PlayerType> = PlayerType.Undefined,
 
     var radioStation: RadioStation? = null,
-    var playlist: Playlist? = null,
-    var artist: Artist? = null,
 
+    var playlist: Playlist? = null,
     var playerPosition: Long = 0,
     var position: Int = 0,
-    var fromSavedState: Boolean = false
+
+    var fromSavedState: Boolean = false,
+    var startWithShuffle: Boolean = false
 ) : Parcelable

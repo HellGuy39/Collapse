@@ -1,15 +1,14 @@
 package com.hellguy39.collapse.presentaton.adapters
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.presentaton.view_holders.ArtistViewHolder
-import com.hellguy39.domain.models.Artist
+import com.hellguy39.domain.models.Playlist
 
 class ArtistsAdapter(
-    private val artists: List<Artist>,
+    private val playlists: List<Playlist>,
     private val listener: OnArtistListener
 ): RecyclerView.Adapter<ArtistViewHolder>() {
 
@@ -28,13 +27,13 @@ class ArtistsAdapter(
         position: Int
     ) {
        holder.onBind(
-           artist = artists[position],
+           playlist = playlists[position],
            position = position,
            listener = listener
        )
     }
 
-    override fun getItemCount(): Int = artists.size
+    override fun getItemCount(): Int = playlists.size
 
     interface OnArtistListener {
         fun onArtistClick(position: Int)

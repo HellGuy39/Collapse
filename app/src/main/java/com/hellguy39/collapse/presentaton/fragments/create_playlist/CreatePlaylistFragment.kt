@@ -1,15 +1,11 @@
 package com.hellguy39.collapse.presentaton.fragments.create_playlist
 
-import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
-import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
@@ -26,8 +22,6 @@ import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.ByteArrayOutputStream
-import java.io.FileNotFoundException
 import java.io.InputStream
 import javax.inject.Inject
 
@@ -46,25 +40,30 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
     }
 
     private lateinit var dataViewModel: MediaLibraryDataViewModel
+    private lateinit var createViewModel: CreatePlaylistViewModel
     private lateinit var binding: CreatePlaylistFragmentBinding
 
     private lateinit var pickImage: ActivityResultLauncher<String>
 
-    private var selectedImage: Bitmap? = null
-
-    private var tracks = listOf<Track>()
+    private var tracks = mutableListOf<Track>()
 
     private val args: CreatePlaylistFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
+        createViewModel = ViewModelProvider(this)[CreatePlaylistViewModel::class.java]
 
         pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
             if (it != null) {
                 val imageStream: InputStream? = context?.contentResolver?.openInputStream(it)
-                selectedImage = BitmapFactory.decodeStream(imageStream)
+                val selectedImage = BitmapFactory.decodeStream(imageStream)
                 binding.ivImage.setImageBitmap(selectedImage)
+
+                val bytes = convertBitmapToByteArrayUseCase.invoke(selectedImage)
+
+                if (bytes != null)
+                    createViewModel.setPicture(bytes)
             }
         }
     }
@@ -77,7 +76,6 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
 
         if (bytes != null) {
             val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
-            selectedImage = bitmap
             binding.ivImage.setImageBitmap(bitmap)
         } else
             binding.ivImage.setImageResource(R.drawable.ic_round_queue_music_24)
@@ -105,8 +103,22 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
         }
 
         setFragmentResultListener("pick_tracks") { requestKey, bundle ->
-            tracks = bundle.get("tracks") as List<Track>
-            updateTracksCounter(tracks.size)
+            tracks = bundle.get("tracks") as MutableList<Track>
+            createViewModel.setSelectedTracks(tracks)
+        }
+
+        setObservers()
+    }
+
+    private fun setObservers() {
+        createViewModel.getPicture().observe(viewLifecycleOwner) {
+            if (it != null) {
+                val bitmap = convertByteArrayToBitmapUseCase.invoke(it)
+                binding.ivImage.setImageBitmap(bitmap)
+            }
+        }
+        createViewModel.getSelectedTracks().observe(viewLifecycleOwner) {
+            updateTracksCounter(it.size)
         }
     }
 
@@ -143,7 +155,7 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
             name = binding.etName.text.toString(),
             description = binding.etDesc.text.toString(),
             tracks = tracks,
-            picture = convertBitmapToByteArrayUseCase.invoke(selectedImage),
+            picture = createViewModel.getPicture().value,
             type = PlaylistType.Custom
         ))
     }
@@ -154,7 +166,7 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
             name = binding.etName.text.toString(),
             description = binding.etDesc.text.toString(),
             tracks = tracks,
-            picture = convertBitmapToByteArrayUseCase.invoke(selectedImage),
+            picture = createViewModel.getPicture().value,
             type = PlaylistType.Custom
         ))
     }

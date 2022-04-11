@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.transition.AutoTransition
 import android.transition.TransitionManager
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -19,10 +20,15 @@ import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
-import com.hellguy39.domain.models.RadioStation
+import com.hellguy39.domain.models.*
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
+import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
+import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
+import com.hellguy39.domain.usecases.radio.RadioStationUseCases
 import com.hellguy39.domain.usecases.state.SavedServiceStateUseCases
+import com.hellguy39.domain.usecases.tracks.TracksUseCases
 import com.hellguy39.domain.utils.PlayerType
+import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,10 +40,22 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     @Inject
+    lateinit var radioStationUseCases: RadioStationUseCases
+
+    @Inject
     lateinit var savedServiceStateUseCases: SavedServiceStateUseCases
 
     @Inject
     lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
+
+    @Inject
+    lateinit var playlistUseCases: PlaylistUseCases
+
+    @Inject
+    lateinit var tracksUseCases: TracksUseCases
+
+    @Inject
+    lateinit var favouriteTracksUseCases: FavouriteTracksUseCases
 
     private lateinit var navController: NavController
     private lateinit var navHostFragment: NavHostFragment
@@ -50,6 +68,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         mediaLibraryDataViewModel = ViewModelProvider(this)[MediaLibraryDataViewModel::class.java]
         radioStationsDataViewModel = ViewModelProvider(this)[RadioStationsDataViewModel::class.java]
 
@@ -72,6 +91,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.layoutCardPlayer.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
         //checkServiceSavedState()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        //initSetupMediaLibraryDataViewModel()
     }
 
     private fun setObservers() {
@@ -123,22 +147,66 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
-    private fun checkServiceSavedState() = CoroutineScope(Dispatchers.IO).launch {
-        val state = savedServiceStateUseCases.getSavedServiceStateUseCase.invoke()
+//    private fun checkServiceSavedState() = CoroutineScope(Dispatchers.IO).launch {
+//        val state = savedServiceStateUseCases.getSavedServiceStateUseCase.invoke()
+//
+//        when (state.playerType) {
+//            PlayerType.LocalTrack -> {
+//                val playlist: Playlist
+//                val artist: Artist
+//
+//                if (state.playlistId != null) {
+//                    when (state.playlistType) {
+//                        PlaylistType.Artist -> {}
+//                        PlaylistType.Favourites -> {}
+//                        PlaylistType.AllTracks -> {}
+//                        PlaylistType.Custom -> {}
+//                    }
+//
+//                    PlayerService.startService(
+//                        context = this@MainActivity,
+//                        contentWrapper = ServiceContentWrapper(
+//                            position = state.position,
+//                            playerPosition = state.playerPosition,
+//                            playlist = playlist,
+//                            artist = artist,
+//                            type = PlayerType.LocalTrack,
+//                        )
+//                    )
+//                }
+//
+//            }
+//            PlayerType.Radio -> {
+//                val id = state.radioStationId
+//                var radioStation = RadioStation()
+//                if (id != null)
+//                    radioStation = radioStationUseCases.getRadioStationByIdUseCase.invoke(id)
+//                else
+//                    return@launch
+//
+//                PlayerService.startService(
+//                    context = this@MainActivity,
+//                    contentWrapper = ServiceContentWrapper(
+//                        type = PlayerType.Radio,
+//                        radioStation = radioStation
+//                    )
+//                )
+//            }
+//        }
+//    }
 
-        withContext(Dispatchers.Main) {
-            if (state.radioStation != null || state.playlist != null) {
-
-                if(state.radioStation != null)
-                    return@withContext //this is a temporary solution
-
-                PlayerService.startService(
-                    context = this@MainActivity,
-                    contentWrapper = state
-                )
-            }
-        }
-    }
+//        withContext(Dispatchers.Main) {
+//            if (state.radioStation != null || state.playlist != null) {
+//
+//                if(state.radioStation != null)
+//                    return@withContext //this is a temporary solution
+//
+//                PlayerService.startService(
+//                    context = this@MainActivity,
+//                    contentWrapper = state
+//                )
+//            }
+//        }
 
     private fun updateCardUIWithMetadata(metadata: MediaMetadata) {
 

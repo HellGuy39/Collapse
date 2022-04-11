@@ -35,6 +35,7 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
     private lateinit var dataViewModel: MediaLibraryDataViewModel
 
     private lateinit var adapter: SelectableTracksAdapter
+
     private var allTracks = mutableListOf<Track>()
     private var positions = mutableListOf<Int>()
 
@@ -54,7 +55,9 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
         super.onViewCreated(view, savedInstanceState)
         binding = SelectTracksFragmentBinding.bind(view)
 
-        binding.topAppBar.setNavigationOnClickListener { findNavController().popBackStack() }
+        binding.topAppBar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
 
         binding.rvTracks.adapter = adapter
         binding.rvTracks.layoutManager = LinearLayoutManager(
@@ -121,7 +124,12 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
 
     override fun onPause() {
         super.onPause()
+        setResult()
+    }
+
+    private fun setResult() {
         setFragmentResult("pick_tracks",
             bundleOf("tracks" to collectTracks(positions = positions)))
     }
+
 }

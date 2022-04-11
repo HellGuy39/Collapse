@@ -2,8 +2,6 @@ package com.hellguy39.data.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
-import com.google.gson.Gson
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.utils.PlaylistType
@@ -14,7 +12,7 @@ data class PlaylistDb(
     var name: String = "",
     var description: String = "",
     var picture: ByteArray? = null,
-    var tracks: List<Track> = listOf(),
+    var tracks: MutableList<Track> = mutableListOf(),
     var type: String = PlaylistType.Custom.name
 ) {
     fun toDefaultModel() : Playlist {

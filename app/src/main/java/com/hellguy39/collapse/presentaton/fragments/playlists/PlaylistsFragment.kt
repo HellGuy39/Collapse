@@ -1,7 +1,6 @@
 package com.hellguy39.collapse.presentaton.fragments.playlists
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
@@ -15,9 +14,7 @@ import com.hellguy39.collapse.presentaton.adapters.PlaylistsAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.Action
 import com.hellguy39.domain.models.Playlist
-import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
-import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -115,8 +112,7 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     override fun onPlaylistClick(playlist: Playlist) {
         findNavController().navigate(
             PlaylistsFragmentDirections.actionPlaylistsFragmentToTrackListFragment(
-                playlist,
-                null
+                playlist
             )
         )
     }

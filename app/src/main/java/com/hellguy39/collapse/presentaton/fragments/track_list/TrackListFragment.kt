@@ -17,7 +17,6 @@ import com.hellguy39.collapse.presentaton.adapters.TracksAdapter
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.Action
-import com.hellguy39.domain.models.Artist
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.ServiceContentWrapper
 import com.hellguy39.domain.models.Track
@@ -35,7 +34,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.OnTrackListener,
-    SearchView.OnQueryTextListener {
+    SearchView.OnQueryTextListener, View.OnClickListener {
 
     companion object {
         fun newInstance() = TrackListFragment()
@@ -57,9 +56,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
     private lateinit var searchView: SearchView
 
     private lateinit var receivedPlaylist: Playlist
-    private var receivedArtist: Artist = Artist()
 
-    private var allTracksFromCurrentPlaylist = listOf<Track>()
     private var recyclerTracks = mutableListOf<Track>()
 
     private lateinit var adapter: TracksAdapter
@@ -72,9 +69,6 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
 
         receivedPlaylist = args.playlist
 
-        if (args.artist != null) {
-            receivedArtist = args.artist!!
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -88,6 +82,11 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
+
+        binding.tvPlaylistName.text = receivedPlaylist.name
+
+        binding.btnPlay.setOnClickListener(this)
+        binding.btnShuffle.setOnClickListener(this)
 
         searchView = binding.toolbar.menu.findItem(R.id.search).actionView as SearchView
         searchView.setOnQueryTextListener(this)
@@ -227,7 +226,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
                         updateListPlayingPosition(position = it)
                     }
                     PlaylistType.Artist -> {
-                        if (PlayerService.getServiceContent().artist == receivedArtist)
+                        if (PlayerService.getServiceContent().playlist?.name == receivedPlaylist.name)
                             updateListPlayingPosition(position = it)
                     }
                 }
@@ -245,12 +244,12 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
     }
 
     private fun onTracksReceived(receivedTracks: List<Track>, playlistType: PlaylistType, name: String) {
-        allTracksFromCurrentPlaylist = receivedTracks
         if (playlistType == PlaylistType.AllTracks || playlistType == PlaylistType.Favourites) {
             receivedPlaylist = Playlist(
+                id = if(playlistType == PlaylistType.AllTracks) -1 else if (playlistType == PlaylistType.Favourites) -2 else null,
                 name = name,
                 type = playlistType,
-                tracks = receivedTracks
+                tracks = receivedTracks.toMutableList()
             )
         }
         clearRecyclerView()
@@ -276,19 +275,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
     }
 
     override fun onTrackClick(track: Track, position: Int) {
-//        if (PlayerService.isPlaying().value != false) {
-//            if (PlayerService.getContentPosition().value == position) {
-//                PlayerService.onPause()
-//            }
-//        }
-
-        PlayerService.startService(requireContext(), ServiceContentWrapper(
-                type = PlayerType.LocalTrack,
-                position = position,//allTracksFromCurrentPlaylist.indexOf(track),
-                playlist = receivedPlaylist,
-                artist = receivedArtist
-            )
-        )
+        startPlayer(position = position)
     }
 
     override fun onAddToFavourites(track: Track) {
@@ -359,7 +346,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
             PlaylistType.Artist -> {
                 queryList = dataViewModel.searchWithQueryInTrackList(
                     query = query?: "",
-                    dataViewModel.getTrackListFromArtist(artist = receivedArtist)
+                    receivedPlaylist.tracks
                 )
             }
         }
@@ -368,4 +355,23 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
         updateRecyclerView(queryList)
     }
 
+    override fun onClick(p0: View?) {
+        when(p0?.id) {
+            binding.btnPlay.id -> {
+                startPlayer(0)
+            }
+            binding.btnShuffle.id -> {
+                startPlayer(0, true)
+            }
+        }
+    }
+
+    private fun startPlayer(position: Int, startWithShuffle: Boolean = false) {
+        PlayerService.startService(requireContext(), ServiceContentWrapper(
+            type = PlayerType.LocalTrack,
+            position = position,
+            playlist = receivedPlaylist,
+            startWithShuffle = startWithShuffle
+        ))
+    }
 }

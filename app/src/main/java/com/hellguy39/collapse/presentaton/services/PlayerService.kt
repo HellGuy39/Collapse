@@ -27,6 +27,7 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.hellguy39.collapse.presentaton.adapters.DescriptionAdapter
+import com.hellguy39.domain.models.EqualizerModel
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.models.ServiceContentWrapper
 import com.hellguy39.domain.models.Track
@@ -76,29 +77,35 @@ class PlayerService : LifecycleService() {
 
     companion object {
 
-        private lateinit var equalizer: Equalizer
         private lateinit var virtualizer: Virtualizer
         private lateinit var bassBoost: BassBoost
-        private var numberOfPresets: Short = 0
-        private var presetNames = mutableListOf<String>()
-        private var lowestBandLevel: Short = -1500
-        private var upperBandLevel: Short = 1500
-        private var numberOfBands: Short = 5
-        private val bandsCenterFreq = ArrayList<Int>(0)
+
+        private var equalizerModel: EqualizerModel = EqualizerModel()
 
         private var isRunningService = MutableLiveData<Boolean>(false)
         private lateinit var exoPlayer: ExoPlayer
+
         private val serviceContentLiveData = MutableLiveData<ServiceContentWrapper>()
-        /*private var positionLiveData = MutableLiveData<Long>()*/
         private val mediaMetadataLiveData = MutableLiveData<MediaMetadata>()
         private val isPlayingLiveData = MutableLiveData<Boolean>()
         private val isEqualizerInitializedLiveData = MutableLiveData<Boolean>(false)
         private val audioSessionIdLiveData = MutableLiveData<Int>()
-        //private val playerTypeLiveData = MutableLiveData<Enum<PlayerType>>()
         private val contentPositionLiveData = MutableLiveData<Int>()
         private val isShuffleLiveData = MutableLiveData<Boolean>()
 
         fun startService(context: Context, contentWrapper: ServiceContentWrapper) {
+
+            if(contentWrapper.type == PlayerType.LocalTrack &&
+                serviceContentLiveData.value?.playlist == contentWrapper.playlist &&
+                    getContentPosition().value == contentWrapper.position) {
+
+                if (isPlaying().value == true)
+                    onPause()
+                else
+                    onPlay()
+
+                return
+            }
 
             updateContent(contentWrapper)
 
@@ -126,6 +133,13 @@ class PlayerService : LifecycleService() {
                 playlist = serviceContentLiveData.value?.playlist,
                 playerPosition = exoPlayer.contentPosition
             )
+        }
+
+        fun getCurrentTrack(): Track? {
+            val pos = serviceContentLiveData.value?.position
+            return if (pos != null)
+                serviceContentLiveData.value?.playlist?.tracks?.get(pos)
+            else null
         }
 
         fun isRunningService(): LiveData<Boolean> = isRunningService
@@ -162,25 +176,27 @@ class PlayerService : LifecycleService() {
         fun onSeekTo(pos: Long) = exoPlayer.seekTo(pos)
 
         //Equalizer
-        fun enableEq(b: Boolean) = equalizer.setEnabled(b)
+        fun enableEq(b: Boolean) = equalizerModel.equalizer?.setEnabled(b)
 
-        fun setBandLevel(band: Short, value: Short) = equalizer.setBandLevel(band, value)
+        fun setBandLevel(band: Short, value: Short) = equalizerModel.equalizer?.setBandLevel(band, value)
         fun setBassBoostBandLevel(value: Short) = bassBoost.setStrength(value)
         fun setVirtualizerBandLevel(value: Short) = virtualizer.setStrength(value)
 
-        fun getLowestBandLevel(): Short = lowestBandLevel
-        fun getUpperBandLevel(): Short = upperBandLevel
-        fun getNumberOfBands(): Short = numberOfBands
-        fun getBandsCenterFreq(): ArrayList<Int> = bandsCenterFreq
+        fun getLowestBandLevel(): Short = equalizerModel.lowestBandLevel
+        fun getUpperBandLevel(): Short = equalizerModel.upperBandLevel
+        fun getNumberOfBands(): Short = equalizerModel.numberOfBands
+        fun getBandsCenterFreq(): ArrayList<Int> = equalizerModel.bandsCenterFreq
 
-        fun getNumberOfPresets(): Short = numberOfPresets
-        fun getPresetNames(): List<String> = presetNames
-        fun usePreset(preset: Short) = equalizer.usePreset(preset)
+        fun getNumberOfPresets(): Short = equalizerModel.numberOfPresets
+        fun getPresetNames(): List<String> = equalizerModel.presetNames
+        fun usePreset(preset: Short) = equalizerModel.equalizer?.usePreset(preset)
 
         fun getBandsLevels(): List<Short> {
             val returnableList = mutableListOf<Short>()
-            (0 until numberOfBands).forEach {
-                returnableList.add(equalizer.getBandLevel(it.toShort()))
+            if (equalizerModel.equalizer != null) {
+                (0 until equalizerModel.numberOfBands).forEach {
+                    returnableList.add(equalizerModel.equalizer!!.getBandLevel(it.toShort()))
+                }
             }
             return returnableList
         }
@@ -220,6 +236,7 @@ class PlayerService : LifecycleService() {
 
     private fun updateContent(content: ServiceContentWrapper) {
         setupPlayerNotificationManager(content.type, content.radioStation)
+        exoPlayer.clearMediaItems()
         when(content.type) {
             PlayerType.LocalTrack -> {
                 val trackList = content.playlist?.tracks
@@ -242,22 +259,12 @@ class PlayerService : LifecycleService() {
         isRunningService.value = true
 
         serviceContentLiveData.observe(this) {
-            //setupExoPlayer(serviceContentWrapper)
             updateContent(it)
             exoPlayer.seekToDefaultPosition(it.position)
             exoPlayer.playWhenReady = true
             exoPlayer.prepare()
+            isRunningService.value = true
         }
-
-//        CoroutineScope(Dispatchers.IO).launch {
-//            //setupContent(content)
-//            withContext(Dispatchers.Main) {
-//                setupExoPlayer(serviceContentWrapper)
-//                initEQ()
-//                setupEqSettings()
-//                isRunningService.value = true
-//            }
-//        }
 
         return START_STICKY
     }
@@ -357,12 +364,13 @@ class PlayerService : LifecycleService() {
                 ) {
                     stopSelf()
                 }
-            })
-            .build()
+            }).build()
         playerNotificationManager.setPlayer(exoPlayer)
     }
 
     private fun setupEqSettings() {
+
+        val equalizer = equalizerModel.equalizer ?: return
 
         val settings = equalizerSettingsUseCases.getEqualizerSettings.invoke()
 
@@ -388,9 +396,12 @@ class PlayerService : LifecycleService() {
 
     private fun initEQ() {
 
-        equalizer = Equalizer(1, exoPlayer.audioSessionId)
+        equalizerModel.equalizer = Equalizer(1, exoPlayer.audioSessionId)
         virtualizer = Virtualizer(1, exoPlayer.audioSessionId)
         bassBoost = BassBoost(1, exoPlayer.audioSessionId)
+
+        if (equalizerModel.equalizer == null)
+            return
 
         if (bassBoost.strengthSupported)
             bassBoost.enabled = true
@@ -398,23 +409,23 @@ class PlayerService : LifecycleService() {
         if (virtualizer.strengthSupported)
             virtualizer.enabled = true
 
-        numberOfBands = equalizer.numberOfBands
-        lowestBandLevel = equalizer.bandLevelRange[0]
-        upperBandLevel = equalizer.bandLevelRange[1]
+        equalizerModel.numberOfBands = equalizerModel.equalizer!!.numberOfBands
+        equalizerModel.lowestBandLevel = equalizerModel.equalizer!!.bandLevelRange[0]
+        equalizerModel.upperBandLevel = equalizerModel.equalizer!!.bandLevelRange[1]
 
-        (0 until numberOfBands)
-            .map { equalizer.getCenterFreq(it.toShort()) }
-            .mapTo(bandsCenterFreq) { it / 1000 }
+        (0 until equalizerModel.numberOfBands)
+            .map { equalizerModel.equalizer!!.getCenterFreq(it.toShort()) }
+            .mapTo(equalizerModel.bandsCenterFreq) { it / 1000 }
 
-        numberOfPresets = equalizer.numberOfPresets
+        equalizerModel.numberOfPresets = equalizerModel.equalizer!!.numberOfPresets
 
-        presetNames.clear()
+        equalizerModel.presetNames.clear()
 
-        (0 until numberOfPresets).forEach { n ->
-            presetNames.add(equalizer.getPresetName(n.toShort()))
+        (0 until equalizerModel.numberOfPresets).forEach { n ->
+            equalizerModel.presetNames.add(equalizerModel.equalizer!!.getPresetName(n.toShort()))
         }
 
-        presetNames.add("Custom")
+        equalizerModel.presetNames.add("Custom")
 
         isEqualizerInitializedLiveData.value = true
     }
@@ -423,8 +434,6 @@ class PlayerService : LifecycleService() {
 
         if (trackList.isNullOrEmpty())
             return
-
-        exoPlayer.clearMediaItems()
 
         for (n in trackList.indices) {
             exoPlayer.addMediaItem(MediaItem.fromUri(trackList[n].path))
@@ -478,9 +487,10 @@ class PlayerService : LifecycleService() {
     }
 
     private fun saveState() = CoroutineScope(Dispatchers.Main).launch {
-        savedServiceStateUseCases.insertSavedServiceStateUseCase.invoke(
-            serviceContentWrapper = getServiceContent()
-        )
+//        Log.d("DEBUG", "CONTENT: ${getServiceContent()}")
+//        savedServiceStateUseCases.insertSavedServiceStateUseCase.invoke(
+//            serviceContentWrapper = getServiceContent()
+//        )
     }
 
     override fun onDestroy() {

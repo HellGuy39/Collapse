@@ -12,9 +12,7 @@ import com.hellguy39.collapse.databinding.FragmentArtistsListBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.ArtistsAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
-import com.hellguy39.domain.models.Artist
 import com.hellguy39.domain.models.Playlist
-import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -24,7 +22,7 @@ class ArtistsListFragment : Fragment(R.layout.fragment_artists_list),
     private lateinit var binding: FragmentArtistsListBinding
     private lateinit var dataViewModel: MediaLibraryDataViewModel
 
-    private var artists = mutableListOf<Artist>()
+    private var playlists = mutableListOf<Playlist>()
 
     private lateinit var searchView: SearchView
 
@@ -59,14 +57,8 @@ class ArtistsListFragment : Fragment(R.layout.fragment_artists_list),
         }
     }
 
-    private fun navigateToTrackList(artist: Artist) = findNavController().navigate(
-        ArtistsListFragmentDirections.actionArtistsListFragmentToTrackListFragment(
-            Playlist(
-                name = artist.name,
-                type = PlaylistType.Artist,
-                tracks = artist.trackList
-            ), artist
-        )
+    private fun navigateToTrackList(playlist: Playlist) = findNavController().navigate(
+        ArtistsListFragmentDirections.actionArtistsListFragmentToTrackListFragment(playlist)
     )
 
     private fun setupRecyclerView() {
@@ -76,27 +68,27 @@ class ArtistsListFragment : Fragment(R.layout.fragment_artists_list),
             false
         )
         binding.rvArtists.adapter = ArtistsAdapter(
-            artists = artists,
+            playlists = playlists,
             listener = this
         )
     }
 
-    private fun updateRecyclerView(receivedArtists: List<Artist>) {
+    private fun updateRecyclerView(receivedArtists: List<Playlist>) {
         for (n in receivedArtists.indices) {
-            artists.add(receivedArtists[n])
+            playlists.add(receivedArtists[n])
         }
         val position = binding.rvArtists.adapter?.itemCount ?: 0
-        binding.rvArtists.adapter?.notifyItemRangeInserted(position, artists.size)
+        binding.rvArtists.adapter?.notifyItemRangeInserted(position, playlists.size)
     }
 
     private fun clearRecyclerView() {
         val size = binding.rvArtists.adapter?.itemCount
-        artists.clear()
+        playlists.clear()
         binding.rvArtists.adapter?.notifyItemRangeRemoved(0, size ?: 0)
     }
 
     override fun onArtistClick(position: Int) {
-        navigateToTrackList(artist = artists[position])
+        navigateToTrackList(playlist = playlists[position])
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {

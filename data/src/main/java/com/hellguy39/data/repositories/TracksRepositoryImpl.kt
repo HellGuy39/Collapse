@@ -3,9 +3,10 @@ package com.hellguy39.data.repositories
 import android.content.Context
 import android.database.Cursor
 import android.provider.MediaStore
-import com.hellguy39.domain.models.Artist
+import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.repositories.TracksRepository
+import com.hellguy39.domain.utils.PlaylistType
 
 class TracksRepositoryImpl(
     private val context: Context
@@ -55,9 +56,9 @@ class TracksRepositoryImpl(
         return audioDataList
     }
 
-    override suspend fun getAllArtists(): List<Artist> {
+    override suspend fun getAllArtists(): List<Playlist> {
 
-        val artistList = mutableListOf<Artist>()
+        val artistList = mutableListOf<Playlist>()
 
         val cursor = initCursor() ?: return emptyList()
 
@@ -72,9 +73,15 @@ class TracksRepositoryImpl(
             val pos = isContainArtist(artistList, track.artist)
 
             if (pos != -1) {
-                artistList[pos].trackList.add(track)
+                artistList[pos].tracks.add(track)
             } else {
-                artistList.add(Artist(name = track.artist, trackList = mutableListOf(track)))
+                artistList.add(
+                    Playlist(
+                        name = track.artist,
+                        tracks = mutableListOf(track),
+                        type = PlaylistType.Artist
+                    )
+                )
             }
 
         }
@@ -84,7 +91,7 @@ class TracksRepositoryImpl(
         return artistList
     }
 
-    private fun isContainArtist(artistList: List<Artist>, artist: String): Int {
+    private fun isContainArtist(artistList: List<Playlist>, artist: String): Int {
         for (n in artistList.indices) {
             if (artistList[n].name == artist) {
                 return n

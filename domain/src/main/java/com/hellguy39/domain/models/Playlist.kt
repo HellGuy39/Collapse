@@ -10,6 +10,6 @@ data class Playlist(
     var name: String = "",
     var description: String = "",
     var picture: ByteArray? = null,
-    var tracks: List<Track> = listOf(),
+    var tracks: MutableList<Track> = mutableListOf(),
     var type: Enum<PlaylistType> = PlaylistType.Custom
 ): Parcelable
