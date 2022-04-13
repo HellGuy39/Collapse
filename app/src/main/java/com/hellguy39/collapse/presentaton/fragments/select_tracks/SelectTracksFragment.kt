@@ -87,13 +87,19 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
             allTracks.add(receivedTracks[n])
         }
 
-        val selectedTracks = args.playlist.tracks
+        val selectedTracks = args.selectedTracks.trackList
 
-        for (n in allTracks.indices) {
-            if (selectedTracks.contains(allTracks[n])) {
-                allTracks[n].isChecked = true
+        for (n in selectedTracks.indices) {
+            if (allTracks.contains(selectedTracks[n])) {
+                adapter.addSelectedPosition(allTracks.indexOf(selectedTracks[n]))
             }
         }
+
+//        for (n in allTracks.indices) {
+//            if (selectedTracks.contains(allTracks[n])) {
+//                allTracks[n].isChecked = true
+//            }
+//        }
 
         val position = binding.rvTracks.adapter?.itemCount ?: 0
         binding.rvTracks.adapter?.notifyItemRangeInserted(position, allTracks.size)

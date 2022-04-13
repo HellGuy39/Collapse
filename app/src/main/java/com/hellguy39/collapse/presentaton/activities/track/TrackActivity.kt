@@ -1,10 +1,9 @@
 package com.hellguy39.collapse.presentaton.activities.track
 
-import android.R.attr.bitmap
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.MenuItem
@@ -13,14 +12,18 @@ import androidx.annotation.ColorInt
 import androidx.annotation.MenuRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.res.ResourcesCompat
 import androidx.palette.graphics.Palette
-import androidx.palette.graphics.Palette.PaletteAsyncListener
+import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.MediaMetadata
+import com.google.android.exoplayer2.Player
+import com.google.android.material.slider.Slider
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.ActivityTrackBinding
 import com.hellguy39.collapse.presentaton.adapters.TracksAdapter
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.domain.models.Track
+import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
 import com.hellguy39.domain.utils.PlaylistType
@@ -35,13 +38,20 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class TrackActivity : AppCompatActivity(), View.OnClickListener, TracksAdapter.OnTrackListener {
+class TrackActivity : AppCompatActivity(),
+    View.OnClickListener,
+    TracksAdapter.OnTrackListener,
+    Slider.OnChangeListener,
+    Slider.OnSliderTouchListener{
 
     @Inject
     lateinit var playlistUseCases: PlaylistUseCases
 
     @Inject
     lateinit var favouriteTracksUseCase: FavouriteTracksUseCases
+
+    @Inject
+    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
 
     private lateinit var binding: ActivityTrackBinding
 
@@ -69,6 +79,10 @@ class TrackActivity : AppCompatActivity(), View.OnClickListener, TracksAdapter.O
         }
 
         setObservers()
+
+        binding.sliderVolume.value = PlayerService.getDeviceVolume().toFloat()
+        binding.sliderVolume.addOnSliderTouchListener(this)
+        binding.sliderVolume.addOnChangeListener(this)
     }
 
 
@@ -84,6 +98,35 @@ class TrackActivity : AppCompatActivity(), View.OnClickListener, TracksAdapter.O
         PlayerService.getCurrentMetadata().observe(this) {
             if (it != null)
                 updateUI(it)
+        }
+
+        PlayerService.getRepeatMode().observe(this) {
+            when (it) {
+                Player.REPEAT_MODE_ALL -> {
+                    val typedValue = TypedValue()
+                    val theme = this.theme
+                    theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
+                    @ColorInt val colorPrimary = typedValue.data
+                    binding.ibRepeatTrack.imageTintList = ColorStateList.valueOf(colorPrimary)
+                    binding.ibRepeatTrack.setImageResource(R.drawable.ic_round_repeat_24)
+                }
+                Player.REPEAT_MODE_ONE -> {
+                    val typedValue = TypedValue()
+                    val theme = this.theme
+                    theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
+                    @ColorInt val colorPrimary = typedValue.data
+                    binding.ibRepeatTrack.imageTintList = ColorStateList.valueOf(colorPrimary)
+                    binding.ibRepeatTrack.setImageResource(R.drawable.ic_round_repeat_one_24)
+                }
+                else -> {
+                    val typedValue = TypedValue()
+                    val theme = this.theme
+                    theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValue, true)
+                    @ColorInt val colorOnSurface = typedValue.data
+                    binding.ibRepeatTrack.imageTintList = ColorStateList.valueOf(colorOnSurface)
+                    binding.ibRepeatTrack.setImageResource(R.drawable.ic_round_repeat_24)
+                }
+            }
         }
 
         PlayerService.isShuffle().observe(this) {
@@ -136,9 +179,11 @@ class TrackActivity : AppCompatActivity(), View.OnClickListener, TracksAdapter.O
 
         val bytes = mediaMetadata.artworkData
 
-        if (bytes != null)
-            binding.ivCover.setImageBitmap(BitmapFactory.decodeByteArray(mediaMetadata.artworkData, 0, bytes.size))
-        else
+        if (bytes != null) {
+            val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
+            Glide.with(this).load(bitmap).into(binding.ivCover)
+            updatePalette(bitmap)
+        } else
             binding.ivCover.setImageResource(R.drawable.ic_round_audiotrack_24)
     }
 
@@ -163,10 +208,12 @@ class TrackActivity : AppCompatActivity(), View.OnClickListener, TracksAdapter.O
                     PlayerService.onShuffle(true)
             }
             binding.ibRepeatTrack.id -> {
-                if (PlayerService.isRepeat() == 0)
-                    PlayerService.onRepeat(2)
-                else
-                    PlayerService.onRepeat(0)
+                when {
+                    PlayerService.isRepeat() == Player.REPEAT_MODE_OFF -> PlayerService.onRepeat(Player.REPEAT_MODE_ALL)
+                    PlayerService.isRepeat() == Player.REPEAT_MODE_ALL -> PlayerService.onRepeat(Player.REPEAT_MODE_ONE)
+                    else -> PlayerService.onRepeat(Player.REPEAT_MODE_OFF)
+                }
+
             }
             binding.ibMore.id -> {
                 showMenu(
@@ -181,12 +228,28 @@ class TrackActivity : AppCompatActivity(), View.OnClickListener, TracksAdapter.O
                 }
             }
         }
-//
-//    private fun updatePalette(bitmap: Bitmap) {
-//        Palette.from(bitmap).generate({ palette ->
-//            val dominant colorpalette.getDominantColor()
-//        })
-//    }
+
+    private fun updatePalette(bitmap: Bitmap) {
+        Palette.from(bitmap).generate { palette ->
+            if (palette != null) {
+                val white = ResourcesCompat.getColor(resources, R.color.white,null)
+
+                binding.topAppBar.setNavigationIconTint(white)
+                binding.topAppBar.setTitleTextColor(white)
+                binding.topAppBar.setBackgroundColor(palette.getMutedColor(1))
+                binding.root.setBackgroundColor(palette.getMutedColor(1))
+                binding.tvTrackName.setTextColor(white)
+                binding.tvPerformer.setTextColor(white)
+                binding.tvRemainingTrackTime.setTextColor(white)
+                binding.tvCurrentTrackTime.setTextColor(white)
+
+                binding.ibPlayPause.imageTintList = ColorStateList.valueOf(white)
+                binding.ibNextTrack.imageTintList = ColorStateList.valueOf(white)
+                binding.ibPreviousTrack.imageTintList = ColorStateList.valueOf(white)
+
+            }
+        }
+    }
 
     override fun onTrackClick(track: Track, position: Int) {
 
@@ -254,6 +317,21 @@ class TrackActivity : AppCompatActivity(), View.OnClickListener, TracksAdapter.O
         }
 
         popup.show()
+    }
+
+    @SuppressLint("RestrictedApi")
+    override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
+        PlayerService.setDeviceVolume(value.toInt())
+    }
+
+    @SuppressLint("RestrictedApi")
+    override fun onStartTrackingTouch(slider: Slider) {
+        PlayerService.setDeviceVolume(slider.value.toInt())
+    }
+
+    @SuppressLint("RestrictedApi")
+    override fun onStopTrackingTouch(slider: Slider) {
+
     }
 
 }

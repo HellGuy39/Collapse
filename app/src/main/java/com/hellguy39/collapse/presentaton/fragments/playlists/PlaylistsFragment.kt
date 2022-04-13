@@ -3,6 +3,7 @@ package com.hellguy39.collapse.presentaton.fragments.playlists
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -41,15 +42,13 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
-        adapter = PlaylistsAdapter(
-            playlists = playlists,
-            listener = this,
-            convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase
-        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        postponeEnterTransition()
+
         binding = PlaylistsFragmentBinding.bind(view)
         binding.topAppBar.setNavigationOnClickListener {
             findNavController().popBackStack()
@@ -59,12 +58,8 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
         searchView = searchItem.actionView as SearchView
         searchView.setOnQueryTextListener(this)
 
-        binding.rvPlaylists.layoutManager = LinearLayoutManager(
-            context,
-            LinearLayoutManager.VERTICAL,
-            false
-        )
-        binding.rvPlaylists.adapter = adapter
+        setupRecyclerView()
+
         binding.topAppBar.setOnMenuItemClickListener {
             when(it?.itemId) {
                 R.id.add -> {
@@ -79,12 +74,34 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
                 else -> false
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
         setObservers()
     }
+
+    private fun setupRecyclerView() {
+
+        adapter = PlaylistsAdapter(
+            playlists = playlists,
+            listener = this,
+            convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase
+        )
+
+        binding.rvPlaylists.layoutManager = LinearLayoutManager(
+            context,
+            LinearLayoutManager.VERTICAL,
+            false
+        )
+
+        binding.rvPlaylists.adapter = adapter
+
+        binding.rvPlaylists.doOnPreDraw {
+            startPostponedEnterTransition()
+        }
+    }
+
+//    override fun onResume() {
+//        super.onResume()
+//        setObservers()
+//    }
 
     private  fun setObservers() {
         dataViewModel.getAllPlaylists().observe(viewLifecycleOwner) {

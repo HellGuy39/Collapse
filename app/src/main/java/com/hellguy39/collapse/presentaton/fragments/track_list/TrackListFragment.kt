@@ -1,9 +1,9 @@
 package com.hellguy39.collapse.presentaton.fragments.track_list
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -61,8 +61,6 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
 
     private lateinit var adapter: TracksAdapter
 
-    private var playingPosition = 0
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
@@ -73,6 +71,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        postponeEnterTransition()
         binding = TrackListFragmentBinding.bind(view)
 
         setupRecyclerView()
@@ -211,10 +210,6 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
             if (receivedPlaylist.type == serviceType) {
                 when(serviceType) {
                     PlaylistType.Custom -> {
-
-                        Log.d("DEBUG", "ID: ${receivedPlaylist.id}\n" +
-                                "SERVICE ID: ${PlayerService.getServiceContent().playlist?.id}")
-
                         if (receivedPlaylist.id == PlayerService.getServiceContent().playlist?.id) {
                             updateListPlayingPosition(position = it)
                         }
@@ -235,12 +230,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
     }
 
     private fun updateListPlayingPosition(position: Int) {
-        recyclerTracks[playingPosition].isPlaying = false
-        binding.rvTrackList.adapter?.notifyItemChanged(playingPosition)
-
-        recyclerTracks[position].isPlaying = true
-        binding.rvTrackList.adapter?.notifyItemChanged(position)
-        playingPosition = position
+        adapter.updatePlayingItem(position)
     }
 
     private fun onTracksReceived(receivedTracks: List<Track>, playlistType: PlaylistType, name: String) {
@@ -269,9 +259,12 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
             getImageBitmapUseCase = getImageBitmapUseCase,
             context = requireContext(),
             favouriteTracksUseCases = favouriteTracksUseCases,
-            playlistType = receivedPlaylist.type
+            playlistType = receivedPlaylist.type,
         )
         binding.rvTrackList.adapter = adapter
+        binding.rvTrackList.doOnPreDraw {
+            startPostponedEnterTransition()
+        }
     }
 
     override fun onTrackClick(track: Track, position: Int) {
@@ -283,15 +276,21 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
     }
 
     override fun onDeleteFromPlaylist(track: Track, position: Int) {
-        dataViewModel.deleteFromPlaylist(track = track, playlist = receivedPlaylist)
 
-        val updatedList = mutableListOf<Track>()
-        updatedList.addAll(receivedPlaylist.tracks)
-        updatedList.removeAt(position)
-        receivedPlaylist.tracks = updatedList
+        receivedPlaylist.tracks.removeAt(position)
         recyclerTracks.removeAt(position)
 
         binding.rvTrackList.adapter?.notifyItemRemoved(position)
+        binding.rvTrackList.adapter?.notifyItemRangeChanged(0, recyclerTracks.size)
+
+        when (receivedPlaylist.type) {
+            PlaylistType.Favourites -> {
+                dataViewModel.deleteFromFavourites(track)
+            }
+            else -> {
+                dataViewModel.deleteFromPlaylist(playlist = receivedPlaylist)
+            }
+        }
     }
 
     private fun updateRecyclerView(receivedTracks: List<Track>) = CoroutineScope(Dispatchers.IO).launch {

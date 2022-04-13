@@ -107,8 +107,8 @@
             android:label="select_tracks_fragment"
             tools:layout="@layout/select_tracks_fragment" >
             <argument
-                android:name="playlist"
-                app:argType="com.hellguy39.domain.models.Playlist" />
+                android:name="SelectedTracks"
+                app:argType="com.hellguy39.domain.models.SelectedTracks" />
         </fragment>
         <fragment
             android:id="@+id/artistsListFragment"

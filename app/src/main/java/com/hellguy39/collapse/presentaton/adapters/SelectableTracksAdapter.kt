@@ -13,6 +13,9 @@ class SelectableTracksAdapter(
     private val getImageBitmapUseCase: GetImageBitmapUseCase,
     private val listener: OnSelectableTrackListener
 ): RecyclerView.Adapter<SelectableTrackViewHolder>() {
+
+    private val selectedPositions = mutableListOf<Int>()
+
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -28,7 +31,8 @@ class SelectableTracksAdapter(
             track = tracks[position],
             getImageBitmapUseCase = getImageBitmapUseCase,
             position = position,
-            listener = listener
+            listener = listener,
+            isSelected = selectedPositions.contains(position)
         )
     }
 
@@ -40,4 +44,9 @@ class SelectableTracksAdapter(
         fun onSelectTrack(position: Int)
         fun onUnselectTrack(position: Int)
     }
+
+    fun addSelectedPosition(position: Int) {
+        selectedPositions.add(position)
+    }
+
 }

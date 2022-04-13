@@ -43,6 +43,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.concurrent.ThreadLocalRandom
 import javax.inject.Inject
 
 
@@ -92,6 +93,7 @@ class PlayerService : LifecycleService() {
         private val audioSessionIdLiveData = MutableLiveData<Int>()
         private val contentPositionLiveData = MutableLiveData<Int>()
         private val isShuffleLiveData = MutableLiveData<Boolean>()
+        private val repeatModeLiveData = MutableLiveData<Int>(Player.REPEAT_MODE_OFF)
 
         fun startService(context: Context, contentWrapper: ServiceContentWrapper) {
 
@@ -142,6 +144,9 @@ class PlayerService : LifecycleService() {
             else null
         }
 
+        fun getDeviceVolume(): Int = exoPlayer.deviceVolume
+        fun setDeviceVolume(volume: Int) { exoPlayer.deviceVolume = volume }
+
         fun isRunningService(): LiveData<Boolean> = isRunningService
 
         fun isShuffle(): LiveData<Boolean> = isShuffleLiveData
@@ -152,6 +157,7 @@ class PlayerService : LifecycleService() {
         fun getDuration(): Long = exoPlayer.duration
         fun isEqualizerInitialized(): LiveData<Boolean> = isEqualizerInitializedLiveData
         fun isRepeat(): Int = exoPlayer.repeatMode
+        fun getRepeatMode(): LiveData<Int> = repeatModeLiveData
 
         //Control
         fun onPlay() {
@@ -228,6 +234,11 @@ class PlayerService : LifecycleService() {
                 Toast.makeText(this@PlayerService, "Error: ${error.errorCodeName}", Toast.LENGTH_SHORT).show()
                 stopSelf()
             }
+
+            override fun onRepeatModeChanged(repeatMode: Int) {
+                super.onRepeatModeChanged(repeatMode)
+                repeatModeLiveData.value = repeatMode
+            }
         })
 
         isPlayingLiveData.value = false
@@ -259,8 +270,18 @@ class PlayerService : LifecycleService() {
         isRunningService.value = true
 
         serviceContentLiveData.observe(this) {
+
             updateContent(it)
-            exoPlayer.seekToDefaultPosition(it.position)
+
+            if (it.startWithShuffle) {
+                onShuffle(true)
+                val maxShufflePos = it.playlist?.tracks?.size ?: 0
+                val shufflePos = ThreadLocalRandom.current().nextInt(maxShufflePos)
+                exoPlayer.seekToDefaultPosition(shufflePos)
+            } else {
+                exoPlayer.seekToDefaultPosition(it.position)
+            }
+
             exoPlayer.playWhenReady = true
             exoPlayer.prepare()
             isRunningService.value = true

@@ -9,6 +9,4 @@ data class Track(
     var name: String = "Unknown",
     var artist: String = "Unknown",
     var path: String = "N/A",
-    var isPlaying: Boolean = false,
-    var isChecked: Boolean = false
 ) : Parcelable

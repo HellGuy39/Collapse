@@ -1,18 +1,23 @@
 package com.hellguy39.collapse.presentaton.activities.main
 
 import android.animation.LayoutTransition
+import android.app.ActivityOptions
 import android.content.Intent
-import android.graphics.BitmapFactory
+import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.transition.AutoTransition
 import android.transition.TransitionManager
-import android.util.Log
+import android.util.TypedValue
 import android.view.View
+import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
+import androidx.palette.graphics.Palette
 import com.google.android.exoplayer2.MediaMetadata
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.ActivityMainBinding
@@ -20,7 +25,7 @@ import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
-import com.hellguy39.domain.models.*
+import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
@@ -28,13 +33,9 @@ import com.hellguy39.domain.usecases.radio.RadioStationUseCases
 import com.hellguy39.domain.usecases.state.SavedServiceStateUseCases
 import com.hellguy39.domain.usecases.tracks.TracksUseCases
 import com.hellguy39.domain.utils.PlayerType
-import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -82,8 +83,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         )
 
         binding.trackCard.setOnClickListener(this)
-
         binding.ibPlayPause.setOnClickListener(this)
+        binding.ibNextTrack.setOnClickListener(this)
 
         setObservers()
 
@@ -95,7 +96,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onRestart() {
         super.onRestart()
-        //initSetupMediaLibraryDataViewModel()
+        initSetupMediaLibraryDataViewModel()
     }
 
     private fun setObservers() {
@@ -210,6 +211,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun updateCardUIWithMetadata(metadata: MediaMetadata) {
 
+        binding.ibNextTrack.visibility = View.VISIBLE
+
         if (PlayerService.isPlaying().value == true)
             binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
         else
@@ -220,14 +223,34 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         val bytes = metadata.artworkData
 
-        if (bytes != null)
-            binding.ivTrackImage.setImageBitmap(convertByteArrayToBitmapUseCase.invoke(bytes))
-        else
+        if (bytes != null) {
+            val white = ResourcesCompat.getColor(resources, R.color.white,null)
+            val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
+            binding.ivTrackImage.setImageBitmap(bitmap)
+            updatePalette(bitmap)
+            binding.tvTrackName.setTextColor(white)
+            binding.tvArtist.setTextColor(white)
+            binding.ibPlayPause.imageTintList = ColorStateList.valueOf(white)
+            binding.ibNextTrack.imageTintList = ColorStateList.valueOf(white)
+        } else {
+            val typedValue = TypedValue()
+            val theme = this.theme
+            theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValue, true)
+            @ColorInt val colorOnSurface = typedValue.data
+
             binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
+            binding.trackCard.backgroundTintList = null
+            binding.ibPlayPause.imageTintList = ColorStateList.valueOf(colorOnSurface)
+            binding.ibNextTrack.imageTintList = ColorStateList.valueOf(colorOnSurface)
+            binding.tvTrackName.setTextColor(colorOnSurface)
+            binding.tvArtist.setTextColor(colorOnSurface)
+        }
 
     }
 
     private fun updateCardUIWithRadioStation(radioStation: RadioStation) {
+
+        binding.ibNextTrack.visibility = View.GONE
 
         if (PlayerService.isPlaying().value == true)
             binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
@@ -239,12 +262,40 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         val bytes = radioStation.picture
 
-        if (bytes != null)
-            binding.ivTrackImage.setImageBitmap(convertByteArrayToBitmapUseCase.invoke(bytes))
-        else
+        if (bytes != null) {
+            val white = ResourcesCompat.getColor(resources, R.color.white,null)
+            val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
+            binding.ivTrackImage.setImageBitmap(bitmap)
+            updatePalette(bitmap)
+            binding.tvTrackName.setTextColor(white)
+            binding.tvArtist.setTextColor(white)
+            binding.ibPlayPause.imageTintList = ColorStateList.valueOf(white)
+            binding.ibNextTrack.imageTintList = ColorStateList.valueOf(white)
+        } else {
+            val typedValue = TypedValue()
+            val theme = this.theme
+            theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValue, true)
+            @ColorInt val colorOnSurface = typedValue.data
+
             binding.ivTrackImage.setImageResource(R.drawable.ic_round_radio_24)
+            binding.trackCard.backgroundTintList = null
+            binding.trackCard.backgroundTintList = null
+            binding.ibPlayPause.imageTintList = ColorStateList.valueOf(colorOnSurface)
+            binding.ibNextTrack.imageTintList = ColorStateList.valueOf(colorOnSurface)
+            binding.tvTrackName.setTextColor(colorOnSurface)
+            binding.tvArtist.setTextColor(colorOnSurface)
+        }
 
     }
+
+    private fun updatePalette(bitmap: Bitmap) {
+        Palette.from(bitmap).generate { palette ->
+            if (palette != null) {
+                binding.trackCard.backgroundTintList = ColorStateList.valueOf(palette.getMutedColor(1))
+            }
+        }
+    }
+
 
     private fun showTrackCard() {
 
@@ -262,7 +313,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(p0: View?) {
         when(p0?.id) {
             binding.trackCard.id -> {
-                startActivity(Intent(this, TrackActivity::class.java))
+                val options = ActivityOptions.makeSceneTransitionAnimation(this)
+                startActivity(Intent(this, TrackActivity::class.java), options.toBundle())
             }
             binding.ibPlayPause.id -> {
                 if (PlayerService.isPlaying().value == true) {
@@ -270,6 +322,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 } else {
                     PlayerService.onPlay()
                 }
+            }
+            binding.ibNextTrack.id -> {
+                PlayerService.onNext()
             }
         }
     }

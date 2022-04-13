@@ -27,7 +27,8 @@ class TrackViewHolder(
         track: Track,
         position: Int,
         type: Enum<PlaylistType>,
-        listener: TracksAdapter.OnTrackListener
+        listener: TracksAdapter.OnTrackListener,
+        isPlaying: Boolean
     ) {
 
         binding.tvTrackName.text = track.name//.ifEmpty { "Unknown" }
@@ -55,7 +56,7 @@ class TrackViewHolder(
             )
         }
 
-        if(track.isPlaying) {
+        if(isPlaying) {
             binding.root.cardElevation = 8f
         } else {
             binding.root.cardElevation = 0f

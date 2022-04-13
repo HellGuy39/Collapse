@@ -1,5 +1,6 @@
 package com.hellguy39.collapse.presentaton.view_models
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -60,7 +61,7 @@ class MediaLibraryDataViewModel @Inject constructor(
         fetchAllPlaylists()
     }
 
-    private fun updateFavouriteTracks() = viewModelScope.launch(Dispatchers.IO) {
+    fun updateFavouriteTracks() = viewModelScope.launch(Dispatchers.IO) {
         fetchAllFavouriteTracks()
     }
 
@@ -69,12 +70,13 @@ class MediaLibraryDataViewModel @Inject constructor(
         updateFavouriteTracks()
     }
 
-    fun deleteFromPlaylist(track: Track, playlist: Playlist) = viewModelScope.launch(Dispatchers.IO) {
-        val updatedList = mutableListOf<Track>()
-        updatedList.addAll(playlist.tracks)
-        updatedList.remove(track)
-        playlist.tracks = updatedList
+    fun deleteFromPlaylist(playlist: Playlist) = viewModelScope.launch(Dispatchers.IO) {
         playlistUseCases.updatePlaylistUseCase.invoke(playlist)
+    }
+
+    fun deleteFromFavourites(track: Track) = viewModelScope.launch(Dispatchers.IO) {
+        (allFavouriteTracksLiveData.value as MutableList<Track>).remove(track)
+        favouriteTracksUseCase.deleteFavouriteTrackUseCase.invoke(track)
     }
 
     fun addNewPlaylist(playlist: Playlist) = viewModelScope.launch(Dispatchers.IO) {

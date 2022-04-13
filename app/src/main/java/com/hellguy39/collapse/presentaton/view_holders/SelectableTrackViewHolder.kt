@@ -18,7 +18,8 @@ class SelectableTrackViewHolder(
         track: Track,
         getImageBitmapUseCase: GetImageBitmapUseCase,
         listener: SelectableTracksAdapter.OnSelectableTrackListener,
-        position: Int
+        position: Int,
+        isSelected: Boolean
     ) {
         binding.tvTrackName.text = track.name//.ifEmpty { "Unknown" }
         binding.tvAuthor.text = track.artist//.ifEmpty { "Unknown" }
@@ -37,7 +38,15 @@ class SelectableTrackViewHolder(
                 listener.onUnselectTrack(position = position)
         }
 
-        if (track.isChecked)
+        binding.root.setOnClickListener {
+            if (binding.cbSelect.isChecked) {
+                binding.cbSelect.isChecked = false
+            } else {
+                binding.cbSelect.isChecked = true
+            }
+        }
+
+        if (isSelected)
             binding.cbSelect.isChecked = true
     }
 

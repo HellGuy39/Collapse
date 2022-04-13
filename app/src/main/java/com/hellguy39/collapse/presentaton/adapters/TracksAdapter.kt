@@ -2,6 +2,7 @@ package com.hellguy39.collapse.presentaton.adapters
 
 import android.content.Context
 import android.content.res.Resources
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -19,8 +20,10 @@ class TracksAdapter(
     private val context: Context,
     private val getImageBitmapUseCase: GetImageBitmapUseCase,
     private val favouriteTracksUseCases: FavouriteTracksUseCases,
-    private val playlistType: Enum<PlaylistType>
+    private val playlistType: Enum<PlaylistType>,
 ): RecyclerView.Adapter<TrackViewHolder>() {
+
+    private var playingItem = -1
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -43,7 +46,8 @@ class TracksAdapter(
             track = trackList[position],
             position = position,
             listener = listener,
-            type = playlistType
+            type = playlistType,
+            isPlaying = playingItem == position
         )
     }
 
@@ -53,6 +57,18 @@ class TracksAdapter(
         fun onTrackClick(track: Track, position: Int)
         fun onAddToFavourites(track: Track)
         fun onDeleteFromPlaylist(track: Track, position: Int)
+    }
+
+    fun updatePlayingItem(pos: Int) {
+
+        val previousItem = playingItem
+        playingItem = pos
+
+        if (previousItem != -1) {
+            notifyItemChanged(previousItem)
+        }
+
+        notifyItemChanged(pos)
     }
 
 }

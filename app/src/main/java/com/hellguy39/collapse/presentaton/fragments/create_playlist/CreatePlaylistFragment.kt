@@ -5,18 +5,19 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.bumptech.glide.Glide
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.CreatePlaylistFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.Action
 import com.hellguy39.domain.models.Playlist
+import com.hellguy39.domain.models.SelectedTracks
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
@@ -24,7 +25,6 @@ import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.InputStream
 import javax.inject.Inject
-
 
 @AndroidEntryPoint
 class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View.OnClickListener {
@@ -66,6 +66,8 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
                     createViewModel.setPicture(bytes)
             }
         }
+
+        tracks = args.playlist.tracks
     }
 
     private fun updateUI(playlist: Playlist) {
@@ -76,11 +78,11 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
 
         if (bytes != null) {
             val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
-            binding.ivImage.setImageBitmap(bitmap)
+            Glide.with(this).load(bitmap).into(binding.ivImage)
         } else
             binding.ivImage.setImageResource(R.drawable.ic_round_queue_music_24)
 
-        updateTracksCounter(playlist.tracks.size)
+        updateTracksCounter(tracks.size)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -98,8 +100,11 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
             }
             Action.Update -> {
                 binding.topAppBar.title = "Edit"
+                if (args.playlist.picture != null)
+                    createViewModel.setPicture(args.playlist.picture!!)
                 updateUI(args.playlist)
             }
+            else -> {}
         }
 
         setFragmentResultListener("pick_tracks") { requestKey, bundle ->
@@ -134,13 +139,14 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
                     Action.Create -> {
                         createNewPlaylist()
                     }
+                    else -> {}
                 }
                 findNavController().popBackStack()
             }
             R.id.cardSelectTracks -> {
                 findNavController().navigate(
                     CreatePlaylistFragmentDirections.actionCreatePlaylistFragmentToSelectTracksFragment(
-                        args.playlist
+                        SelectedTracks(trackList = tracks)
                     )
                 )
             }
