@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_round_search_24"
+        android:title="Search"
+        app:showAsAction="ifRoom"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        />
+
+    <item
+        android:id="@+id/edit"
+        android:icon="@drawable/ic_round_edit_24"
+        android:title="Edit"
+        app:showAsAction="never"
+        />
+
+    <item
+        android:id="@+id/delete"
+        android:icon="@drawable/ic_round_delete_24"
+        android:title="Delete"
+        app:showAsAction="never"
+        />
+
+</menu>
