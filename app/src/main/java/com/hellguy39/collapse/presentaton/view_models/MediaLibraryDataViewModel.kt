@@ -67,7 +67,8 @@ class MediaLibraryDataViewModel @Inject constructor(
 
     fun addToFavourites(track: Track) = viewModelScope.launch(Dispatchers.IO) {
         favouriteTracksUseCase.addFavouriteTrackUseCase.invoke(track = track)
-        updateFavouriteTracks()
+        (allFavouriteTracksLiveData.value as MutableList<Track>).add(track)
+        //updateFavouriteTracks()
     }
 
     fun deleteFromPlaylist(playlist: Playlist) = viewModelScope.launch(Dispatchers.IO) {
@@ -81,7 +82,8 @@ class MediaLibraryDataViewModel @Inject constructor(
 
     fun addNewPlaylist(playlist: Playlist) = viewModelScope.launch(Dispatchers.IO) {
         playlistUseCases.addPlaylistUseCase.invoke(playlist = playlist)
-        updatePlaylists()
+        (allPlaylistsLiveData.value as MutableList<Playlist>).add(playlist)
+        //updatePlaylists()
     }
 
     fun deletePlaylist(playlist: Playlist) = viewModelScope.launch(Dispatchers.IO) {

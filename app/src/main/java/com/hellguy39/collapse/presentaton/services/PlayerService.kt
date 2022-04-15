@@ -5,12 +5,12 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.media.audiofx.AudioEffect
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
 import android.net.Uri
 import android.os.IBinder
-import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
@@ -27,10 +27,7 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.hellguy39.collapse.presentaton.adapters.DescriptionAdapter
-import com.hellguy39.domain.models.EqualizerModel
-import com.hellguy39.domain.models.RadioStation
-import com.hellguy39.domain.models.ServiceContentWrapper
-import com.hellguy39.domain.models.Track
+import com.hellguy39.domain.models.*
 import com.hellguy39.domain.usecases.eq_settings.EqualizerSettingsUseCases
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
@@ -38,6 +35,7 @@ import com.hellguy39.domain.usecases.radio.RadioStationUseCases
 import com.hellguy39.domain.usecases.state.SavedServiceStateUseCases
 import com.hellguy39.domain.usecases.tracks.TracksUseCases
 import com.hellguy39.domain.utils.PlayerType
+import com.hellguy39.domain.utils.PlaylistType
 import com.hellguy39.domain.utils.Protocol
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -83,21 +81,23 @@ class PlayerService : LifecycleService() {
 
         private var equalizerModel: EqualizerModel = EqualizerModel()
 
-        private var isRunningService = MutableLiveData<Boolean>(false)
+        private var isRunningService = MutableLiveData(false)
         private lateinit var exoPlayer: ExoPlayer
 
         private val serviceContentLiveData = MutableLiveData<ServiceContentWrapper>()
         private val mediaMetadataLiveData = MutableLiveData<MediaMetadata>()
         private val isPlayingLiveData = MutableLiveData<Boolean>()
-        private val isEqualizerInitializedLiveData = MutableLiveData<Boolean>(false)
+        private val isEqualizerInitializedLiveData = MutableLiveData(false)
         private val audioSessionIdLiveData = MutableLiveData<Int>()
         private val contentPositionLiveData = MutableLiveData<Int>()
         private val isShuffleLiveData = MutableLiveData<Boolean>()
-        private val repeatModeLiveData = MutableLiveData<Int>(Player.REPEAT_MODE_OFF)
+        private val repeatModeLiveData = MutableLiveData(Player.REPEAT_MODE_OFF)
 
         fun startService(context: Context, contentWrapper: ServiceContentWrapper) {
 
-            if(contentWrapper.type == PlayerType.LocalTrack &&
+            if(!contentWrapper.fromSavedState &&
+                !contentWrapper.skipPauseClick &&
+                contentWrapper.type == PlayerType.LocalTrack &&
                 serviceContentLiveData.value?.playlist == contentWrapper.playlist &&
                     getContentPosition().value == contentWrapper.position) {
 
@@ -118,10 +118,10 @@ class PlayerService : LifecycleService() {
             }
         }
 
-        fun stopService(context: Context) {
-            val service = Intent(context, PlayerService::class.java)
-            context.stopService(service)
-        }
+//        fun stopService(context: Context) {
+//            val service = Intent(context, PlayerService::class.java)
+//            context.stopService(service)
+//        }
 
         private fun updateContent(content: ServiceContentWrapper) {
             serviceContentLiveData.value = content
@@ -172,6 +172,7 @@ class PlayerService : LifecycleService() {
             else
                 exoPlayer.pause()
         }
+
         fun onNext() { if (exoPlayer.hasNextMediaItem()) exoPlayer.seekToNextMediaItem() }
         fun onPrevious() { if (exoPlayer.hasPreviousMediaItem()) exoPlayer.seekToPreviousMediaItem() }
         fun onShuffle(b: Boolean) {
@@ -181,19 +182,21 @@ class PlayerService : LifecycleService() {
         fun onRepeat(n: Int) { exoPlayer.repeatMode = n }
         fun onSeekTo(pos: Long) = exoPlayer.seekTo(pos)
 
-        //Equalizer
         fun enableEq(b: Boolean) = equalizerModel.equalizer?.setEnabled(b)
+
 
         fun setBandLevel(band: Short, value: Short) = equalizerModel.equalizer?.setBandLevel(band, value)
         fun setBassBoostBandLevel(value: Short) = bassBoost.setStrength(value)
+
+
         fun setVirtualizerBandLevel(value: Short) = virtualizer.setStrength(value)
 
         fun getLowestBandLevel(): Short = equalizerModel.lowestBandLevel
         fun getUpperBandLevel(): Short = equalizerModel.upperBandLevel
-        fun getNumberOfBands(): Short = equalizerModel.numberOfBands
+        //fun getNumberOfBands(): Short = equalizerModel.numberOfBands
         fun getBandsCenterFreq(): ArrayList<Int> = equalizerModel.bandsCenterFreq
 
-        fun getNumberOfPresets(): Short = equalizerModel.numberOfPresets
+        //fun getNumberOfPresets(): Short = equalizerModel.numberOfPresets
         fun getPresetNames(): List<String> = equalizerModel.presetNames
         fun usePreset(preset: Short) = equalizerModel.equalizer?.usePreset(preset)
 
@@ -282,87 +285,20 @@ class PlayerService : LifecycleService() {
                 exoPlayer.seekToDefaultPosition(it.position)
             }
 
-            exoPlayer.playWhenReady = true
             exoPlayer.prepare()
+
+            if (it.fromSavedState) {
+                exoPlayer.seekTo(it.playerPosition)
+                exoPlayer.playWhenReady = false
+            } else  {
+                exoPlayer.playWhenReady = true
+            }
+
             isRunningService.value = true
         }
 
         return START_STICKY
     }
-
-//    private fun setupExoPlayer(content: ServiceContentWrapper) {
-//
-//        when(content.type) {
-//            PlayerType.LocalTrack -> initDefaultPlayer(content.playlist?.tracks ?: listOf())
-//            PlayerType.Radio -> initRadioPlayer(content.radioStation ?: RadioStation())
-//        }
-//        exoPlayer.seekToDefaultPosition(content.position)
-//
-////        if (content.fromSavedState) {
-////            val pos = content.playerPosition
-////            exoPlayer.seekTo(pos)
-////            exoPlayer.playWhenReady = false
-////        } else {
-////            exoPlayer.playWhenReady = true
-////        }
-//
-//        exoPlayer.prepare()
-//    }
-
-//    private suspend fun setupContent(content: ServiceContentWrapper) {
-//
-//        if (content.radioStation != null && content.radioStation?.id != -1)
-//            radioStation = content.radioStation!!
-//
-//        if (content.fromSavedState) {
-//            val radioStationId = content.radioStation?.id
-//            val playlistId = content.playlist?.id
-//
-//            if (radioStationId != null && radioStationId != -1)
-//                content.radioStation = radioStationUseCases.getRadioStationByIdUseCase.invoke(
-//                    radioStationId
-//                )
-//
-//
-//            if (playlistId != null && playlistId != -1) {
-//
-//                if(content.playlist == null)
-//                    return
-//
-//                val type = content.playlist!!.type
-//
-//                when(type) {
-//                    PlaylistType.AllTracks -> {
-//                        content.playlist = Playlist(
-//                            name = "All tracks",
-//                            type = PlaylistType.AllTracks,
-//                            tracks = tracksUseCases.getAllTracksUseCase.invoke()
-//                        )
-//                    }
-//                    PlaylistType.Favourites -> {
-//                        content.playlist = Playlist(
-//                            name = "Favourites",
-//                            type = PlaylistType.Favourites,
-//                            tracks = favouriteTracksUseCases.getAllFavouriteTracksUseCase.invoke()
-//                        )
-//                    }
-//                    PlaylistType.Custom -> {
-//                        content.playlist = playlistUseCases.getPlaylistByIdUseCase.invoke(
-//                            playlistId
-//                        )
-//                    }
-//                    PlaylistType.Artist -> {
-//                        //stopSelf()
-//                    }
-//                    PlaylistType.Undefined -> {
-//                        //stopSelf()
-//                    }
-//                }
-//            }
-//        }
-//
-//        serviceContentWrapper = content
-//    }
 
     private fun setupPlayerNotificationManager(type: Enum<PlayerType>, radioStation: RadioStation?) {
         playerNotificationManager = PlayerNotificationManager.Builder(
@@ -417,9 +353,9 @@ class PlayerService : LifecycleService() {
 
     private fun initEQ() {
 
-        equalizerModel.equalizer = Equalizer(1, exoPlayer.audioSessionId)
-        virtualizer = Virtualizer(1, exoPlayer.audioSessionId)
-        bassBoost = BassBoost(1, exoPlayer.audioSessionId)
+        equalizerModel.equalizer = Equalizer(0, exoPlayer.audioSessionId)
+        virtualizer = Virtualizer(0, exoPlayer.audioSessionId)
+        bassBoost = BassBoost(0, exoPlayer.audioSessionId)
 
         if (equalizerModel.equalizer == null)
             return
@@ -427,8 +363,10 @@ class PlayerService : LifecycleService() {
         if (bassBoost.strengthSupported)
             bassBoost.enabled = true
 
-        if (virtualizer.strengthSupported)
+        if (virtualizer.strengthSupported) {
             virtualizer.enabled = true
+            //virtualizer.forceVirtualizationMode(Virtualizer.VIRTUALIZATION_MODE_AUTO)
+        }
 
         equalizerModel.numberOfBands = equalizerModel.equalizer!!.numberOfBands
         equalizerModel.lowestBandLevel = equalizerModel.equalizer!!.bandLevelRange[0]
@@ -508,10 +446,19 @@ class PlayerService : LifecycleService() {
     }
 
     private fun saveState() = CoroutineScope(Dispatchers.Main).launch {
-//        Log.d("DEBUG", "CONTENT: ${getServiceContent()}")
-//        savedServiceStateUseCases.insertSavedServiceStateUseCase.invoke(
-//            serviceContentWrapper = getServiceContent()
-//        )
+        val content = getServiceContent()
+
+        savedServiceStateUseCases.insertSavedServiceStateUseCase.invoke(
+            savedState = SavedState(
+                playerPosition = content.playerPosition,
+                position = content.position,
+                artistName = content.playlist?.name,
+                playlistType = content.playlist?.type ?: PlaylistType.Undefined,
+                playlistId = content.playlist?.id,
+                radioStationId = content.radioStation?.id,
+                playerType = content.type,
+            )
+        )
     }
 
     override fun onDestroy() {
@@ -530,7 +477,6 @@ class PlayerService : LifecycleService() {
         super.onTaskRemoved(rootIntent)
         isRunningService.value = false
         saveState()
-        //playerNotificationManager.setPlayer(null)
         stopSelf()
     }
 }

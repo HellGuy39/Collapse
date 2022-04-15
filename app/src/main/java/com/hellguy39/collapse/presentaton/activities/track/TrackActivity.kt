@@ -262,13 +262,13 @@ class TrackActivity : AppCompatActivity(),
     }
 
     override fun onDeleteFromPlaylist(track: Track, position: Int) {
+        val playlist = PlayerService.getServiceContent().playlist
+        val updatedList = mutableListOf<Track>()
+
+        if (playlist == null)
+            return
+
         CoroutineScope(Dispatchers.IO).launch {
-            val playlist = PlayerService.getServiceContent().playlist
-            val updatedList = mutableListOf<Track>()
-
-            if (playlist == null)
-                return@launch
-
             updatedList.addAll(playlist.tracks)
             updatedList.remove(track)
             playlist.tracks = updatedList

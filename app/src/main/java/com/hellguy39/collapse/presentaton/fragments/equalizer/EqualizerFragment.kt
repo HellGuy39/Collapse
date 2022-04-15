@@ -2,18 +2,15 @@ package com.hellguy39.collapse.presentaton.fragments.equalizer
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.CompoundButton
-import android.widget.Switch
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.slider.Slider
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.EqualizerFragmentBinding
 import com.hellguy39.collapse.presentaton.services.PlayerService
-import com.hellguy39.domain.models.EqualizerSettings
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -26,6 +23,8 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
     companion object {
         fun newInstance() = EqualizerFragment()
         private const val STEP_SIZE = 1f
+        private const val STEP_SIZE_X2 = 2f
+        private const val STEP_SIZE_X5 = 5f
     }
 
     private lateinit var viewModel: EqualizerViewModel
@@ -208,8 +207,8 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
         if (PlayerService.isBassBoostSupported()) {
             binding.bassBoostBand.apply {
                 valueFrom = 0f
-                valueTo = 10f
-                stepSize = STEP_SIZE
+                valueTo = 30f
+                stepSize = STEP_SIZE_X5
                 addOnChangeListener(this@EqualizerFragment)
                 addOnSliderTouchListener(this@EqualizerFragment)
             }
@@ -221,9 +220,9 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
     private fun setupVirtualizer() {
         if (PlayerService.isVirtualizerSupported()) {
             binding.surroundBand.apply {
-                valueFrom = 0f
-                valueTo = 10f
-                stepSize = STEP_SIZE
+                valueFrom = -30f
+                valueTo = 30f
+                stepSize = STEP_SIZE_X5
                 addOnChangeListener(this@EqualizerFragment)
                 addOnSliderTouchListener(this@EqualizerFragment)
             }
@@ -278,20 +277,6 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
                 viewModel.saveVirtualizer(value * 1000)
             }
         }
-    }
-
-    private fun saveSettings() {
-        viewModel.saveEqualizerSettings(equalizerSettings = EqualizerSettings(
-            isEnabled = binding.eqSwitch.isChecked,
-            band1Level = binding.band1.value * 100,
-            band2Level = binding.band2.value * 100,
-            band3Level = binding.band3.value * 100,
-            band4Level = binding.band4.value * 100,
-            band5Level = binding.band5.value * 100,
-            bandBassBoost = binding.bassBoostBand.value * 1000,
-            bandVirtualizer = binding.surroundBand.value * 1000,
-            preset = selectedPreset
-        ))
     }
 
     @SuppressLint("RestrictedApi")

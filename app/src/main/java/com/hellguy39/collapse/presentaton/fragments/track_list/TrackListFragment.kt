@@ -2,6 +2,7 @@ package com.hellguy39.collapse.presentaton.fragments.track_list
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
@@ -71,7 +72,9 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         postponeEnterTransition()
+
         binding = TrackListFragmentBinding.bind(view)
 
         setupRecyclerView()
@@ -93,6 +96,20 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
         setupToolbarImage(receivedPlaylist.type)
         setupToolbarMenu(receivedPlaylist.type)
 
+        when (receivedPlaylist.type) {
+            PlaylistType.AllTracks -> {
+                setAllTracksObserver()
+            }
+            PlaylistType.Custom -> {
+                onTracksReceived(receivedPlaylist.tracks, PlaylistType.Custom, receivedPlaylist.name)
+            }
+            PlaylistType.Favourites -> {
+                setFavouritesTracksObserver()
+            }
+            PlaylistType.Artist -> {
+                onTracksReceived(receivedPlaylist.tracks, PlaylistType.Artist, receivedPlaylist.name)
+            }
+        }
     }
 
     private fun setupToolbarMenu(type: Enum<PlaylistType>) = when(type) {
@@ -157,26 +174,6 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
             Action.Update
         )
     )
-
-    override fun onResume() {
-        super.onResume()
-
-        when (receivedPlaylist.type) {
-            PlaylistType.AllTracks -> {
-                setAllTracksObserver()
-            }
-            PlaylistType.Custom -> {
-                onTracksReceived(receivedPlaylist.tracks, PlaylistType.Custom, receivedPlaylist.name)
-            }
-            PlaylistType.Favourites -> {
-                setFavouritesTracksObserver()
-            }
-            PlaylistType.Artist -> {
-                onTracksReceived(receivedPlaylist.tracks, PlaylistType.Artist, receivedPlaylist.name)
-            }
-        }
-    }
-
 
     private fun showDeleteDialog() {
         MaterialAlertDialogBuilder(requireContext())
@@ -247,6 +244,9 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
     }
 
     private fun setupRecyclerView() {
+        binding.rvTrackList.doOnPreDraw {
+            startPostponedEnterTransition()
+        }
         binding.rvTrackList.layoutManager = LinearLayoutManager(
             context,
             LinearLayoutManager.VERTICAL,
@@ -262,13 +262,10 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
             playlistType = receivedPlaylist.type,
         )
         binding.rvTrackList.adapter = adapter
-        binding.rvTrackList.doOnPreDraw {
-            startPostponedEnterTransition()
-        }
     }
 
     override fun onTrackClick(track: Track, position: Int) {
-        startPlayer(position = position)
+        startPlayer(position = position, skipPauseClick = false)
     }
 
     override fun onAddToFavourites(track: Track) {
@@ -357,20 +354,26 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
     override fun onClick(p0: View?) {
         when(p0?.id) {
             binding.btnPlay.id -> {
-                startPlayer(0)
+                startPlayer(position = 0, skipPauseClick = true)
             }
             binding.btnShuffle.id -> {
-                startPlayer(0, true)
+                startPlayer(position = 0, startWithShuffle = true, skipPauseClick = true)
             }
         }
     }
 
-    private fun startPlayer(position: Int, startWithShuffle: Boolean = false) {
+    private fun startPlayer(position: Int, startWithShuffle: Boolean = false, skipPauseClick: Boolean) {
+        if (receivedPlaylist.tracks.size == 0) {
+            Toast.makeText(requireContext(), "Nothing to play", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         PlayerService.startService(requireContext(), ServiceContentWrapper(
             type = PlayerType.LocalTrack,
             position = position,
             playlist = receivedPlaylist,
-            startWithShuffle = startWithShuffle
+            startWithShuffle = startWithShuffle,
+            skipPauseClick = skipPauseClick
         ))
     }
 }

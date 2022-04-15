@@ -15,5 +15,6 @@ data class ServiceContentWrapper(
     var position: Int = 0,
 
     var fromSavedState: Boolean = false,
-    var startWithShuffle: Boolean = false
+    var startWithShuffle: Boolean = false,
+    var skipPauseClick: Boolean = false
 ) : Parcelable
