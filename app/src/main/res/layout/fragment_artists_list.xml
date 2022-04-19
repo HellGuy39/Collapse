@@ -14,7 +14,7 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:menu="@menu/artists_top_menu"
+            app:menu="@menu/search_top_menu"
             app:navigationIcon="@drawable/ic_round_arrow_back_ios_24"
             app:title="Artists" />
 
@@ -24,6 +24,7 @@
         android:id="@+id/rvArtists"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:transitionGroup="true"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

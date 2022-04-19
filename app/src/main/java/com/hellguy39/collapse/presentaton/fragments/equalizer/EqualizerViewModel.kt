@@ -20,23 +20,31 @@ class EqualizerViewModel @Inject constructor(
     }
 
     fun savePreset(preset: Int) {
-        equalizerSettingsUseCases.savePresetEqualizerSettingsUseCase.invoke(preset = preset)
+        equalizerSettingsUseCases.saveEqPresetUseCase.invoke(preset = preset)
     }
 
-    fun saveIsEnabled(isEnabled: Boolean) {
-        equalizerSettingsUseCases.saveIsEnabledEQSettingsUseCase.invoke(isEnabled = isEnabled)
+    fun saveEqSwitch(isEnabled: Boolean) {
+        equalizerSettingsUseCases.saveEqSwitchUseCase.invoke(isEnabled = isEnabled)
+    }
+
+    fun saveBassBoostSwitch(isEnabled: Boolean) {
+        equalizerSettingsUseCases.saveBassBoostSwitchUseCase.invoke(isEnabled = isEnabled)
+    }
+
+    fun saveVirtualizerSwitch(isEnabled: Boolean) {
+        equalizerSettingsUseCases.saveVirtualizerSwitchUseCase.invoke(isEnabled = isEnabled)
     }
 
     fun saveBandsLevel(levels: List<Short>) {
-        equalizerSettingsUseCases.saveBandsLevelEQSettingsUseCase.invoke(levels = levels)
+        equalizerSettingsUseCases.saveEqBandsLevelUseCase.invoke(levels = levels)
     }
 
-    fun saveBassBoost(bass: Float) {
-        equalizerSettingsUseCases.saveBassBoostEQSettingsUseCase.invoke(bass = bass)
+    fun saveBassBoostValue(bass: Float) {
+        equalizerSettingsUseCases.saveBassBoostValueUseCase.invoke(bass = bass)
     }
 
-    fun saveVirtualizer(virtualize: Float) {
-        equalizerSettingsUseCases.saveVirtualizerEQSettingsUseCase.invoke(virtualize = virtualize)
+    fun saveVirtualizerValue(virtualize: Float) {
+        equalizerSettingsUseCases.saveVirtualizerValueUseCase.invoke(virtualize = virtualize)
     }
 
 }

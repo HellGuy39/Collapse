@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hellguy39.data.models.TrackDb
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
@@ -68,7 +69,6 @@ class MediaLibraryDataViewModel @Inject constructor(
     fun addToFavourites(track: Track) = viewModelScope.launch(Dispatchers.IO) {
         favouriteTracksUseCase.addFavouriteTrackUseCase.invoke(track = track)
         (allFavouriteTracksLiveData.value as MutableList<Track>).add(track)
-        //updateFavouriteTracks()
     }
 
     fun deleteFromPlaylist(playlist: Playlist) = viewModelScope.launch(Dispatchers.IO) {
@@ -80,10 +80,20 @@ class MediaLibraryDataViewModel @Inject constructor(
         favouriteTracksUseCase.deleteFavouriteTrackUseCase.invoke(track)
     }
 
+    fun deleteFromFavouritesWithoutId(track: Track) = viewModelScope.launch(Dispatchers.IO) {
+        val list = (allFavouriteTracksLiveData.value as MutableList<Track>)
+
+        for (n in list.indices) {
+            if (isFavourite(list[n], track)) {
+                (allFavouriteTracksLiveData.value as MutableList<Track>).remove(list[n])
+                favouriteTracksUseCase.deleteFromFavouritesWithoutIdUseCase.invoke(track)
+            }
+        }
+    }
+
     fun addNewPlaylist(playlist: Playlist) = viewModelScope.launch(Dispatchers.IO) {
         playlistUseCases.addPlaylistUseCase.invoke(playlist = playlist)
         (allPlaylistsLiveData.value as MutableList<Playlist>).add(playlist)
-        //updatePlaylists()
     }
 
     fun deletePlaylist(playlist: Playlist) = viewModelScope.launch(Dispatchers.IO) {
@@ -168,5 +178,12 @@ class MediaLibraryDataViewModel @Inject constructor(
         }
 
         return returnableList
+    }
+
+    private fun isFavourite(track1: Track, track2: Track): Boolean {
+        return (track1.path == track2.path &&
+                track1.artist == track2.artist &&
+                track1.name == track2.name)
+
     }
 }

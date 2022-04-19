@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:transitionName="track_card_transition"
     tools:context=".presentaton.activities.track.TrackActivity">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -17,7 +18,8 @@
             android:layout_height="?attr/actionBarSize"
             tools:title="Tittle"
             tools:subtitle="Subtitle"
-            app:navigationIcon="@drawable/ic_round_arrow_back_ios_24" />
+            app:menu="@menu/more_top_menu"
+            app:navigationIcon="@drawable/ic_round_arrow_down_ios_24" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -32,12 +34,12 @@
             android:orientation="vertical">
 
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="350dp"
-                android:layout_height="350dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="16dp"
+                android:layout_width="320dp"
+                android:layout_height="320dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="16dp"
                 app:strokeWidth="0dp">
 
                 <ImageView
@@ -49,47 +51,34 @@
             </com.google.android.material.card.MaterialCardView>
 
             <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
-                android:layout_marginTop="24dp"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_marginTop="12dp"
+                android:orientation="vertical">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/tvTrackName"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_height="match_parent"
+                    android:ellipsize="marquee"
+                    android:fontFamily="@font/roboto_medium"
+                    android:maxLines="1"
+                    android:gravity="center"
+                    android:textSize="32sp"
+                    tools:text="Smells Like Teen Spirit" />
 
-                    <TextView
-                        android:id="@+id/tvTrackName"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:ellipsize="marquee"
-                        android:fontFamily="@font/roboto_medium"
-                        android:maxLines="1"
-                        android:textSize="32sp"
-                        tools:text="Smells Like Teen Spirit" />
-
-                    <TextView
-                        android:id="@+id/tvPerformer"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:fontFamily="@font/roboto_regular"
-                        android:textSize="24sp"
-                        tools:text="Nirvana" />
-                </LinearLayout>
-
-                <ImageButton
-                    android:layout_weight="0"
-                    android:id="@+id/ibMore"
-                    android:layout_gravity="top|end"
-                    android:backgroundTint="@android:color/transparent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_round_more_vert_24" />
-
+                <TextView
+                    android:id="@+id/tvPerformer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fontFamily="@font/roboto_regular"
+                    android:textSize="24sp"
+                    android:maxLines="1"
+                    android:ellipsize="marquee"
+                    android:gravity="center"
+                    tools:text="Nirvana" />
             </LinearLayout>
 
             <com.google.android.material.slider.Slider
@@ -199,8 +188,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:valueFrom="0.0"
-                    android:valueTo="15.0" />
+                    app:tickColor="@android:color/transparent"/>
 
                 <ImageView
                     android:id="@+id/ivVolumeUp"
@@ -214,5 +202,34 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <LinearLayout
+        android:id="@+id/bottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="420dp"
+        app:behavior_peekHeight="32dp"
+        android:clickable="true"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:backgroundTint="?attr/colorSurface"
+        android:background="@drawable/bottom_sheet_rectangle"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <View
+            android:layout_gravity="center|top"
+            android:backgroundTint="?attr/colorOnSurface"
+            android:background="@drawable/rectangle"
+            android:layout_width="48dp"
+            android:layout_height="8dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTrackList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"/>
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

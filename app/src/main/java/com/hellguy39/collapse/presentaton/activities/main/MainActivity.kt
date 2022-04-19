@@ -19,6 +19,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import androidx.palette.graphics.Palette
 import com.google.android.exoplayer2.MediaMetadata
+import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.ActivityMainBinding
 import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
@@ -72,6 +73,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setExitSharedElementCallback(MaterialContainerTransformSharedElementCallback())
+        window.sharedElementsUseOverlay = false
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -362,7 +365,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(p0: View?) {
         when(p0?.id) {
             binding.trackCard.id -> {
-                val options = ActivityOptions.makeSceneTransitionAnimation(this)
+                val options = ActivityOptions.makeSceneTransitionAnimation(
+                    this,
+                    binding.trackCard,
+                    "track_card_transition"
+                )//ActivityOptions.makeSceneTransitionAnimation(this)
                 startActivity(Intent(this, TrackActivity::class.java), options.toBundle())
             }
             binding.ibPlayPause.id -> {

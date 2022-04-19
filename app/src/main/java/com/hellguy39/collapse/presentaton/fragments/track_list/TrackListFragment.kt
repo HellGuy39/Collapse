@@ -6,15 +6,18 @@ import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackListFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.TracksAdapter
+import com.hellguy39.collapse.presentaton.fragments.trackMenuBottomSheet.TrackMenuBottomSheet
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.Action
@@ -34,8 +37,11 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.OnTrackListener,
-    SearchView.OnQueryTextListener, View.OnClickListener {
+class TrackListFragment : Fragment(R.layout.track_list_fragment),
+    TracksAdapter.OnTrackListener,
+    SearchView.OnQueryTextListener,
+    View.OnClickListener,
+    TrackMenuEvents {
 
     companion object {
         fun newInstance() = TrackListFragment()
@@ -64,6 +70,12 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
+
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
 
         receivedPlaylist = args.playlist
@@ -79,22 +91,15 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
 
         setupRecyclerView()
 
-        binding.collapseToolbar.title = receivedPlaylist.name
-
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
-
-        binding.tvPlaylistName.text = receivedPlaylist.name
 
         binding.btnPlay.setOnClickListener(this)
         binding.btnShuffle.setOnClickListener(this)
 
         searchView = binding.toolbar.menu.findItem(R.id.search).actionView as SearchView
         searchView.setOnQueryTextListener(this)
-
-        setupToolbarImage(receivedPlaylist.type)
-        setupToolbarMenu(receivedPlaylist.type)
 
         when (receivedPlaylist.type) {
             PlaylistType.AllTracks -> {
@@ -168,12 +173,20 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
     }
 
 
-    private fun navigateToEditPlaylist() = findNavController().navigate(
-        TrackListFragmentDirections.actionTrackListFragmentToCreatePlaylistFragment(
-            receivedPlaylist,
-            Action.Update
+    private fun navigateToEditPlaylist() {
+
+        setFragmentResultListener("updatedPlaylist") { requestKey, bundle ->
+            receivedPlaylist = bundle.get("playlist") as Playlist
+            onTracksReceived(receivedPlaylist.tracks, PlaylistType.Custom, receivedPlaylist.name)
+        }
+
+        findNavController().navigate(
+            TrackListFragmentDirections.actionTrackListFragmentToCreatePlaylistFragment(
+                receivedPlaylist,
+                Action.Update
+            )
         )
-    )
+    }
 
     private fun showDeleteDialog() {
         MaterialAlertDialogBuilder(requireContext())
@@ -231,6 +244,13 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
     }
 
     private fun onTracksReceived(receivedTracks: List<Track>, playlistType: PlaylistType, name: String) {
+
+        binding.collapseToolbar.title = receivedPlaylist.name
+        binding.tvPlaylistName.text = receivedPlaylist.name
+
+        setupToolbarImage(receivedPlaylist.type)
+        setupToolbarMenu(receivedPlaylist.type)
+
         if (playlistType == PlaylistType.AllTracks || playlistType == PlaylistType.Favourites) {
             receivedPlaylist = Playlist(
                 id = if(playlistType == PlaylistType.AllTracks) -1 else if (playlistType == PlaylistType.Favourites) -2 else null,
@@ -258,10 +278,20 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
             listener = this,
             getImageBitmapUseCase = getImageBitmapUseCase,
             context = requireContext(),
-            favouriteTracksUseCases = favouriteTracksUseCases,
             playlistType = receivedPlaylist.type,
         )
         binding.rvTrackList.adapter = adapter
+    }
+
+    override fun onTrackMenuClick(track: Track, position: Int, playlistType: Enum<PlaylistType>) {
+        val bottomSheet = TrackMenuBottomSheet(track = track,
+            position = position,
+            listener = this,
+            playlistType = playlistType,
+            getImageBitmapUseCase = getImageBitmapUseCase,
+            isTrackFavouriteUseCase = favouriteTracksUseCases.isTrackFavouriteUseCase
+        )
+        bottomSheet.show(childFragmentManager, TrackMenuBottomSheet.TRACK_MENU_TAG)
     }
 
     override fun onTrackClick(track: Track, position: Int) {
@@ -272,9 +302,18 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment), TracksAdapter.
         dataViewModel.addToFavourites(track = track)
     }
 
+    override fun onDeleteFromFavourites(track: Track) {
+        dataViewModel.deleteFromFavouritesWithoutId(track)
+    }
+
     override fun onDeleteFromPlaylist(track: Track, position: Int) {
 
-        receivedPlaylist.tracks.removeAt(position)
+        if (receivedPlaylist.tracks.size == 1) {
+            receivedPlaylist.tracks = mutableListOf()
+        } else {
+            receivedPlaylist.tracks.removeAt(position)
+        }
+
         recyclerTracks.removeAt(position)
 
         binding.rvTrackList.adapter?.notifyItemRemoved(position)

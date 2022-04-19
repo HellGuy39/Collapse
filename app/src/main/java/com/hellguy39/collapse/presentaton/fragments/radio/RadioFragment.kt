@@ -5,9 +5,12 @@ import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.transition.platform.MaterialElevationScale
+import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.RadioFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
@@ -43,6 +46,8 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enterTransition = MaterialFadeThrough()
+        reenterTransition = MaterialFadeThrough()
         dataViewModel = ViewModelProvider(activity as MainActivity)[RadioStationsDataViewModel::class.java]
     }
 
@@ -60,26 +65,27 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
             )
         }
 
+        binding.fabAdd.setOnClickListener {
+            setupMaterialElevationScale()
+            findNavController().navigate(
+                RadioFragmentDirections.actionRadioFragmentToAddRadioStationFragment(
+                    Action.Create,
+                    RadioStation()
+                ), FragmentNavigatorExtras(binding.fabAdd to "create_radio_station_transition")
+            )
+        }
+
         val searchItem = binding.topAppBar.menu.findItem(R.id.search)
 
         searchView = searchItem.actionView as SearchView
         searchView.setOnQueryTextListener(this)
 
-        binding.topAppBar.setOnMenuItemClickListener {
-            when(it.itemId) {
-                R.id.add -> {
-                    findNavController().navigate(
-                        RadioFragmentDirections.actionRadioFragmentToAddRadioStationFragment(
-                            Action.Create,
-                            RadioStation()
-                        )
-                    )
-                    true
-                }
-                else -> false
-            }
-        }
         setObservers()
+    }
+
+    private fun setupMaterialElevationScale() {
+        exitTransition = MaterialElevationScale(false)
+        reenterTransition = MaterialElevationScale(true)
     }
 
     private fun setObservers() {
@@ -145,9 +151,8 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
     }
 
     private fun onSearchViewChangeQuery(query: String?) {
-        var queryList = listOf<RadioStation>()
 
-        queryList = dataViewModel.searchWithQueryInRadioStations(
+        val queryList: List<RadioStation> = dataViewModel.searchWithQueryInRadioStations(
             query = query?: "",
             dataViewModel.getRadioStationList().value
         )

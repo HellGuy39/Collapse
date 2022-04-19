@@ -2,7 +2,6 @@ package com.hellguy39.collapse.presentaton.adapters
 
 import android.content.Context
 import android.content.res.Resources
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -10,7 +9,6 @@ import com.hellguy39.collapse.R
 import com.hellguy39.collapse.presentaton.view_holders.TrackViewHolder
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
-import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.utils.PlaylistType
 
 class TracksAdapter(
@@ -19,7 +17,6 @@ class TracksAdapter(
     private val listener: OnTrackListener,
     private val context: Context,
     private val getImageBitmapUseCase: GetImageBitmapUseCase,
-    private val favouriteTracksUseCases: FavouriteTracksUseCases,
     private val playlistType: Enum<PlaylistType>,
 ): RecyclerView.Adapter<TrackViewHolder>() {
 
@@ -33,7 +30,6 @@ class TracksAdapter(
         return TrackViewHolder(
             v = itemView,
             getImageBitmapUseCase = getImageBitmapUseCase,
-            favouriteTracksUseCases = favouriteTracksUseCases,
             context = context
         )
     }
@@ -54,9 +50,8 @@ class TracksAdapter(
     override fun getItemCount(): Int = trackList.size
 
     interface OnTrackListener {
+        fun onTrackMenuClick(track: Track, position: Int, playlistType: Enum<PlaylistType>)
         fun onTrackClick(track: Track, position: Int)
-        fun onAddToFavourites(track: Track)
-        fun onDeleteFromPlaylist(track: Track, position: Int)
     }
 
     fun updatePlayingItem(pos: Int) {

@@ -19,5 +19,12 @@ class ArtistViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             listener.onArtistClick(position)
         }
         binding.tvArtistName.text = playlist.name
+        val itemCount = playlist.tracks.size
+
+        if (itemCount == 1)
+            binding.tvTracksCount.text = "$itemCount track"
+        else if (itemCount > 1)
+            binding.tvTracksCount.text = "$itemCount tracks"
+
     }
 }

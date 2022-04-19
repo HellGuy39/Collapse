@@ -4,12 +4,10 @@ import com.hellguy39.data.repositories.*
 import com.hellguy39.domain.repositories.TracksRepository
 import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
+import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import com.hellguy39.domain.usecases.eq_settings.*
-import com.hellguy39.domain.usecases.favourites.AddFavouriteTrackUseCase
-import com.hellguy39.domain.usecases.favourites.DeleteFavouriteTrackUseCase
-import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
-import com.hellguy39.domain.usecases.favourites.GetAllFavouriteTracksUseCase
+import com.hellguy39.domain.usecases.favourites.*
 import com.hellguy39.domain.usecases.playlist.*
 import com.hellguy39.domain.usecases.radio.*
 import com.hellguy39.domain.usecases.state.GetSavedServiceStateUseCase
@@ -41,11 +39,13 @@ class DomainModule {
         return EqualizerSettingsUseCases(
             getEqualizerSettings = GetEqualizerSettingsUseCase(repository),
             saveEqualizerSettingsUseCase = SaveEqualizerSettingsUseCase(repository),
-            savePresetEqualizerSettingsUseCase = SavePresetEQSettingsUseCase(repository),
-            saveIsEnabledEQSettingsUseCase = SaveIsEnabledEQSettingsUseCase(repository),
-            saveBandsLevelEQSettingsUseCase = SaveBandsLevelEQSettingsUseCase(repository),
-            saveBassBoostEQSettingsUseCase = SaveBassBoostEQSettingsUseCase(repository),
-            saveVirtualizerEQSettingsUseCase = SaveVirtualizerEQSettingsUseCase(repository)
+            saveEqPresetUseCase = SaveEqPresetUseCase(repository),
+            saveEqSwitchUseCase = SaveEqSwitchUseCase(repository),
+            saveEqBandsLevelUseCase = SaveEqBandsLevelUseCase(repository),
+            saveBassBoostValueUseCase = SaveBassBoostValueUseCase(repository),
+            saveVirtualizerValueUseCase = SaveVirtualizerValueUseCase(repository),
+            saveBassBoostSwitchUseCase = SaveBassBoostSwitchUseCase(repository),
+            saveVirtualizerSwitchUseCase = SaveVirtualizerSwitchUseCase(repository)
         )
     }
 
@@ -97,7 +97,9 @@ class DomainModule {
         return FavouriteTracksUseCases(
             addFavouriteTrackUseCase = AddFavouriteTrackUseCase(repository),
             deleteFavouriteTrackUseCase = DeleteFavouriteTrackUseCase(repository),
-            getAllFavouriteTracksUseCase = GetAllFavouriteTracksUseCase(repository)
+            getAllFavouriteTracksUseCase = GetAllFavouriteTracksUseCase(repository),
+            deleteFromFavouritesWithoutIdUseCase = DeleteFromFavouritesWithoutIdUseCase(repository),
+            isTrackFavouriteUseCase = IsTrackFavouriteUseCase(repository)
         )
     }
 
@@ -113,5 +115,10 @@ class DomainModule {
         return ConvertByteArrayToBitmapUseCase()
     }
 
+    @Provides
+    @Singleton
+    fun provideGetColorFromThemeUseCase(): GetColorFromThemeUseCase {
+        return GetColorFromThemeUseCase()
+    }
 
 }

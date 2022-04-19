@@ -10,11 +10,15 @@ interface EqualizerSettingsRepository {
 
     fun savePreset(preset: Int)
 
-    fun saveIsEnabled(isEnabled: Boolean)
+    fun saveEqSwitch(isEnabled: Boolean)
+
+    fun saveBassBoostSwitch(isEnabled: Boolean)
 
     fun saveBassBoostValue(bass: Float)
 
-    fun saveVirtualizer(virtualize: Float)
+    fun saveVirtualizerValue(virtualize: Float)
+
+    fun saveVirtualizerSwitch(isEnabled: Boolean)
 
     fun saveBandsLevel(levels: List<Float>)
 }

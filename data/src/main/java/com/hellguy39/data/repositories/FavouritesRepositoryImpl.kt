@@ -22,6 +22,25 @@ class FavouritesRepositoryImpl(
         favouritesDao.deleteFavouriteTrack(trackDb = TrackDb().toDbModel(track))
     }
 
+    override suspend fun isTrackFavourite(track: Track): Boolean {
+        val favourites = favouritesDao.getAllFavouriteTracks()
+        for (n in favourites.indices) {
+            if (isFavourite(favourites[n], track)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    override suspend fun deleteFromFavouritesWithoutId(track: Track) {
+        val favourites = favouritesDao.getAllFavouriteTracks()
+        for (n in favourites.indices) {
+            if (isFavourite(favourites[n], track)) {
+                favouritesDao.deleteFavouriteTrack(favourites[n])
+            }
+        }
+    }
+
     private fun toReturnableList(list: List<TrackDb>): List<Track> {
         val returnableList = mutableListOf<Track>()
 
@@ -30,5 +49,11 @@ class FavouritesRepositoryImpl(
         }
 
         return returnableList
+    }
+    private fun isFavourite(trackDb: TrackDb, track: Track): Boolean {
+        return (trackDb.path == track.path &&
+                trackDb.artist == track.artist &&
+                trackDb.name == track.name)
+
     }
 }

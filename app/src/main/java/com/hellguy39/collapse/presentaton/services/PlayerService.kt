@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.media.audiofx.AudioEffect
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
@@ -92,6 +91,7 @@ class PlayerService : LifecycleService() {
         private val contentPositionLiveData = MutableLiveData<Int>()
         private val isShuffleLiveData = MutableLiveData<Boolean>()
         private val repeatModeLiveData = MutableLiveData(Player.REPEAT_MODE_OFF)
+        private val deviceVolumeLiveData = MutableLiveData<Int>()
 
         fun startService(context: Context, contentWrapper: ServiceContentWrapper) {
 
@@ -113,15 +113,9 @@ class PlayerService : LifecycleService() {
 
             if (isRunningService.value != true) {
                 val service = Intent(context, PlayerService::class.java)
-                //service.putExtra("track_list", contentWrapper)
                 ContextCompat.startForegroundService(context, service)
             }
         }
-
-//        fun stopService(context: Context) {
-//            val service = Intent(context, PlayerService::class.java)
-//            context.stopService(service)
-//        }
 
         private fun updateContent(content: ServiceContentWrapper) {
             serviceContentLiveData.value = content
@@ -144,8 +138,10 @@ class PlayerService : LifecycleService() {
             else null
         }
 
-        fun getDeviceVolume(): Int = exoPlayer.deviceVolume
+        fun getDeviceVolume(): LiveData<Int> = deviceVolumeLiveData
         fun setDeviceVolume(volume: Int) { exoPlayer.deviceVolume = volume }
+
+        fun getDeviceInfo(): DeviceInfo = exoPlayer.deviceInfo
 
         fun isRunningService(): LiveData<Boolean> = isRunningService
 
@@ -182,12 +178,14 @@ class PlayerService : LifecycleService() {
         fun onRepeat(n: Int) { exoPlayer.repeatMode = n }
         fun onSeekTo(pos: Long) = exoPlayer.seekTo(pos)
 
-        fun enableEq(b: Boolean) = equalizerModel.equalizer?.setEnabled(b)
-
+        fun enableEq(b: Boolean) { equalizerModel.equalizer?.setEnabled(b) }
+        fun enableBass(b: Boolean) = bassBoost.setEnabled(b)
+        fun enableVirtualizer(b: Boolean) = virtualizer.setEnabled(b)
 
         fun setBandLevel(band: Short, value: Short) = equalizerModel.equalizer?.setBandLevel(band, value)
-        fun setBassBoostBandLevel(value: Short) = bassBoost.setStrength(value)
-
+        fun setBassBoostBandLevel(value: Short) {
+            bassBoost.setStrength(value)
+        }
 
         fun setVirtualizerBandLevel(value: Short) = virtualizer.setStrength(value)
 
@@ -218,7 +216,10 @@ class PlayerService : LifecycleService() {
         super.onCreate()
         exoPlayer = ExoPlayer.Builder(this).build()
 
+        deviceVolumeLiveData.value = exoPlayer.deviceVolume
+
         exoPlayer.addListener(object : Player.Listener {
+
             override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
                 mediaMetadataLiveData.value = mediaMetadata
                 contentPositionLiveData.value = exoPlayer.currentMediaItemIndex
@@ -241,6 +242,11 @@ class PlayerService : LifecycleService() {
             override fun onRepeatModeChanged(repeatMode: Int) {
                 super.onRepeatModeChanged(repeatMode)
                 repeatModeLiveData.value = repeatMode
+            }
+
+            override fun onDeviceVolumeChanged(volume: Int, muted: Boolean) {
+                super.onDeviceVolumeChanged(volume, muted)
+                deviceVolumeLiveData.value = volume
             }
         })
 
@@ -270,6 +276,7 @@ class PlayerService : LifecycleService() {
 
         initEQ()
         setupEqSettings()
+
         isRunningService.value = true
 
         serviceContentLiveData.observe(this) {
@@ -327,11 +334,13 @@ class PlayerService : LifecycleService() {
 
     private fun setupEqSettings() {
 
+
+
         val equalizer = equalizerModel.equalizer ?: return
 
         val settings = equalizerSettingsUseCases.getEqualizerSettings.invoke()
 
-        equalizer.enabled = settings.isEnabled
+        equalizer.enabled = settings.isEqEnabled
 
         if(settings.preset == -1) {
             equalizer.setBandLevel(0, (settings.band1Level).toInt().toShort())
@@ -343,30 +352,22 @@ class PlayerService : LifecycleService() {
             equalizer.usePreset(settings.preset.toShort())
         }
 
-        if(virtualizer.strengthSupported)
+        if(virtualizer.strengthSupported) {
+            virtualizer.enabled = settings.isVirtualizerEnabled
             virtualizer.setStrength((settings.bandVirtualizer).toInt().toShort())
+        }
 
-        if(bassBoost.strengthSupported)
+        if(bassBoost.strengthSupported) {
+            bassBoost.enabled = settings.isBassEnabled
             bassBoost.setStrength((settings.bandVirtualizer).toInt().toShort())
-
+        }
     }
 
     private fun initEQ() {
 
-        equalizerModel.equalizer = Equalizer(0, exoPlayer.audioSessionId)
-        virtualizer = Virtualizer(0, exoPlayer.audioSessionId)
-        bassBoost = BassBoost(0, exoPlayer.audioSessionId)
-
-        if (equalizerModel.equalizer == null)
-            return
-
-        if (bassBoost.strengthSupported)
-            bassBoost.enabled = true
-
-        if (virtualizer.strengthSupported) {
-            virtualizer.enabled = true
-            //virtualizer.forceVirtualizationMode(Virtualizer.VIRTUALIZATION_MODE_AUTO)
-        }
+        equalizerModel.equalizer = Equalizer(1000, exoPlayer.audioSessionId)
+        virtualizer = Virtualizer(1000, exoPlayer.audioSessionId)
+        bassBoost = BassBoost(1000, exoPlayer.audioSessionId)
 
         equalizerModel.numberOfBands = equalizerModel.equalizer!!.numberOfBands
         equalizerModel.lowestBandLevel = equalizerModel.equalizer!!.bandLevelRange[0]
@@ -438,7 +439,7 @@ class PlayerService : LifecycleService() {
         val channel = NotificationChannel(
             channelId,
             channelName,
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_LOW,
         )
         channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

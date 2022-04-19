@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:paddingTop="8dp"
-    app:cardCornerRadius="0dp"
-    app:cardElevation="0dp"
-    style="@style/Widget.Material3.CardView.Elevated"
+    android:orientation="vertical"
     android:id="@+id/root">
 
     <LinearLayout
@@ -30,9 +27,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_weight="1"
             android:layout_gravity="center"
-            android:orientation="vertical"
+            android:orientation="horizontal"
+            android:layout_weight="1"
             app:layout_constraintBottom_toTopOf="@+id/view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/ivTrackImage"
@@ -45,8 +42,19 @@
                 android:ellipsize="end"
                 android:fontFamily="@font/roboto_regular"
                 android:maxLines="1"
+                android:layout_marginEnd="16dp"
+                android:layout_weight="1"
                 android:textSize="20sp"
                 tools:text="Billie Eilish" />
+
+            <TextView
+                android:id="@+id/tvTracksCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:textSize="20sp"
+                android:gravity="end"
+                tools:text="0 tracks" />
 
         </LinearLayout>
 
@@ -70,4 +78,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

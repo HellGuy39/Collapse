@@ -30,6 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="0"
         app:cardCornerRadius="0dp"
+        android:transitionName="track_card_transition"
         style="@style/Widget.Material3.CardView.Filled"
         app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"

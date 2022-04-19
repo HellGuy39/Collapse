@@ -1,16 +1,23 @@
 package com.hellguy39.collapse.presentaton.fragments.create_playlist
 
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.ColorInt
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
+import com.google.android.material.transition.platform.MaterialContainerTransform
+import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.CreatePlaylistFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
@@ -25,6 +32,7 @@ import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.InputStream
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View.OnClickListener {
@@ -51,6 +59,23 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val typedValue = TypedValue()
+        val theme = requireContext().theme
+        theme.resolveAttribute(com.google.android.material.R.attr.colorSurface, typedValue, true)
+        @ColorInt val color = typedValue.data
+
+        sharedElementEnterTransition = MaterialContainerTransform().apply {
+            drawingViewId = R.id.fragmentContainer
+            //scrimColor = Color.TRANSPARENT
+            setAllContainerColors(color)
+        }
+
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
+
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
         createViewModel = ViewModelProvider(this)[CreatePlaylistViewModel::class.java]
 
@@ -167,13 +192,17 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
     }
 
     private fun updatePlaylist() {
-        dataViewModel.updateExistingPlaylist(Playlist(
+        val updatedPlaylist = Playlist(
             id = args.playlist.id,
             name = binding.etName.text.toString(),
             description = binding.etDesc.text.toString(),
             tracks = tracks,
             picture = createViewModel.getPicture().value,
             type = PlaylistType.Custom
-        ))
+        )
+        dataViewModel.updateExistingPlaylist(updatedPlaylist)
+        setFragmentResult("updatedPlaylist",
+            bundleOf("playlist" to updatedPlaylist)
+        )
     }
 }
