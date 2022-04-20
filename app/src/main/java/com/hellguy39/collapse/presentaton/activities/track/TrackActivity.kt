@@ -29,10 +29,7 @@ import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
 import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -67,6 +64,8 @@ class TrackActivity : AppCompatActivity(),
     private lateinit var primaryColorStateList: ColorStateList
     private lateinit var onSurfaceColorStateList: ColorStateList
     @ColorInt private var colorSurface: Int = 0
+    @ColorInt private var textColor: Int = 0
+    private lateinit var iconTint: ColorStateList
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -141,15 +140,19 @@ class TrackActivity : AppCompatActivity(),
         setIsPlayingObserver()
 
         val bytes = PlayerService.getServiceContent().radioStation?.picture
-
+        setupImage(bytes)
         binding.tvTrackName.text = PlayerService.getServiceContent().radioStation?.name ?: "Unknown"
+    }
 
+    private fun setupImage(bytes: ByteArray?) {
         if (bytes != null) {
             val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
             Glide.with(this).load(bitmap).into(binding.ivCover)
             updatePalette(bitmap)
-        } else
+        } else {
+            setDefaultUIColors()
             binding.ivCover.setImageResource(R.drawable.ic_round_audiotrack_24)
+        }
     }
 
     private fun setupUIForLocalTrack() {
@@ -165,6 +168,9 @@ class TrackActivity : AppCompatActivity(),
         @ColorInt val colorOnSurface = getColorFromThemeUseCase.invoke(theme, com.google.android.material.R.attr.colorOnSurface)
         primaryColorStateList = ColorStateList.valueOf(colorPrimary)
         onSurfaceColorStateList = ColorStateList.valueOf(colorOnSurface)
+
+        textColor = binding.tvTrackName.currentTextColor
+        iconTint = binding.ibPlayPause.imageTintList ?: ColorStateList.valueOf(colorOnSurface)
         colorSurface = getColorFromThemeUseCase.invoke(theme, com.google.android.material.R.attr.colorSurface)
     }
 
@@ -233,7 +239,15 @@ class TrackActivity : AppCompatActivity(),
         }
     }
 
+    private val listener = CoroutineScope(Dispatchers.Default).launch {
+//        while () {
+//
+//        }
+    }
+
     private fun updateUI(mediaMetadata: MediaMetadata) {
+
+        listener.start()
 
         CoroutineScope(Dispatchers.Main).launch {
             while (true) {
@@ -266,12 +280,7 @@ class TrackActivity : AppCompatActivity(),
 
         val bytes = mediaMetadata.artworkData
 
-        if (bytes != null) {
-            val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
-            Glide.with(this).load(bitmap).into(binding.ivCover)
-            updatePalette(bitmap)
-        } else
-            binding.ivCover.setImageResource(R.drawable.ic_round_audiotrack_24)
+        setupImage(bytes)
     }
 
     override fun onClick(p0: View?) {
@@ -311,7 +320,6 @@ class TrackActivity : AppCompatActivity(),
                 val darkMutedColor = palette.getDarkMutedColor(1)
                 val white = ResourcesCompat.getColor(resources, R.color.white,null)
                 val stateListMuted = ColorStateList.valueOf(mutedColor)
-                //val stateListDarkMuted = ColorStateList.valueOf(darkMutedColor)
                 val stateListWhite = ColorStateList.valueOf(white)
 
                 binding.topAppBar.setNavigationIconTint(white)
@@ -328,16 +336,27 @@ class TrackActivity : AppCompatActivity(),
                 binding.topAppBar.setBackgroundColor(mutedColor)
                 binding.root.setBackgroundColor(mutedColor)
 
-                binding.root.backgroundTintList = stateListMuted
-                binding.topAppBar.backgroundTintList = stateListMuted
-
-
-            } else {
-
             }
         }
     }
 
+
+    private fun setDefaultUIColors() {
+        binding.topAppBar.setNavigationIconTint(iconTint.defaultColor)
+        binding.topAppBar.setTitleTextColor(textColor)
+        binding.tvTrackName.setTextColor(textColor)
+        binding.tvPerformer.setTextColor(textColor)
+        binding.tvRemainingTrackTime.setTextColor(textColor)
+        binding.tvCurrentTrackTime.setTextColor(textColor)
+        binding.ibPlayPause.imageTintList = iconTint
+        binding.ibNextTrack.imageTintList = iconTint
+        binding.ibPreviousTrack.imageTintList = iconTint
+        binding.topAppBar.menu.findItem(R.id.more).iconTintList = iconTint
+
+        binding.topAppBar.setBackgroundColor(colorSurface)
+        binding.root.setBackgroundColor(colorSurface)
+
+    }
 
     @SuppressLint("RestrictedApi")
     override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {

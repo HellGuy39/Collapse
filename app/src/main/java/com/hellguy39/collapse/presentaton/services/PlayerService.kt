@@ -37,9 +37,7 @@ import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.utils.PlaylistType
 import com.hellguy39.domain.utils.Protocol
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.concurrent.ThreadLocalRandom
 import javax.inject.Inject
 
@@ -333,8 +331,6 @@ class PlayerService : LifecycleService() {
     }
 
     private fun setupEqSettings() {
-
-
 
         val equalizer = equalizerModel.equalizer ?: return
 

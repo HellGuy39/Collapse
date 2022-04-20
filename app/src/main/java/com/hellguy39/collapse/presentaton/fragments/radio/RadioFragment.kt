@@ -20,10 +20,8 @@ import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
 import com.hellguy39.collapse.utils.Action
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.models.ServiceContentWrapper
-import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 import com.hellguy39.domain.utils.PlayerType
-import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -46,8 +44,7 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enterTransition = MaterialFadeThrough()
-        reenterTransition = MaterialFadeThrough()
+        setupMaterialFadeThought()
         dataViewModel = ViewModelProvider(activity as MainActivity)[RadioStationsDataViewModel::class.java]
     }
 
@@ -81,6 +78,11 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
         searchView.setOnQueryTextListener(this)
 
         setObservers()
+    }
+
+    private fun setupMaterialFadeThought() {
+        enterTransition = MaterialFadeThrough()
+        reenterTransition = MaterialFadeThrough()
     }
 
     private fun setupMaterialElevationScale() {
@@ -125,6 +127,7 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
     }
 
     override fun onStationEdit(radioStation: RadioStation) {
+        setupMaterialFadeThought()
         findNavController().navigate(
             RadioFragmentDirections.actionRadioFragmentToAddRadioStationFragment(
                 Action.Update,
