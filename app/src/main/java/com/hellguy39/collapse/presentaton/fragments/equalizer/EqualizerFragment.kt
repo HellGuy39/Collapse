@@ -2,18 +2,16 @@ package com.hellguy39.collapse.presentaton.fragments.equalizer
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.CompoundButton
-import android.widget.Switch
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.slider.Slider
+import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.EqualizerFragmentBinding
 import com.hellguy39.collapse.presentaton.services.PlayerService
-import com.hellguy39.domain.models.EqualizerSettings
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -36,6 +34,8 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        enterTransition = MaterialFadeThrough()
         viewModel = ViewModelProvider(this)[EqualizerViewModel::class.java]
     }
 
@@ -61,6 +61,8 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
                 applySettings()
 
                 binding.eqSwitch.setOnCheckedChangeListener(this)
+                binding.virtualizerSwitch.setOnCheckedChangeListener(this)
+                binding.bassSwitch.setOnCheckedChangeListener(this)
             }
         }
     }
@@ -75,6 +77,8 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
         binding.bassBoostBand.isEnabled = b
         binding.surroundBand.isEnabled = b
         binding.acPreset.isEnabled = b
+        binding.bassSwitch.isEnabled = b
+        binding.virtualizerSwitch.isEnabled = b
 
         if (b)
             binding.cardEqMessage.visibility = View.GONE
@@ -137,7 +141,9 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
     private fun applySettings() {
         val settings = viewModel.getEqualizerSettings()
 
-        binding.eqSwitch.isChecked = settings.isEnabled
+        binding.eqSwitch.isChecked = settings.isEqEnabled
+        binding.bassSwitch.isChecked = settings.isBassEnabled
+        binding.virtualizerSwitch.isChecked = settings.isVirtualizerEnabled
 
         if (settings.preset == -1) {
             isPresetMode = false
@@ -155,10 +161,10 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
         }
 
         if (PlayerService.isBassBoostSupported())
-            binding.bassBoostBand.value = settings.bandBassBoost / 1000
+            binding.bassBoostBand.value = settings.bandBassBoost / 100
 
         if (PlayerService.isVirtualizerSupported())
-            binding.surroundBand.value = settings.bandVirtualizer / 1000
+            binding.surroundBand.value = settings.bandVirtualizer / 100
     }
 
     private fun setupPreset() {
@@ -270,28 +276,14 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
                 PlayerService.setBandLevel(4, (value * 100).toInt().toShort())
             }
             R.id.bassBoostBand -> {
-                PlayerService.setBassBoostBandLevel((value * 1000).toInt().toShort())
-                viewModel.saveBassBoost(value * 1000)
+                PlayerService.setBassBoostBandLevel((value * 100).toInt().toShort())
+                viewModel.saveBassBoostValue(value * 100)
             }
             R.id.surroundBand -> {
-                PlayerService.setVirtualizerBandLevel((value * 1000).toInt().toShort())
-                viewModel.saveVirtualizer(value * 1000)
+                PlayerService.setVirtualizerBandLevel((value * 100).toInt().toShort())
+                viewModel.saveVirtualizerValue(value * 100)
             }
         }
-    }
-
-    private fun saveSettings() {
-        viewModel.saveEqualizerSettings(equalizerSettings = EqualizerSettings(
-            isEnabled = binding.eqSwitch.isChecked,
-            band1Level = binding.band1.value * 100,
-            band2Level = binding.band2.value * 100,
-            band3Level = binding.band3.value * 100,
-            band4Level = binding.band4.value * 100,
-            band5Level = binding.band5.value * 100,
-            bandBassBoost = binding.bassBoostBand.value * 1000,
-            bandVirtualizer = binding.surroundBand.value * 1000,
-            preset = selectedPreset
-        ))
     }
 
     @SuppressLint("RestrictedApi")
@@ -310,7 +302,19 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
     }
 
     override fun onCheckedChanged(p0: CompoundButton?, b: Boolean) {
-        PlayerService.enableEq(b)
-        viewModel.saveIsEnabled(b)
+        when(p0?.id) {
+            binding.eqSwitch.id -> {
+                PlayerService.enableEq(b)
+                viewModel.saveEqSwitch(b)
+            }
+            binding.bassSwitch.id -> {
+                PlayerService.enableBass(b)
+                viewModel.saveBassBoostSwitch(b)
+            }
+            binding.virtualizerSwitch.id -> {
+                PlayerService.enableVirtualizer(b)
+                viewModel.saveVirtualizerSwitch(b)
+            }
+        }
     }
 }

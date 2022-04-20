@@ -19,13 +19,16 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import androidx.palette.graphics.Palette
 import com.google.android.exoplayer2.MediaMetadata
+import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.ActivityMainBinding
 import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
+import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.RadioStation
+import com.hellguy39.domain.models.ServiceContentWrapper
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
@@ -33,9 +36,13 @@ import com.hellguy39.domain.usecases.radio.RadioStationUseCases
 import com.hellguy39.domain.usecases.state.SavedServiceStateUseCases
 import com.hellguy39.domain.usecases.tracks.TracksUseCases
 import com.hellguy39.domain.utils.PlayerType
+import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -67,6 +74,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setExitSharedElementCallback(MaterialContainerTransformSharedElementCallback())
+        window.sharedElementsUseOverlay = false
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -91,7 +100,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.layoutCardPlayer.visibility = View.GONE
         binding.layoutCardPlayer.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
-        //checkServiceSavedState()
+        checkServiceSavedState()
     }
 
     override fun onRestart() {
@@ -148,66 +157,110 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
-//    private fun checkServiceSavedState() = CoroutineScope(Dispatchers.IO).launch {
-//        val state = savedServiceStateUseCases.getSavedServiceStateUseCase.invoke()
-//
-//        when (state.playerType) {
-//            PlayerType.LocalTrack -> {
-//                val playlist: Playlist
-//                val artist: Artist
-//
-//                if (state.playlistId != null) {
-//                    when (state.playlistType) {
-//                        PlaylistType.Artist -> {}
-//                        PlaylistType.Favourites -> {}
-//                        PlaylistType.AllTracks -> {}
-//                        PlaylistType.Custom -> {}
-//                    }
-//
-//                    PlayerService.startService(
-//                        context = this@MainActivity,
-//                        contentWrapper = ServiceContentWrapper(
-//                            position = state.position,
-//                            playerPosition = state.playerPosition,
-//                            playlist = playlist,
-//                            artist = artist,
-//                            type = PlayerType.LocalTrack,
-//                        )
-//                    )
-//                }
-//
-//            }
-//            PlayerType.Radio -> {
-//                val id = state.radioStationId
-//                var radioStation = RadioStation()
-//                if (id != null)
-//                    radioStation = radioStationUseCases.getRadioStationByIdUseCase.invoke(id)
-//                else
-//                    return@launch
-//
-//                PlayerService.startService(
-//                    context = this@MainActivity,
-//                    contentWrapper = ServiceContentWrapper(
-//                        type = PlayerType.Radio,
-//                        radioStation = radioStation
-//                    )
-//                )
-//            }
-//        }
-//    }
+    private fun checkServiceSavedState() = CoroutineScope(Dispatchers.IO).launch {
+        val savedState = savedServiceStateUseCases.getSavedServiceStateUseCase.invoke()
 
-//        withContext(Dispatchers.Main) {
-//            if (state.radioStation != null || state.playlist != null) {
-//
-//                if(state.radioStation != null)
-//                    return@withContext //this is a temporary solution
-//
-//                PlayerService.startService(
-//                    context = this@MainActivity,
-//                    contentWrapper = state
-//                )
-//            }
-//        }
+        when(savedState.playerType) {
+            PlayerType.LocalTrack -> {
+                val playlistId = savedState.playlistId
+                val artistName = savedState.artistName
+                val position = savedState.position
+                val playerPosition = savedState.playerPosition
+
+                when(savedState.playlistType) {
+                    PlaylistType.AllTracks -> {
+                        val trackList = tracksUseCases.getAllTracksUseCase.invoke()
+                        startPlayer(receivedPlaylist = Playlist(
+                            tracks = trackList.toMutableList(),
+                            name = "All tracks",
+                            type = PlaylistType.AllTracks
+                        ),
+                            position = position,
+                            playerPosition = playerPosition,
+                            skipPauseClick = true,
+                            startWithShuffle = false
+                        )
+                    }
+                    PlaylistType.Favourites -> {
+                        val favourites = favouriteTracksUseCases.getAllFavouriteTracksUseCase.invoke()
+                        startPlayer(receivedPlaylist = Playlist(
+                            tracks = favourites.toMutableList(),
+                            name = "All tracks",
+                            type = PlaylistType.AllTracks
+                        ),
+                            position = position,
+                            playerPosition = playerPosition,
+                            skipPauseClick = true,
+                            startWithShuffle = false
+                        )
+                    }
+                    PlaylistType.Artist -> {
+                        if (artistName != null) {
+                            val artistTrackList = tracksUseCases.getAllTrackByArtistUseCase.invoke(artistName)
+                            startPlayer(receivedPlaylist = Playlist(
+                                tracks = artistTrackList.toMutableList(),
+                                name = artistName,
+                                type = PlaylistType.Artist
+                                ),
+                                position = position,
+                                playerPosition = playerPosition,
+                                skipPauseClick = true,
+                                startWithShuffle = false
+                            )
+                        }
+                    }
+                    PlaylistType.Custom -> {
+                        if (playlistId != null) {
+                            val playlist = playlistUseCases.getPlaylistByIdUseCase.invoke(id = playlistId)
+                            startPlayer(
+                                receivedPlaylist = playlist,
+                                position = position,
+                                skipPauseClick = true,
+                                startWithShuffle = false,
+                                playerPosition = playerPosition
+                            )
+                        }
+                    }
+                    PlaylistType.Undefined -> {
+
+                    }
+                    else -> {}
+                }
+
+            }
+            PlayerType.Radio -> {
+
+            }
+            PlayerType.Undefined -> {
+
+            }
+            else -> {}
+        }
+    }
+
+
+    private fun startPlayer(
+        receivedPlaylist: Playlist,
+        position: Int,
+        startWithShuffle: Boolean = false,
+        skipPauseClick: Boolean = false,
+        playerPosition: Long
+    ) = CoroutineScope(Dispatchers.Main).launch {
+        if (receivedPlaylist.tracks.size == 0) {
+            return@launch
+        }
+
+        PlayerService.startService(this@MainActivity, ServiceContentWrapper(
+            type = PlayerType.LocalTrack,
+            position = position,
+            playlist = receivedPlaylist,
+            playerPosition = playerPosition,
+            startWithShuffle = startWithShuffle,
+            skipPauseClick = skipPauseClick,
+            fromSavedState = true
+            )
+        )
+    }
 
     private fun updateCardUIWithMetadata(metadata: MediaMetadata) {
 
@@ -313,7 +366,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(p0: View?) {
         when(p0?.id) {
             binding.trackCard.id -> {
-                val options = ActivityOptions.makeSceneTransitionAnimation(this)
+                val options = ActivityOptions.makeSceneTransitionAnimation(
+                    this,
+                    binding.trackCard,
+                    "track_card_transition"
+                )//ActivityOptions.makeSceneTransitionAnimation(this)
                 startActivity(Intent(this, TrackActivity::class.java), options.toBundle())
             }
             binding.ibPlayPause.id -> {

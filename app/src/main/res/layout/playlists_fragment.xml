@@ -13,16 +13,26 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
-            app:menu="@menu/playlists_top_menu"
+            app:menu="@menu/search_top_menu"
             app:navigationIcon="@drawable/ic_round_arrow_back_ios_24"
             android:layout_height="?attr/actionBarSize"
             app:title="Playlists" />
     </com.google.android.material.appbar.AppBarLayout>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAdd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:transitionName="create_playlist_transition"
+        app:srcCompat="@drawable/ic_round_add_24"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvPlaylists"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:transitionGroup="true"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -26,25 +26,13 @@
             tools:layout="@layout/media_library_fragment">
             <action
                 android:id="@+id/action_mediaLibraryFragment_to_playlistFragment"
-                app:destination="@id/playlistsFragment"
-                app:enterAnim="@anim/to_left_in"
-                app:exitAnim="@anim/to_left_out"
-                app:popEnterAnim="@anim/to_right_in"
-                app:popExitAnim="@anim/to_right_out" />
+                app:destination="@id/playlistsFragment" />
             <action
                 android:id="@+id/action_mediaLibraryFragment_to_trackListFragment"
-                app:destination="@id/trackListFragment"
-                app:enterAnim="@anim/to_left_in"
-                app:exitAnim="@anim/to_left_out"
-                app:popEnterAnim="@anim/to_right_in"
-                app:popExitAnim="@anim/to_right_out" />
+                app:destination="@id/trackListFragment" />
             <action
                 android:id="@+id/action_mediaLibraryFragment_to_artistsListFragment"
-                app:destination="@id/artistsListFragment"
-                app:enterAnim="@anim/to_left_in"
-                app:exitAnim="@anim/to_left_out"
-                app:popEnterAnim="@anim/to_right_in"
-                app:popExitAnim="@anim/to_right_out" />
+                app:destination="@id/artistsListFragment" />
         </fragment>
         <fragment
             android:id="@+id/trackListFragment"
@@ -56,11 +44,7 @@
                 app:argType="com.hellguy39.domain.models.Playlist" />
             <action
                 android:id="@+id/action_trackListFragment_to_createPlaylistFragment"
-                app:destination="@id/createPlaylistFragment"
-                app:enterAnim="@anim/to_left_in"
-                app:exitAnim="@anim/to_left_out"
-                app:popEnterAnim="@anim/to_right_in"
-                app:popExitAnim="@anim/to_right_out" />
+                app:destination="@id/createPlaylistFragment" />
         </fragment>
         <fragment
             android:id="@+id/playlistsFragment"
@@ -69,18 +53,10 @@
             tools:layout="@layout/playlists_fragment">
             <action
                 android:id="@+id/action_playlistsFragment_to_trackListFragment"
-                app:destination="@id/trackListFragment"
-                app:enterAnim="@anim/to_left_in"
-                app:exitAnim="@anim/to_left_out"
-                app:popEnterAnim="@anim/to_right_in"
-                app:popExitAnim="@anim/to_right_out" />
+                app:destination="@id/trackListFragment" />
             <action
                 android:id="@+id/action_playlistsFragment_to_createPlaylistFragment"
-                app:destination="@id/createPlaylistFragment"
-                app:enterAnim="@anim/to_left_in"
-                app:exitAnim="@anim/to_left_out"
-                app:popEnterAnim="@anim/to_right_in"
-                app:popExitAnim="@anim/to_right_out" />
+                app:destination="@id/createPlaylistFragment" />
         </fragment>
         <fragment
             android:id="@+id/createPlaylistFragment"
@@ -89,11 +65,7 @@
             tools:layout="@layout/create_playlist_fragment" >
             <action
                 android:id="@+id/action_createPlaylistFragment_to_selectTracksFragment"
-                app:destination="@id/selectTracksFragment"
-                app:enterAnim="@anim/to_left_in"
-                app:exitAnim="@anim/to_left_out"
-                app:popEnterAnim="@anim/to_right_in"
-                app:popExitAnim="@anim/to_right_out" />
+                app:destination="@id/selectTracksFragment" />
             <argument
                 android:name="playlist"
                 app:argType="com.hellguy39.domain.models.Playlist" />
@@ -117,11 +89,7 @@
             tools:layout="@layout/fragment_artists_list" >
             <action
                 android:id="@+id/action_artistsListFragment_to_trackListFragment"
-                app:destination="@id/trackListFragment"
-                app:enterAnim="@anim/to_left_in"
-                app:exitAnim="@anim/to_left_out"
-                app:popEnterAnim="@anim/to_right_in"
-                app:popExitAnim="@anim/to_right_out" />
+                app:destination="@id/trackListFragment" />
         </fragment>
     </navigation>
     <navigation android:id="@+id/navigation_radio"
@@ -133,11 +101,7 @@
             tools:layout="@layout/radio_fragment">
             <action
                 android:id="@+id/action_radioFragment_to_addRadioStationFragment"
-                app:destination="@id/addRadioStationFragment"
-                app:enterAnim="@anim/to_left_in"
-                app:exitAnim="@anim/to_left_out"
-                app:popEnterAnim="@anim/to_right_in"
-                app:popExitAnim="@anim/to_right_out" />
+                app:destination="@id/addRadioStationFragment" />
         </fragment>
         <fragment
             android:id="@+id/addRadioStationFragment"

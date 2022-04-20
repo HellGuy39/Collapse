@@ -1,7 +1,9 @@
 package com.hellguy39.domain.models
 
 data class EqualizerSettings(
-    var isEnabled: Boolean = false,
+    var isEqEnabled: Boolean = false,
+    var isBassEnabled: Boolean = false,
+    var isVirtualizerEnabled: Boolean = false,
     var band1Level: Float = 0f,
     var band2Level: Float = 0f,
     var band3Level: Float = 0f,

@@ -6,8 +6,11 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.transition.platform.MaterialElevationScale
+import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.PlaylistsFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
@@ -41,7 +44,22 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setupSharedAxisAnimations()
+
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
+    }
+
+    private fun setupSharedAxisAnimations() {
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
+    }
+
+    private fun setupMaterialElevationScale() {
+        exitTransition = MaterialElevationScale(false)
+        reenterTransition = MaterialElevationScale(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -60,20 +78,18 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
 
         setupRecyclerView()
 
-        binding.topAppBar.setOnMenuItemClickListener {
-            when(it?.itemId) {
-                R.id.add -> {
-                    findNavController().navigate(
-                        PlaylistsFragmentDirections.actionPlaylistsFragmentToCreatePlaylistFragment(
-                            Playlist(),
-                            Action.Create
-                        )
-                    )
-                    true
-                }
-                else -> false
-            }
+        binding.fabAdd.setOnClickListener {
+
+            setupMaterialElevationScale()
+
+            findNavController().navigate(
+                PlaylistsFragmentDirections.actionPlaylistsFragmentToCreatePlaylistFragment(
+                    Playlist(),
+                    Action.Create
+                ), FragmentNavigatorExtras(binding.fabAdd to "create_playlist_transition")
+            )
         }
+
         setObservers()
     }
 
@@ -127,6 +143,7 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     }
 
     override fun onPlaylistClick(playlist: Playlist) {
+        setupSharedAxisAnimations()
         findNavController().navigate(
             PlaylistsFragmentDirections.actionPlaylistsFragmentToTrackListFragment(
                 playlist

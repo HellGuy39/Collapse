@@ -67,7 +67,6 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="4dp"
-                android:fontFamily="@font/roboto_regular"
                 android:text="Equalizer"
                 android:textSize="24sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -222,11 +221,11 @@
                     style="@style/Widget.Material3.CardView.Outlined"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="4dp"
                     android:layout_marginEnd="4dp"
                     android:layout_marginBottom="8dp"
+                    android:layout_weight="1"
                     app:cardCornerRadius="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -239,13 +238,16 @@
                         android:orientation="vertical"
                         android:padding="12dp">
 
-                        <TextView
-                            android:id="@+id/tvBass"
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/bassSwitch"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
                             android:text="Bass"
-                            android:textSize="20sp" />
+                            android:textSize="20sp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <com.google.android.material.slider.Slider
                             android:id="@+id/bassBoostBand"
@@ -264,8 +266,8 @@
                     android:layout_marginTop="4dp"
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="8dp"
-                    app:cardCornerRadius="8dp"
                     android:layout_weight="1"
+                    app:cardCornerRadius="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/materialCardView"
@@ -277,13 +279,15 @@
                         android:orientation="vertical"
                         android:padding="12dp">
 
-                        <TextView
-                            android:id="@+id/tvSurround"
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/virtualizerSwitch"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
                             android:text="Surround"
-                            android:textSize="20sp" />
+                            android:textSize="20sp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <com.google.android.material.slider.Slider
                             android:id="@+id/surroundBand"

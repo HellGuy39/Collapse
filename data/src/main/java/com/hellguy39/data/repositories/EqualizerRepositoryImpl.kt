@@ -4,7 +4,9 @@ import android.content.SharedPreferences
 import com.hellguy39.domain.models.EqualizerSettings
 import com.hellguy39.domain.repositories.EqualizerSettingsRepository
 
-private const val IS_ENABLED = "isEnabled"
+private const val IS_EQ_ENABLED = "isEqEnabled"
+private const val IS_BASS_ENABLED = "isBassEnabled"
+private const val IS_VIRTUALIZER_ENABLED = "isVirtualizerEnabled"
 private const val BAND_1 = "band1"
 private const val BAND_2 = "band2"
 private const val BAND_3 = "band3"
@@ -18,7 +20,9 @@ class EqualizerRepositoryImpl(private val prefs: SharedPreferences): EqualizerSe
     override fun getEqualizerSettings(): EqualizerSettings {
 
         val equalizerSettings = EqualizerSettings(
-            isEnabled = prefs.getBoolean(IS_ENABLED, false),
+            isEqEnabled = prefs.getBoolean(IS_EQ_ENABLED, false),
+            isBassEnabled = prefs.getBoolean(IS_BASS_ENABLED, false),
+            isVirtualizerEnabled = prefs.getBoolean(IS_VIRTUALIZER_ENABLED, false),
             band1Level = prefs.getFloat(BAND_1, 0f),
             band2Level = prefs.getFloat(BAND_2, 0f),
             band3Level = prefs.getFloat(BAND_3, 0f),
@@ -34,7 +38,9 @@ class EqualizerRepositoryImpl(private val prefs: SharedPreferences): EqualizerSe
 
     override fun saveEqualizerSettings(equalizerSettings: EqualizerSettings) {
         prefs.edit().apply {
-            this.putBoolean(IS_ENABLED, equalizerSettings.isEnabled)
+            this.putBoolean(IS_EQ_ENABLED, equalizerSettings.isEqEnabled)
+            this.putBoolean(IS_VIRTUALIZER_ENABLED, equalizerSettings.isVirtualizerEnabled)
+            this.putBoolean(IS_BASS_ENABLED, equalizerSettings.isBassEnabled)
             this.putFloat(BAND_1, equalizerSettings.band1Level)
             this.putFloat(BAND_2, equalizerSettings.band2Level)
             this.putFloat(BAND_3, equalizerSettings.band3Level)
@@ -52,9 +58,15 @@ class EqualizerRepositoryImpl(private val prefs: SharedPreferences): EqualizerSe
         }.apply()
     }
 
-    override fun saveIsEnabled(isEnabled: Boolean) {
+    override fun saveEqSwitch(isEnabled: Boolean) {
         prefs.edit().apply {
-            this.putBoolean(IS_ENABLED, isEnabled)
+            this.putBoolean(IS_EQ_ENABLED, isEnabled)
+        }.apply()
+    }
+
+    override fun saveBassBoostSwitch(isEnabled: Boolean) {
+        prefs.edit().apply {
+            this.putBoolean(IS_BASS_ENABLED, isEnabled)
         }.apply()
     }
 
@@ -64,9 +76,15 @@ class EqualizerRepositoryImpl(private val prefs: SharedPreferences): EqualizerSe
         }.apply()
     }
 
-    override fun saveVirtualizer(virtualize: Float) {
+    override fun saveVirtualizerValue(virtualize: Float) {
         prefs.edit().apply {
             this.putFloat(BAND_VIRTUALIZER, virtualize)
+        }.apply()
+    }
+
+    override fun saveVirtualizerSwitch(isEnabled: Boolean) {
+        prefs.edit().apply {
+            this.putBoolean(IS_VIRTUALIZER_ENABLED, isEnabled)
         }.apply()
     }
 

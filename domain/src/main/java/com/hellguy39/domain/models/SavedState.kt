@@ -13,5 +13,5 @@ data class SavedState(
     var playerPosition: Long = 0,
     var position: Int = 0,
     var playerType: Enum<PlayerType> = PlayerType.Undefined,
-    var playlistType: PlaylistType = PlaylistType.Undefined
+    var playlistType: Enum<PlaylistType> = PlaylistType.Undefined
 ): Parcelable

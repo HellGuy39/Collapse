@@ -1,23 +1,19 @@
 package com.hellguy39.collapse.presentaton.view_holders
 
 import android.content.Context
-import android.view.MenuItem
 import android.view.View
-import androidx.annotation.MenuRes
-import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackItemBinding
 import com.hellguy39.collapse.presentaton.adapters.TracksAdapter
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
-import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.utils.PlaylistType
 
 class TrackViewHolder(
     v: View,
     private val getImageBitmapUseCase: GetImageBitmapUseCase,
-    private val favouriteTracksUseCases: FavouriteTracksUseCases,
     private val context: Context
 ): RecyclerView.ViewHolder(v) {
 
@@ -46,62 +42,14 @@ class TrackViewHolder(
         }
 
         binding.ibMore.setOnClickListener {
-            showMenu(
-                v = it,
-                menuRes = R.menu.track_item_menu,
-                listener = listener,
-                track = track,
-                type = type,
-                position = position
-            )
+            listener.onTrackMenuClick(track = track, position = position, playlistType = type)
         }
 
         if(isPlaying) {
-            binding.root.cardElevation = 8f
+            binding.root.setBackgroundColor(ResourcesCompat.getColor(context.resources, R.color.gray_25, null))
         } else {
-            binding.root.cardElevation = 0f
+            binding.root.setBackgroundColor(0)
         }
 
-    }
-
-    private fun showMenu(
-        v: View,
-        @MenuRes menuRes: Int,
-        listener: TracksAdapter.OnTrackListener,
-        track: Track,
-        type: Enum<PlaylistType>,
-        position: Int
-    ) {
-        val popup = PopupMenu(context,v)
-        popup.menuInflater.inflate(menuRes, popup.menu)
-
-        popup.setOnMenuItemClickListener { menuItem: MenuItem ->
-            when(menuItem.itemId) {
-                R.id.deleteFromPlaylist -> {
-                    listener.onDeleteFromPlaylist(track = track, position = position)
-                    true
-                }
-                R.id.addToFavourites -> {
-                    listener.onAddToFavourites(track = track)
-                    true
-                }
-                else -> false
-            }
-        }
-
-        when(type) {
-            PlaylistType.Custom -> { }
-            PlaylistType.Favourites -> {
-                popup.menu.findItem(R.id.addToFavourites).isVisible = false
-            }
-            PlaylistType.AllTracks -> {
-                popup.menu.findItem(R.id.deleteFromPlaylist).isVisible = false
-            }
-            PlaylistType.Artist -> {
-                popup.menu.findItem(R.id.deleteFromPlaylist).isVisible = false
-            }
-        }
-
-        popup.show()
     }
 }

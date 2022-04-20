@@ -10,4 +10,7 @@ interface FavouritesRepository {
 
     suspend fun deleteFavouriteTrack(track: Track)
 
+    suspend fun isTrackFavourite(track: Track): Boolean
+
+    suspend fun deleteFromFavouritesWithoutId(track: Track)
 }

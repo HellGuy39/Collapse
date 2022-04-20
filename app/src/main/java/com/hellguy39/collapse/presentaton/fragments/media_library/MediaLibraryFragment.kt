@@ -11,6 +11,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.transition.platform.MaterialFade
+import com.google.android.material.transition.platform.MaterialFadeThrough
+import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.MediaLibraryFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
@@ -32,6 +35,13 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
     lateinit var getImageBitmapUseCase: GetImageBitmapUseCase
 
     private lateinit var binding: MediaLibraryFragmentBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
+        reenterTransition = MaterialFadeThrough()//MaterialSharedAxis(MaterialSharedAxis.X,false)
+
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
