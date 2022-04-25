@@ -11,5 +11,5 @@ import com.hellguy39.data.models.RadioStationDb
     version = 1
 )
 abstract class RadioStationsDatabase : RoomDatabase() {
-    abstract fun radioStationsDao(): RadioStationsDao
+    abstract fun dao(): RadioStationsDao
 }

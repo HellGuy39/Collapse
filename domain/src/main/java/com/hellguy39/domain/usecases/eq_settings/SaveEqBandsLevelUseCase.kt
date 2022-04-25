@@ -4,12 +4,6 @@ import com.hellguy39.domain.repositories.EqualizerSettingsRepository
 
 class SaveEqBandsLevelUseCase(private val repository: EqualizerSettingsRepository) {
     operator fun invoke(levels: List<Short>) {
-        val newLevels = mutableListOf<Float>()
-
-        for (n in levels.indices) {
-            newLevels.add(levels[n].toFloat())
-        }
-
-        repository.saveBandsLevel(levels = newLevels)
+        repository.saveBandsLevel(levels = levels)
     }
 }

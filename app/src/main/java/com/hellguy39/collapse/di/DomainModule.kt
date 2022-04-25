@@ -2,10 +2,7 @@ package com.hellguy39.collapse.di
 
 import com.hellguy39.data.repositories.*
 import com.hellguy39.domain.repositories.TracksRepository
-import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
-import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
+import com.hellguy39.domain.usecases.*
 import com.hellguy39.domain.usecases.eq_settings.*
 import com.hellguy39.domain.usecases.favourites.*
 import com.hellguy39.domain.usecases.playlist.*
@@ -37,7 +34,7 @@ class DomainModule {
     @Singleton
     fun provideEqualizerSettingsUseCases(repository: EqualizerRepositoryImpl): EqualizerSettingsUseCases {
         return EqualizerSettingsUseCases(
-            getEqualizerSettings = GetEqualizerSettingsUseCase(repository),
+            getEqualizerSettingsUseCase = GetEqualizerSettingsUseCase(repository),
             saveEqualizerSettingsUseCase = SaveEqualizerSettingsUseCase(repository),
             saveEqPresetUseCase = SaveEqPresetUseCase(repository),
             saveEqSwitchUseCase = SaveEqSwitchUseCase(repository),
@@ -45,7 +42,8 @@ class DomainModule {
             saveBassBoostValueUseCase = SaveBassBoostValueUseCase(repository),
             saveVirtualizerValueUseCase = SaveVirtualizerValueUseCase(repository),
             saveBassBoostSwitchUseCase = SaveBassBoostSwitchUseCase(repository),
-            saveVirtualizerSwitchUseCase = SaveVirtualizerSwitchUseCase(repository)
+            saveVirtualizerSwitchUseCase = SaveVirtualizerSwitchUseCase(repository),
+            saveBandLevelUseCase = SaveBandLevelUseCase(repository)
         )
     }
 
@@ -101,6 +99,12 @@ class DomainModule {
             deleteFromFavouritesWithoutIdUseCase = DeleteFromFavouritesWithoutIdUseCase(repository),
             isTrackFavouriteUseCase = IsTrackFavouriteUseCase(repository)
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetEqualizerPropertiesUseCase(): GetEqualizerPropertiesUseCase {
+        return GetEqualizerPropertiesUseCase()
     }
 
     @Provides

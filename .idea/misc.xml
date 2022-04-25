@@ -5,8 +5,10 @@
       <map>
         <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/activity_main.xml" value="0.259375" />
         <entry key="app/src/main/res/drawable/bottom_sheet_rectangle.xml" value="0.23" />
+        <entry key="app/src/main/res/drawable/ic_baseline_play_circle_filled_24.xml" value="0.23" />
         <entry key="app/src/main/res/drawable/ic_round_arrow_back_ios_24.xml" value="0.248" />
         <entry key="app/src/main/res/drawable/ic_round_arrow_down_ios_24.xml" value="0.23" />
+        <entry key="app/src/main/res/drawable/ic_round_equalizer_24.xml" value="0.23" />
         <entry key="app/src/main/res/drawable/ic_round_pause_24.xml" value="0.248" />
         <entry key="app/src/main/res/drawable/ic_round_pause_24_small.xml" value="0.248" />
         <entry key="app/src/main/res/drawable/ic_round_play_arrow_24.xml" value="0.248" />
@@ -30,6 +32,7 @@
         <entry key="app/src/main/res/layout/notification_player.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/playlist_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/playlist_item.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/layout/playlist_menu_bottom_sheet.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/playlists_fragment.xml" value="0.27281494140625" />
         <entry key="app/src/main/res/layout/radio_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/radio_item.xml" value="0.29739583333333336" />

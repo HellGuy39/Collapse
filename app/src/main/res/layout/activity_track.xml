@@ -139,7 +139,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:backgroundTint="@android:color/transparent"
-                    android:src="@drawable/ic_round_skip_previous_24" />
+                    android:src="@drawable/ic_round_skip_previous_48" />
 
 
                 <ImageButton
@@ -148,7 +148,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:backgroundTint="@android:color/transparent"
-                    android:src="@drawable/ic_baseline_play_circle_filled_24" />
+                    android:src="@drawable/ic_baseline_play_circle_filled_64" />
 
                 <ImageButton
                     android:id="@+id/ibNextTrack"
@@ -156,7 +156,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:backgroundTint="@android:color/transparent"
-                    android:src="@drawable/ic_round_skip_next_24" />
+                    android:src="@drawable/ic_round_skip_next_48" />
 
                 <ImageButton
                     android:id="@+id/ibRepeatTrack"

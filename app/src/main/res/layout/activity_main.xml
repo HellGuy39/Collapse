@@ -104,7 +104,7 @@
                 android:layout_height="48dp"
                 android:layout_weight="0"
                 android:backgroundTint="@android:color/transparent"
-                android:src="@drawable/ic_round_skip_next_24" />
+                android:src="@drawable/ic_round_skip_next_48" />
 
         </LinearLayout>
 

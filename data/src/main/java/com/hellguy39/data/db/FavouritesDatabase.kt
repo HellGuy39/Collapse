@@ -11,5 +11,5 @@ import com.hellguy39.data.models.TrackDb
     exportSchema = false
 )
 abstract class FavouritesDatabase : RoomDatabase() {
-    abstract fun favouritesDao(): FavouritesDao
+    abstract fun dao(): FavouritesDao
 }

@@ -86,20 +86,20 @@ class DataModule {
     @Provides
     @Singleton
     fun provideRadioStationRepository(database: RadioStationsDatabase): RadioStationsRepositoryImpl {
-        return RadioStationsRepositoryImpl(database.radioStationsDao())
+        return RadioStationsRepositoryImpl(database.dao())
     }
 
 
     @Singleton
     @Provides
     fun providePlaylistsRepository(database: PlaylistsDatabase): PlaylistsRepositoryImpl {
-        return PlaylistsRepositoryImpl(database.playlistsDao())
+        return PlaylistsRepositoryImpl(database.dao())
     }
 
     @Provides
     @Singleton
     fun provideFavouritesRepository(database: FavouritesDatabase): FavouritesRepositoryImpl {
-        return FavouritesRepositoryImpl(favouritesDao = database.favouritesDao())
+        return FavouritesRepositoryImpl(favouritesDao = database.dao())
     }
 
     @Provides

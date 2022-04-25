@@ -17,6 +17,7 @@ import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackListFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.TracksAdapter
+import com.hellguy39.collapse.presentaton.fragments.trackMenuBottomSheet.PlaylistMenuBottomSheet
 import com.hellguy39.collapse.presentaton.fragments.trackMenuBottomSheet.TrackMenuBottomSheet
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
@@ -41,7 +42,8 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
     TracksAdapter.OnTrackListener,
     SearchView.OnQueryTextListener,
     View.OnClickListener,
-    TrackMenuEvents {
+    TrackMenuEvents,
+    PlaylistMenuEvents{
 
     companion object {
         fun newInstance() = TrackListFragment()
@@ -117,37 +119,6 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
         }
     }
 
-    private fun setupToolbarMenu(type: Enum<PlaylistType>) = when(type) {
-        PlaylistType.AllTracks -> {
-            binding.toolbar.menu.findItem(R.id.edit).isVisible = false
-            binding.toolbar.menu.findItem(R.id.delete).isVisible = false
-        }
-        PlaylistType.Favourites -> {
-            binding.toolbar.menu.findItem(R.id.edit).isVisible = false
-            binding.toolbar.menu.findItem(R.id.delete).isVisible = false
-        }
-        PlaylistType.Custom -> {
-            binding.toolbar.setOnMenuItemClickListener {
-                when(it.itemId) {
-                    R.id.edit -> {
-                        navigateToEditPlaylist()
-                        true
-                    }
-                    R.id.delete -> {
-                        showDeleteDialog()
-                        true
-                    }
-                    else -> false
-                }
-            }
-        }
-        PlaylistType.Artist -> {
-            binding.toolbar.menu.findItem(R.id.edit).isVisible = false
-            binding.toolbar.menu.findItem(R.id.delete).isVisible = false
-        }
-        else -> {}
-    }
-
     private fun setupToolbarImage(type: Enum<PlaylistType>) = when(type) {
         PlaylistType.AllTracks -> {
             binding.toolbarImage.visibility = View.GONE
@@ -170,35 +141,6 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
                 binding.toolbarImage.visibility = View.GONE
         }
         else -> {}
-    }
-
-
-    private fun navigateToEditPlaylist() {
-
-        setFragmentResultListener("updatedPlaylist") { requestKey, bundle ->
-            receivedPlaylist = bundle.get("playlist") as Playlist
-            onTracksReceived(receivedPlaylist.tracks, PlaylistType.Custom, receivedPlaylist.name)
-        }
-
-        findNavController().navigate(
-            TrackListFragmentDirections.actionTrackListFragmentToCreatePlaylistFragment(
-                receivedPlaylist,
-                Action.Update
-            )
-        )
-    }
-
-    private fun showDeleteDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Are you sure want to delete this playlist?")
-            .setNeutralButton("Cancel") { dialog, which ->
-                dialog.cancel()
-            }
-            .setPositiveButton("Yes") { dialog, which ->
-                dataViewModel.deletePlaylist(playlist = receivedPlaylist)
-                findNavController().popBackStack()
-            }
-            .show()
     }
 
     private fun setAllTracksObserver() {
@@ -249,7 +191,15 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
         binding.tvPlaylistName.text = receivedPlaylist.name
 
         setupToolbarImage(receivedPlaylist.type)
-        setupToolbarMenu(receivedPlaylist.type)
+        binding.toolbar.menu.findItem(R.id.more).setOnMenuItemClickListener {
+            val bottomSheet = PlaylistMenuBottomSheet(
+                convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase,
+                playlist = receivedPlaylist,
+                listener = this
+            )
+            bottomSheet.show(childFragmentManager, PlaylistMenuBottomSheet.PLAYLIST_MENU_TAG)
+            true
+        }
 
         if (playlistType == PlaylistType.AllTracks || playlistType == PlaylistType.Favourites) {
             receivedPlaylist = Playlist(
@@ -414,5 +364,39 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
             startWithShuffle = startWithShuffle,
             skipPauseClick = skipPauseClick
         ))
+    }
+
+    override fun onEditPlaylist() {
+        setFragmentResultListener("updatedPlaylist") { requestKey, bundle ->
+            receivedPlaylist = bundle.get("playlist") as Playlist
+            onTracksReceived(receivedPlaylist.tracks, PlaylistType.Custom, receivedPlaylist.name)
+        }
+
+        navigateToEditPlaylist()
+    }
+
+    override fun onDeletePlaylist() {
+        showDeleteDialog()
+    }
+
+    private fun navigateToEditPlaylist() = findNavController().navigate(
+        TrackListFragmentDirections.actionTrackListFragmentToCreatePlaylistFragment(
+            receivedPlaylist,
+            Action.Update
+        )
+    )
+
+
+    private fun showDeleteDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Are you sure want to delete this playlist?")
+            .setNeutralButton("Cancel") { dialog, which ->
+                dialog.cancel()
+            }
+            .setPositiveButton("Yes") { dialog, which ->
+                dataViewModel.deletePlaylist(playlist = receivedPlaylist)
+                findNavController().popBackStack()
+            }
+            .show()
     }
 }

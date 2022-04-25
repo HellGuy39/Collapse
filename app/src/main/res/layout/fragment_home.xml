@@ -14,6 +14,7 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            app:menu="@menu/more_top_menu"
             tools:title="Good afternoon" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -22,7 +23,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,8 +33,244 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:layout_marginEnd="8dp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:srcCompat="@drawable/ic_round_play_arrow_24" />
+
+                        <TextView
+                            android:id="@+id/tvSaveState"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Continue?"
+                            android:textSize="22sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:layout_gravity="center"
+                            android:layout_marginEnd="8dp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:srcCompat="@drawable/ic_round_audiotrack_24" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvTrackName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="22sp"
+                                tools:text="Smells like teen spirit" />
+
+                            <TextView
+                                android:id="@+id/tvArtistName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                tools:text="Nirvana" />
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderSaveStateTrackTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:value="0.5" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:orientation="horizontal">
+
+                        <ImageButton
+                            android:id="@+id/ibShuffle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:backgroundTint="@android:color/transparent"
+                            android:src="@drawable/ic_round_shuffle_24" />
+
+
+                        <ImageButton
+                            android:id="@+id/ibPreviousTrack"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_gravity="center"
+                            android:backgroundTint="@android:color/transparent"
+                            android:src="@drawable/ic_round_skip_previous_48" />
+
+
+                        <ImageButton
+                            android:id="@+id/ibPlayPause"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_gravity="center"
+                            android:backgroundTint="@android:color/transparent"
+                            android:src="@drawable/ic_round_play_arrow_48" />
+
+                        <ImageButton
+                            android:id="@+id/ibNextTrack"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_gravity="center"
+                            android:backgroundTint="@android:color/transparent"
+                            android:src="@drawable/ic_round_skip_next_48" />
+
+                        <ImageButton
+                            android:id="@+id/ibRepeatTrack"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:backgroundTint="@android:color/transparent"
+                            android:src="@drawable/ic_round_repeat_24" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/ic_round_access_time_24" />
+
+                    <TextView
+                        android:id="@+id/rvRecent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="22sp"
+                        android:text="Recent" />
+                </LinearLayout>
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_marginTop="8dp"
+                    android:id="@+id/rvRecentPlaylists"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardStat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_round_dashboard_24" />
+
+                <TextView
+                        android:id="@+id/tvStats"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:text="Statistic"
+                        android:textSize="22sp" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="0"
+                        android:src="@drawable/ic_round_arrow_forward_ios_24" />
+
+            </LinearLayout>
+
+
+        </com.google.android.material.card.MaterialCardView>
+
+
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardEQ"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:transitionName="equalizer_transition"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -47,14 +283,16 @@
                         android:layout_height="match_parent"
                         android:orientation="horizontal">
 
-                        <ImageView
+                        <ImageButton
+                            android:id="@+id/ivEq"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:layout_gravity="center"
                             android:layout_marginEnd="8dp"
+                            android:background="@android:color/transparent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:srcCompat="@drawable/ic_round_equalizer_24" />
+                            android:src="@drawable/ic_round_equalizer_24" />
 
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -74,13 +312,14 @@
                         android:orientation="horizontal">
 
                         <ImageView
+                            android:id="@+id/ivBass"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:layout_gravity="center"
                             android:layout_marginEnd="8dp"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:srcCompat="@drawable/ic_round_speaker_24" />
+                            android:src="@drawable/ic_round_speaker_24" />
 
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -100,13 +339,14 @@
                         android:orientation="horizontal">
 
                         <ImageView
+                            android:id="@+id/ivSurround"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:layout_gravity="center"
                             android:layout_marginEnd="8dp"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:srcCompat="@drawable/ic_round_surround_sound_24" />
+                            android:src="@drawable/ic_round_surround_sound_24" />
 
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -141,7 +381,7 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/tvFavourites"
+                            android:id="@+id/tvEqAdvanced"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"

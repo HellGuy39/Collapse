@@ -14,5 +14,5 @@ import com.hellguy39.data.type_converters.PlaylistTypeConverter
 )
 @TypeConverters(PlaylistTypeConverter::class)
 abstract class PlaylistsDatabase : RoomDatabase() {
-    abstract fun playlistsDao(): PlaylistsDao
+    abstract fun dao(): PlaylistsDao
 }

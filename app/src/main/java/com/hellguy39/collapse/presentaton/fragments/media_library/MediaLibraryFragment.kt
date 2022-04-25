@@ -38,9 +38,9 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
+        //exitTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
         reenterTransition = MaterialFadeThrough()//MaterialSharedAxis(MaterialSharedAxis.X,false)
-
+        enterTransition = MaterialFadeThrough()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

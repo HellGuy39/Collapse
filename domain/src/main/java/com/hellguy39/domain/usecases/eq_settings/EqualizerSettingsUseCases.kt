@@ -1,7 +1,7 @@
 package com.hellguy39.domain.usecases.eq_settings
 
 class EqualizerSettingsUseCases(
-    val getEqualizerSettings: GetEqualizerSettingsUseCase,
+    val getEqualizerSettingsUseCase: GetEqualizerSettingsUseCase,
     val saveEqualizerSettingsUseCase: SaveEqualizerSettingsUseCase,
     val saveEqSwitchUseCase: SaveEqSwitchUseCase,
     val saveBassBoostSwitchUseCase: SaveBassBoostSwitchUseCase,
@@ -9,5 +9,6 @@ class EqualizerSettingsUseCases(
     val saveEqBandsLevelUseCase: SaveEqBandsLevelUseCase,
     val saveEqPresetUseCase: SaveEqPresetUseCase,
     val saveBassBoostValueUseCase: SaveBassBoostValueUseCase,
-    val saveVirtualizerValueUseCase: SaveVirtualizerValueUseCase
+    val saveVirtualizerValueUseCase: SaveVirtualizerValueUseCase,
+    val saveBandLevelUseCase: SaveBandLevelUseCase
 )

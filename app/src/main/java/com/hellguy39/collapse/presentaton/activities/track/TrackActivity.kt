@@ -195,9 +195,9 @@ class TrackActivity : AppCompatActivity(),
 
     private fun setIsPlayingObserver() = PlayerService.isPlaying().observe(this) {
         if (it) {
-            binding.ibPlayPause.setImageResource(R.drawable.ic_baseline_pause_circle_filled_24)
+            binding.ibPlayPause.setImageResource(R.drawable.ic_baseline_pause_circle_filled_64)
         } else {
-            binding.ibPlayPause.setImageResource(R.drawable.ic_baseline_play_circle_filled_24)
+            binding.ibPlayPause.setImageResource(R.drawable.ic_baseline_play_circle_filled_64)
         }
     }
 
