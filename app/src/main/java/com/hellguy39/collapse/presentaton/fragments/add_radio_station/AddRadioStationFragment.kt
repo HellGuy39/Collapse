@@ -3,13 +3,10 @@ package com.hellguy39.collapse.presentaton.fragments.add_radio_station
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
-import android.util.TypedValue
 import android.view.View
 import android.widget.ArrayAdapter
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.ColorInt
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
@@ -17,16 +14,17 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.transition.platform.MaterialContainerTransform
-import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.AddRadioStationFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
 import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
+import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
 import com.hellguy39.domain.utils.Protocol
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.InputStream
@@ -40,6 +38,9 @@ class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
 
     @Inject
     lateinit var convertBitmapToByteArrayUseCase: ConvertBitmapToByteArrayUseCase
+
+    @Inject
+    lateinit var getColorFromThemeUseCase: GetColorFromThemeUseCase
 
     companion object {
         fun newInstance() = AddRadioStationFragment()
@@ -65,15 +66,15 @@ class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val typedValue = TypedValue()
-        val theme = requireContext().theme
-        theme.resolveAttribute(com.google.android.material.R.attr.colorSurface, typedValue, true)
-        @ColorInt val color = typedValue.data
-
         sharedElementEnterTransition = MaterialContainerTransform().apply {
             drawingViewId = R.id.fragmentContainer
             //scrimColor = Color.TRANSPARENT
-            setAllContainerColors(color)
+            setAllContainerColors(
+                getColorFromThemeUseCase.invoke(
+                    requireActivity().theme,
+                    com.google.android.material.R.attr.colorSurface
+                )
+            )
         }
 
         enterTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
@@ -90,9 +91,7 @@ class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
 
         binding.fabAdd.hide()
 
-        binding.topAppBar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
+        binding.topAppBar.setOnBackFragmentNavigation(findNavController())
 
         pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
             if (it != null) {
@@ -141,7 +140,7 @@ class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
         val adapter = ArrayAdapter(requireContext(), R.layout.list_item, protocols)
         binding.acProtocol.setAdapter(adapter)
         binding.acProtocol.setText(binding.acProtocol.adapter.getItem(0).toString(), false)
-        binding.acProtocol.setOnItemClickListener { adapterView, view, i, l ->
+        binding.acProtocol.setOnItemClickListener { _, _, i, _ ->
             when (binding.acProtocol.adapter.getItem(i).toString()) {
                 Protocol.HLS.name -> selectedProtocol = Protocol.HLS
                 Protocol.DASH.name -> selectedProtocol = Protocol.DASH

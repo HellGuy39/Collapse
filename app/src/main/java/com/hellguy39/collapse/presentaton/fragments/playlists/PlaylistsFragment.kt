@@ -17,6 +17,8 @@ import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.PlaylistsAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.getVerticalLayoutManager
+import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 import dagger.hilt.android.AndroidEntryPoint
@@ -68,9 +70,7 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
         postponeEnterTransition()
 
         binding = PlaylistsFragmentBinding.bind(view)
-        binding.topAppBar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
+        binding.topAppBar.setOnBackFragmentNavigation(findNavController())
 
         val searchItem = binding.topAppBar.menu.findItem(R.id.search)
         searchView = searchItem.actionView as SearchView
@@ -101,11 +101,7 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
             convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase
         )
 
-        binding.rvPlaylists.layoutManager = LinearLayoutManager(
-            context,
-            LinearLayoutManager.VERTICAL,
-            false
-        )
+        binding.rvPlaylists.layoutManager = getVerticalLayoutManager(context)
 
         binding.rvPlaylists.adapter = adapter
 
@@ -113,11 +109,6 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
             startPostponedEnterTransition()
         }
     }
-
-//    override fun onResume() {
-//        super.onResume()
-//        setObservers()
-//    }
 
     private  fun setObservers() {
         dataViewModel.getAllPlaylists().observe(viewLifecycleOwner) {

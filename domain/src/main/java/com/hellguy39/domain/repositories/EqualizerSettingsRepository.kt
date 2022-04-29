@@ -10,6 +10,10 @@ interface EqualizerSettingsRepository {
 
     fun savePreset(preset: Short)
 
+    fun saveReverbPreset(preset: Short)
+
+    fun saveReverbSwitch(isEnabled: Boolean)
+
     fun saveEqSwitch(isEnabled: Boolean)
 
     fun saveBassBoostSwitch(isEnabled: Boolean)

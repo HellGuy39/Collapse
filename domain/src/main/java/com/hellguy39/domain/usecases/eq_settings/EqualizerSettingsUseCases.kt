@@ -10,5 +10,7 @@ class EqualizerSettingsUseCases(
     val saveEqPresetUseCase: SaveEqPresetUseCase,
     val saveBassBoostValueUseCase: SaveBassBoostValueUseCase,
     val saveVirtualizerValueUseCase: SaveVirtualizerValueUseCase,
-    val saveBandLevelUseCase: SaveBandLevelUseCase
+    val saveBandLevelUseCase: SaveBandLevelUseCase,
+    val saveReverbPresetUseCase: SaveReverbPresetUseCase,
+    val saveReverbSwitchUseCase: SaveReverbSwitchUseCase
 )

@@ -2,8 +2,13 @@ package com.hellguy39.collapse.utils
 
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
+import android.media.audiofx.PresetReverb
 import android.media.audiofx.Virtualizer
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.google.android.exoplayer2.audio.AuxEffectInfo
+import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.domain.models.EqualizerProperties
 import com.hellguy39.domain.models.EqualizerSettings
 import com.hellguy39.domain.usecases.GetEqualizerPropertiesUseCase
@@ -14,20 +19,36 @@ class AudioEffectController(
     private val equalizerSettingsUseCases: EqualizerSettingsUseCases
 ) {
     private val equalizerProperties: EqualizerProperties = getEqualizerPropertiesUseCase.invoke()
-    private val equalizerSettings: EqualizerSettings = equalizerSettingsUseCases.getEqualizerSettingsUseCase.invoke()
+    private val equalizerSettings = MutableLiveData<EqualizerSettings>(
+        equalizerSettingsUseCases.getEqualizerSettingsUseCase.invoke()
+    )
 
     private var virtualizer: Virtualizer? = null
     private var bassBoost: BassBoost? = null
     private var eq: Equalizer? = null
+    private var reverb: PresetReverb? = null
+
+    private val reverbPresetList = listOf(
+        PresetReverb.PRESET_NONE,
+        PresetReverb.PRESET_SMALLROOM,
+        PresetReverb.PRESET_MEDIUMROOM,
+        PresetReverb.PRESET_LARGEROOM,
+        PresetReverb.PRESET_MEDIUMHALL,
+        PresetReverb.PRESET_LARGEHALL,
+        PresetReverb.PRESET_PLATE
+    )
+
+    fun getReverbPresetList(): List<Short> = reverbPresetList
 
     fun getProperties(): EqualizerProperties = equalizerProperties
 
-    fun getCurrentEqualizerSettings(): EqualizerSettings = equalizerSettings
+    fun getCurrentSettings(): LiveData<EqualizerSettings> = equalizerSettings
 
     fun init(audioSessionId: Int) {
         virtualizer = Virtualizer(1000, audioSessionId)
         eq = Equalizer(1000, audioSessionId)
         bassBoost = BassBoost(1000, audioSessionId)
+        reverb = PresetReverb(1000, audioSessionId)
 
         applySettings()
     }
@@ -57,6 +78,8 @@ class AudioEffectController(
             setBassEnabled(settings.isBassEnabled)
             setBassStrength(settings.bandVirtualizer)
         }
+
+        reverb?.preset = settings.reverbPreset
     }
 
     //***** Equalizer
@@ -64,24 +87,33 @@ class AudioEffectController(
     fun setEqEnabled(enabled: Boolean) {
         saveEqSwitch(enabled)
         eq?.enabled = enabled
+        equalizerSettings.value?.isEqEnabled = enabled
     }
 
     fun setBandLevel(band: Short, level: Short) {
         saveBandLevel(band, level)
         eq?.setBandLevel(band, level)
         when(band) {
-            (0).toShort() -> equalizerSettings.band1Level = level
-            (1).toShort() -> equalizerSettings.band2Level = level
-            (2).toShort() -> equalizerSettings.band3Level = level
-            (3).toShort() -> equalizerSettings.band4Level = level
-            (4).toShort() -> equalizerSettings.band5Level = level
+            (0).toShort() -> equalizerSettings.value?.band1Level = level
+            (1).toShort() -> equalizerSettings.value?.band2Level = level
+            (2).toShort() -> equalizerSettings.value?.band3Level = level
+            (3).toShort() -> equalizerSettings.value?.band4Level = level
+            (4).toShort() -> equalizerSettings.value?.band5Level = level
         }
     }
 
     fun setPreset(preset: Short) {
         savePreset(preset)
         eq?.usePreset(preset)
-        equalizerSettings.preset = preset
+        equalizerSettings.value?.preset = preset
+    }
+
+    private fun toPresetMode() {
+        //equalizerSettings.value?.band1Level = eq?.getBandLevel(0) ?: return
+    }
+
+    private fun toCustomMode() {
+
     }
 
     //***** BassBoost
@@ -89,13 +121,13 @@ class AudioEffectController(
     fun setBassStrength(value: Short) {
         saveBassBoostValue(value)
         bassBoost?.setStrength(value)
-        equalizerSettings.bandBassBoost = value
+        equalizerSettings.value?.bandBassBoost = value
     }
 
     fun setBassEnabled(enabled: Boolean) {
         saveBassBoostSwitch(enabled)
         bassBoost?.enabled = enabled
-        equalizerSettings.isBassEnabled = enabled
+        equalizerSettings.value?.isBassEnabled = enabled
     }
 
     //***** Virtualize
@@ -103,16 +135,38 @@ class AudioEffectController(
     fun setVirtualizeStrength(value: Short) {
         saveVirtualizerValue(value)
         virtualizer?.setStrength(value)
-        equalizerSettings.bandVirtualizer = value
+        equalizerSettings.value?.bandVirtualizer = value
     }
 
     fun setVirtualizeEnabled(enabled: Boolean) {
         saveVirtualizerSwitch(enabled)
         virtualizer?.enabled = enabled
-        equalizerSettings.isVirtualizerEnabled = enabled
+        equalizerSettings.value?.isVirtualizerEnabled = enabled
+    }
+
+    //***** Reverb
+
+    fun setReverbPreset(preset: Short) {
+        saveReverbPreset(preset)
+        reverb?.preset = preset
+        equalizerSettings.value?.reverbPreset = preset
+    }
+
+    fun setReverbEnabled(enabled: Boolean) {
+        saveReverbSwitch(enabled)
+        reverb?.enabled = enabled
+        equalizerSettings.value?.isReverbEnabled = enabled
     }
 
     //***** Save options
+
+    private fun saveReverbSwitch(enabled: Boolean) {
+        equalizerSettingsUseCases.saveReverbSwitchUseCase.invoke(enabled)
+    }
+
+    private fun saveReverbPreset(preset: Short) {
+        equalizerSettingsUseCases.saveReverbPresetUseCase.invoke(preset)
+    }
 
     private fun saveVirtualizerSwitch(isEnabled: Boolean) {
         equalizerSettingsUseCases.saveVirtualizerSwitchUseCase.invoke(isEnabled = isEnabled)

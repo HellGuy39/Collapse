@@ -43,7 +43,9 @@ class DomainModule {
             saveVirtualizerValueUseCase = SaveVirtualizerValueUseCase(repository),
             saveBassBoostSwitchUseCase = SaveBassBoostSwitchUseCase(repository),
             saveVirtualizerSwitchUseCase = SaveVirtualizerSwitchUseCase(repository),
-            saveBandLevelUseCase = SaveBandLevelUseCase(repository)
+            saveBandLevelUseCase = SaveBandLevelUseCase(repository),
+            saveReverbPresetUseCase = SaveReverbPresetUseCase(repository),
+            saveReverbSwitchUseCase = SaveReverbSwitchUseCase(repository)
         )
     }
 
@@ -123,6 +125,12 @@ class DomainModule {
     @Singleton
     fun provideGetColorFromThemeUseCase(): GetColorFromThemeUseCase {
         return GetColorFromThemeUseCase()
+    }
+
+    @Provides
+    @Singleton
+    fun provideDateFormatUseCase(): DateFormatUseCase {
+        return DateFormatUseCase()
     }
 
 }

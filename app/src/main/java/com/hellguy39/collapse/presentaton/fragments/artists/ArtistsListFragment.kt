@@ -13,6 +13,8 @@ import com.hellguy39.collapse.databinding.FragmentArtistsListBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.ArtistsAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
+import com.hellguy39.collapse.utils.getVerticalLayoutManager
+import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Playlist
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -47,10 +49,7 @@ class ArtistsListFragment : Fragment(R.layout.fragment_artists_list),
         searchView = binding.topAppBar.menu.findItem(R.id.search).actionView as SearchView
         searchView.setOnQueryTextListener(this)
 
-        binding.topAppBar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
-
+        binding.topAppBar.setOnBackFragmentNavigation(findNavController())
         setArtistsObserver()
     }
 
@@ -66,11 +65,7 @@ class ArtistsListFragment : Fragment(R.layout.fragment_artists_list),
     )
 
     private fun setupRecyclerView() {
-        binding.rvArtists.layoutManager = LinearLayoutManager(
-            context,
-            LinearLayoutManager.VERTICAL,
-            false
-        )
+        binding.rvArtists.layoutManager = getVerticalLayoutManager(requireContext())
         binding.rvArtists.adapter = ArtistsAdapter(
             playlists = playlists,
             listener = this

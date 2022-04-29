@@ -15,4 +15,6 @@ data class EqualizerSettings(
     var isBassEnabled: Boolean = false,
     var bandBassBoost: Short = 0,
 
+    var isReverbEnabled: Boolean = false,
+    var reverbPreset: Short = 0 // Preset none
 )

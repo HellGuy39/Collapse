@@ -2,7 +2,9 @@ package com.hellguy39.collapse.presentaton.fragments.equalizer
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.CompoundButton
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -34,6 +36,16 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
     companion object {
         fun newInstance() = EqualizerFragment()
         private const val STEP_SIZE = 1f
+
+        val reverbPresetNames = listOf(
+            "None",
+            "Small room",
+            "Medium room",
+            "Large room",
+            "Medium hall",
+            "Large hall",
+            "Plate"
+        )
     }
 
     //private lateinit var viewModel: EqualizerViewModel
@@ -90,6 +102,7 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
         binding.eqSwitch.setOnCheckedChangeListener(this)
         binding.virtualizerSwitch.setOnCheckedChangeListener(this)
         binding.bassSwitch.setOnCheckedChangeListener(this)
+        binding.reverbSwitch.setOnCheckedChangeListener(this)
 
         binding.band1.apply {
             valueFrom = (lowestBandLevel / 100).toFloat()
@@ -150,14 +163,39 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
             binding.eqSwitch.isEnabled = false
             binding.surroundBand.isEnabled = false
         }
+
+        val reverbPresetAdapter = ArrayAdapter(requireContext(), R.layout.list_item, reverbPresetNames)
+        binding.acReverb.setAdapter(reverbPresetAdapter)
+
+        binding.acReverb.setOnItemClickListener { adapterView, view, i, l ->
+            val item = binding.acReverb.adapter.getItem(i).toString()
+            val presets = effectController.getReverbPresetList()
+
+            when(item) {
+                reverbPresetNames[0] -> effectController.setReverbPreset(presets[0])
+                reverbPresetNames[1] -> effectController.setReverbPreset(presets[1])
+                reverbPresetNames[2] -> effectController.setReverbPreset(presets[2])
+                reverbPresetNames[3] -> effectController.setReverbPreset(presets[3])
+                reverbPresetNames[4] -> effectController.setReverbPreset(presets[4])
+                reverbPresetNames[5] -> effectController.setReverbPreset(presets[5])
+                reverbPresetNames[6] -> effectController.setReverbPreset(presets[6])
+            }
+        }
+
     }
 
     private fun displayAudioEffectControllerValues() {
-        val settings = effectController.getCurrentEqualizerSettings()
+        val settings = effectController.getCurrentSettings().value ?: return
 
         binding.eqSwitch.isChecked = settings.isEqEnabled
         binding.bassSwitch.isChecked = settings.isBassEnabled
         binding.virtualizerSwitch.isChecked = settings.isVirtualizerEnabled
+
+        binding.band1.value = (settings.band1Level / 100).toFloat()
+        binding.band2.value = (settings.band2Level / 100).toFloat()
+        binding.band3.value = (settings.band3Level / 100).toFloat()
+        binding.band4.value = (settings.band4Level / 100).toFloat()
+        binding.band5.value = (settings.band5Level / 100).toFloat()
 
         if (binding.bassBoostBand.isEnabled)
             binding.bassBoostBand.value = (settings.bandBassBoost / 100).toFloat()
@@ -292,6 +330,7 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
             binding.eqSwitch.id -> effectController.setEqEnabled(b)
             binding.bassSwitch.id -> effectController.setBassEnabled(b)
             binding.virtualizerSwitch.id -> effectController.setVirtualizeEnabled(b)
+            binding.reverbSwitch.id -> effectController.setReverbEnabled(b)
         }
     }
 }

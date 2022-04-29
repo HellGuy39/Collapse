@@ -1,13 +1,10 @@
 package com.hellguy39.collapse.presentaton.fragments.create_playlist
 
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.ColorInt
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
@@ -23,11 +20,13 @@ import com.hellguy39.collapse.databinding.CreatePlaylistFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.SelectedTracks
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
+import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
 import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.InputStream
@@ -42,6 +41,9 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
 
     @Inject
     lateinit var convertBitmapToByteArrayUseCase: ConvertBitmapToByteArrayUseCase
+
+    @Inject
+    lateinit var getColorFromThemeUseCase: GetColorFromThemeUseCase
 
     companion object {
         fun newInstance() = CreatePlaylistFragment()
@@ -60,15 +62,14 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val typedValue = TypedValue()
-        val theme = requireContext().theme
-        theme.resolveAttribute(com.google.android.material.R.attr.colorSurface, typedValue, true)
-        @ColorInt val color = typedValue.data
-
         sharedElementEnterTransition = MaterialContainerTransform().apply {
             drawingViewId = R.id.fragmentContainer
             //scrimColor = Color.TRANSPARENT
-            setAllContainerColors(color)
+            setAllContainerColors(getColorFromThemeUseCase.invoke(
+                requireActivity().theme,
+                com.google.android.material.R.attr.colorSurface
+                )
+            )
         }
 
         enterTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
@@ -114,7 +115,8 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
         super.onViewCreated(view, savedInstanceState)
         binding = CreatePlaylistFragmentBinding.bind(view)
 
-        binding.topAppBar.setNavigationOnClickListener { findNavController().popBackStack() }
+        binding.topAppBar.setOnBackFragmentNavigation(findNavController())
+
         binding.fabAdd.setOnClickListener(this)
         binding.cardSelectTracks.setOnClickListener(this)
         binding.ivImage.setOnClickListener(this)

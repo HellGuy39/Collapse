@@ -15,6 +15,8 @@ import com.hellguy39.collapse.databinding.SelectTracksFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.SelectableTracksAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
+import com.hellguy39.collapse.utils.getVerticalLayoutManager
+import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import dagger.hilt.android.AndroidEntryPoint
@@ -62,16 +64,9 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
         super.onViewCreated(view, savedInstanceState)
         binding = SelectTracksFragmentBinding.bind(view)
 
-        binding.topAppBar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
-
+        binding.topAppBar.setOnBackFragmentNavigation(findNavController())
         binding.rvTracks.adapter = adapter
-        binding.rvTracks.layoutManager = LinearLayoutManager(
-            context,
-            LinearLayoutManager.VERTICAL,
-            false
-        )
+        binding.rvTracks.layoutManager = getVerticalLayoutManager(requireContext())
 
         setObservers()
     }
@@ -101,12 +96,6 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
                 adapter.addSelectedPosition(allTracks.indexOf(selectedTracks[n]))
             }
         }
-
-//        for (n in allTracks.indices) {
-//            if (selectedTracks.contains(allTracks[n])) {
-//                allTracks[n].isChecked = true
-//            }
-//        }
 
         val position = binding.rvTracks.adapter?.itemCount ?: 0
         binding.rvTracks.adapter?.notifyItemRangeInserted(position, allTracks.size)

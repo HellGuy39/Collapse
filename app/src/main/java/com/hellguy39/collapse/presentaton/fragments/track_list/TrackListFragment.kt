@@ -10,7 +10,6 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.hellguy39.collapse.R
@@ -22,6 +21,8 @@ import com.hellguy39.collapse.presentaton.fragments.trackMenuBottomSheet.TrackMe
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.getVerticalLayoutManager
+import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.ServiceContentWrapper
 import com.hellguy39.domain.models.Track
@@ -93,9 +94,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
 
         setupRecyclerView()
 
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
+        binding.toolbar.setOnBackFragmentNavigation(findNavController())
 
         binding.btnPlay.setOnClickListener(this)
         binding.btnShuffle.setOnClickListener(this)
@@ -217,11 +216,8 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
         binding.rvTrackList.doOnPreDraw {
             startPostponedEnterTransition()
         }
-        binding.rvTrackList.layoutManager = LinearLayoutManager(
-            context,
-            LinearLayoutManager.VERTICAL,
-            false
-        )
+        binding.rvTrackList.layoutManager = getVerticalLayoutManager(requireContext())
+
         adapter = TracksAdapter(
             trackList = recyclerTracks,
             resources = resources,

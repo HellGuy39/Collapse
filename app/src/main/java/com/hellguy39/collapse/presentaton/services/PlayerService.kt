@@ -5,10 +5,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.media.audiofx.BassBoost
-import android.media.audiofx.Equalizer
-import android.media.audiofx.Virtualizer
 import android.net.Uri
+import android.os.CountDownTimer
 import android.os.IBinder
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -27,18 +25,18 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.hellguy39.collapse.presentaton.adapters.DescriptionAdapter
 import com.hellguy39.collapse.utils.AudioEffectController
-import com.hellguy39.domain.models.*
-import com.hellguy39.domain.usecases.eq_settings.EqualizerSettingsUseCases
-import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
-import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
-import com.hellguy39.domain.usecases.radio.RadioStationUseCases
+import com.hellguy39.domain.models.RadioStation
+import com.hellguy39.domain.models.SavedState
+import com.hellguy39.domain.models.ServiceContentWrapper
+import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.state.SavedServiceStateUseCases
-import com.hellguy39.domain.usecases.tracks.TracksUseCases
 import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.utils.PlaylistType
 import com.hellguy39.domain.utils.Protocol
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.concurrent.ThreadLocalRandom
 import javax.inject.Inject
 
@@ -48,18 +46,6 @@ class PlayerService : LifecycleService() {
 
     @Inject
     lateinit var savedServiceStateUseCases: SavedServiceStateUseCases
-
-    @Inject
-    lateinit var playlistUseCases: PlaylistUseCases
-
-    @Inject
-    lateinit var radioStationUseCases: RadioStationUseCases
-
-    @Inject
-    lateinit var favouriteTracksUseCases: FavouriteTracksUseCases
-
-    @Inject
-    lateinit var tracksUseCases: TracksUseCases
 
     @Inject
     lateinit var effectController: AudioEffectController
@@ -84,6 +70,7 @@ class PlayerService : LifecycleService() {
         private val isShuffleLiveData = MutableLiveData<Boolean>()
         private val repeatModeLiveData = MutableLiveData(Player.REPEAT_MODE_OFF)
         private val deviceVolumeLiveData = MutableLiveData<Int>()
+        private val trackDurationLiveData = MutableLiveData<Long>(0)
 
         fun startService(context: Context, contentWrapper: ServiceContentWrapper) {
 
@@ -139,12 +126,16 @@ class PlayerService : LifecycleService() {
 
         fun isShuffle(): LiveData<Boolean> = isShuffleLiveData
         fun isPlaying(): LiveData<Boolean> = isPlayingLiveData
-        fun getCurrentPosition(): Long = exoPlayer.currentPosition
+        //fun getCurrentPosition(): Long = exoPlayer.currentPosition
         fun getCurrentMetadata(): LiveData<MediaMetadata> = mediaMetadataLiveData
         fun getContentPosition(): LiveData<Int> = contentPositionLiveData
+
         fun getDuration(): Long = exoPlayer.duration
+
         fun isRepeat(): Int = exoPlayer.repeatMode
         fun getRepeatMode(): LiveData<Int> = repeatModeLiveData
+
+        fun getCurrentDuration(): LiveData<Long> = trackDurationLiveData
 
         //Control
         fun onPlay() {
@@ -167,46 +158,24 @@ class PlayerService : LifecycleService() {
             exoPlayer.shuffleModeEnabled = b
         }
         fun onRepeat(n: Int) { exoPlayer.repeatMode = n }
-        fun onSeekTo(pos: Long) = exoPlayer.seekTo(pos)
+        fun onSeekTo(pos: Long) {
+            exoPlayer.seekTo(pos)
+            trackDurationLiveData.value = pos
+        }
+
+        private var timer: CountDownTimer? = null
+        private const val TIMER_INTERVAL: Long = 250
     }
 
     override fun onCreate() {
         super.onCreate()
         exoPlayer = ExoPlayer.Builder(this).build()
 
+        effectController.init(exoPlayer.audioSessionId)
+
         deviceVolumeLiveData.value = exoPlayer.deviceVolume
 
-        exoPlayer.addListener(object : Player.Listener {
-
-            override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
-                mediaMetadataLiveData.value = mediaMetadata
-                contentPositionLiveData.value = exoPlayer.currentMediaItemIndex
-            }
-
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                isPlayingLiveData.value = isPlaying
-            }
-
-            override fun onAudioSessionIdChanged(audioSessionId: Int) {
-                effectController.init(audioSessionId)
-            }
-
-            override fun onPlayerError(error: PlaybackException) {
-                super.onPlayerError(error)
-                Toast.makeText(this@PlayerService, "Error: ${error.errorCodeName}", Toast.LENGTH_SHORT).show()
-                stopSelf()
-            }
-
-            override fun onRepeatModeChanged(repeatMode: Int) {
-                super.onRepeatModeChanged(repeatMode)
-                repeatModeLiveData.value = repeatMode
-            }
-
-            override fun onDeviceVolumeChanged(volume: Int, muted: Boolean) {
-                super.onDeviceVolumeChanged(volume, muted)
-                deviceVolumeLiveData.value = volume
-            }
-        })
+        exoPlayer.addListener(getPlayerListener())
 
         isPlayingLiveData.value = false
         createNotificationsChannel()
@@ -231,9 +200,6 @@ class PlayerService : LifecycleService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-
-        //initEQ()
-        //setupEqSettings()
 
         isRunningService.value = true
 
@@ -266,85 +232,12 @@ class PlayerService : LifecycleService() {
     }
 
     private fun setupPlayerNotificationManager(type: Enum<PlayerType>, radioStation: RadioStation?) {
-        playerNotificationManager = PlayerNotificationManager.Builder(
-            this,
-            notificationId,
-            channelId
-        ).setMediaDescriptionAdapter(DescriptionAdapter(context = this, type = type, radioStation = radioStation)
-        ).setNotificationListener(object : PlayerNotificationManager.NotificationListener {
-                override fun onNotificationPosted(
-                    notificationId: Int,
-                    notification: Notification,
-                    ongoing: Boolean
-                ) {
-                    startForeground(notificationId, notification)
-                }
-
-                override fun onNotificationCancelled(
-                    notificationId: Int,
-                    dismissedByUser: Boolean
-                ) {
-                    stopSelf()
-                }
-            }).build()
+        playerNotificationManager = PlayerNotificationManager
+            .Builder(this, notificationId, channelId)
+            .setMediaDescriptionAdapter(DescriptionAdapter(context = this, type = type, radioStation = radioStation))
+            .setNotificationListener(getNotificationListener()).build()
         playerNotificationManager.setPlayer(exoPlayer)
     }
-
-//    private fun setupEqSettings() {
-//
-//        val equalizer = equalizerModel.equalizer ?: return
-//
-//        val settings = equalizerSettingsUseCases.getEqualizerSettings.invoke()
-//
-//        equalizer.enabled = settings.isEqEnabled
-//
-//        if(settings.preset == -1) {
-//            equalizer.setBandLevel(0, (settings.band1Level).toInt().toShort())
-//            equalizer.setBandLevel(1, (settings.band2Level).toInt().toShort())
-//            equalizer.setBandLevel(2, (settings.band3Level).toInt().toShort())
-//            equalizer.setBandLevel(3, (settings.band4Level).toInt().toShort())
-//            equalizer.setBandLevel(4, (settings.band5Level).toInt().toShort())
-//        } else {
-//            equalizer.usePreset(settings.preset.toShort())
-//        }
-//
-//        if(virtualizer.strengthSupported) {
-//            virtualizer.enabled = settings.isVirtualizerEnabled
-//            virtualizer.setStrength((settings.bandVirtualizer).toInt().toShort())
-//        }
-//
-//        if(bassBoost.strengthSupported) {
-//            bassBoost.enabled = settings.isBassEnabled
-//            bassBoost.setStrength((settings.bandVirtualizer).toInt().toShort())
-//        }
-//    }
-////
-//    private fun initEQ() {
-//
-//        equalizerModel.equalizer = Equalizer(1000, exoPlayer.audioSessionId)
-//        virtualizer = Virtualizer(1000, exoPlayer.audioSessionId)
-//        bassBoost = BassBoost(1000, exoPlayer.audioSessionId)
-//
-//        equalizerModel.numberOfBands = equalizerModel.equalizer!!.numberOfBands
-//        equalizerModel.lowestBandLevel = equalizerModel.equalizer!!.bandLevelRange[0]
-//        equalizerModel.upperBandLevel = equalizerModel.equalizer!!.bandLevelRange[1]
-//
-//        (0 until equalizerModel.numberOfBands)
-//            .map { equalizerModel.equalizer!!.getCenterFreq(it.toShort()) }
-//            .mapTo(equalizerModel.bandsCenterFreq) { it / 1000 }
-//
-//        equalizerModel.numberOfPresets = equalizerModel.equalizer!!.numberOfPresets
-//
-//        equalizerModel.presetNames.clear()
-//
-//        (0 until equalizerModel.numberOfPresets).forEach { n ->
-//            equalizerModel.presetNames.add(equalizerModel.equalizer!!.getPresetName(n.toShort()))
-//        }
-//
-//        equalizerModel.presetNames.add("Custom")
-//
-//        isEqualizerInitializedLiveData.value = true
-//    }
 
     private fun initDefaultPlayer(trackList: List<Track>) {
 
@@ -402,6 +295,30 @@ class PlayerService : LifecycleService() {
         service.createNotificationChannel(channel)
     }
 
+    private fun startTimer(duration: Long) {
+
+        val startFrom = trackDurationLiveData.value ?: 0
+        var timerDuration = duration
+
+        if (startFrom != 0.toLong()) {
+            timerDuration = duration - startFrom
+        }
+
+        timer = object : CountDownTimer(timerDuration, TIMER_INTERVAL) {
+            override fun onTick(millisUntilFinished: Long) {
+                trackDurationLiveData.value = trackDurationLiveData.value?.plus(TIMER_INTERVAL)
+            }
+
+            override fun onFinish() {
+                trackDurationLiveData.value = trackDurationLiveData.value?.plus(TIMER_INTERVAL)
+            }
+        }.start()
+    }
+
+    private fun stopTimer() {
+        timer?.cancel()
+    }
+
     private fun saveState() = CoroutineScope(Dispatchers.Main).launch {
         val content = getServiceContent()
 
@@ -435,5 +352,63 @@ class PlayerService : LifecycleService() {
         isRunningService.value = false
         saveState()
         stopSelf()
+    }
+
+    private fun getNotificationListener(): PlayerNotificationManager.NotificationListener =
+        object : PlayerNotificationManager.NotificationListener {
+
+        override fun onNotificationPosted(
+            notificationId: Int,
+            notification: Notification,
+            ongoing: Boolean
+        ) {
+            startForeground(notificationId, notification)
+        }
+
+        override fun onNotificationCancelled(
+            notificationId: Int,
+            dismissedByUser: Boolean
+        ) {
+            stopSelf()
+        }
+    }
+
+    private fun getPlayerListener() : Player.Listener = object : Player.Listener {
+
+        override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+            mediaMetadataLiveData.value = mediaMetadata
+            contentPositionLiveData.value = exoPlayer.currentMediaItemIndex
+            trackDurationLiveData.value = 0
+        }
+
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            isPlayingLiveData.value = isPlaying
+
+            if (isPlaying) {
+                startTimer(exoPlayer.duration)
+            } else {
+                stopTimer()
+            }
+        }
+
+        override fun onAudioSessionIdChanged(audioSessionId: Int) {
+            effectController.init(audioSessionId)
+        }
+
+        override fun onPlayerError(error: PlaybackException) {
+            super.onPlayerError(error)
+            Toast.makeText(this@PlayerService, "Error: ${error.errorCodeName}", Toast.LENGTH_SHORT).show()
+            stopSelf()
+        }
+
+        override fun onRepeatModeChanged(repeatMode: Int) {
+            super.onRepeatModeChanged(repeatMode)
+            repeatModeLiveData.value = repeatMode
+        }
+
+        override fun onDeviceVolumeChanged(volume: Int, muted: Boolean) {
+            super.onDeviceVolumeChanged(volume, muted)
+            deviceVolumeLiveData.value = volume
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.hellguy39.domain.repositories.EqualizerSettingsRepository
 private const val IS_EQ_ENABLED = "isEqEnabled"
 private const val IS_BASS_ENABLED = "isBassEnabled"
 private const val IS_VIRTUALIZER_ENABLED = "isVirtualizerEnabled"
+private const val IS_REVERB_ENABLED = "isReverbEnabled"
 private const val BAND_1 = "band1"
 private const val BAND_2 = "band2"
 private const val BAND_3 = "band3"
@@ -15,6 +16,7 @@ private const val BAND_5 = "band5"
 private const val BAND_BASS_BOOST = "band_bass_boost"
 private const val BAND_VIRTUALIZER = "band_virtualizer"
 private const val PRESET = "preset"
+private const val REVERB_PRESET = "reverb_preset"
 
 class EqualizerRepositoryImpl(private val prefs: SharedPreferences): EqualizerSettingsRepository {
     override fun getEqualizerSettings(): EqualizerSettings {
@@ -23,6 +25,7 @@ class EqualizerRepositoryImpl(private val prefs: SharedPreferences): EqualizerSe
             isEqEnabled = prefs.getBoolean(IS_EQ_ENABLED, false),
             isBassEnabled = prefs.getBoolean(IS_BASS_ENABLED, false),
             isVirtualizerEnabled = prefs.getBoolean(IS_VIRTUALIZER_ENABLED, false),
+            isReverbEnabled = prefs.getBoolean(IS_REVERB_ENABLED, false),
             band1Level = prefs.getInt(BAND_1, 0).toShort(),
             band2Level = prefs.getInt(BAND_2, 0).toShort(),
             band3Level = prefs.getInt(BAND_3, 0).toShort(),
@@ -30,7 +33,8 @@ class EqualizerRepositoryImpl(private val prefs: SharedPreferences): EqualizerSe
             band5Level = prefs.getInt(BAND_5, 0).toShort(),
             bandBassBoost = prefs.getInt(BAND_BASS_BOOST, 0).toShort(),
             bandVirtualizer = prefs.getInt(BAND_VIRTUALIZER, 0).toShort(),
-            preset = prefs.getInt(PRESET, 0).toShort()
+            preset = prefs.getInt(PRESET, 0).toShort(),
+            reverbPreset = prefs.getInt(REVERB_PRESET, 0).toShort()
         )
 
         return equalizerSettings
@@ -41,6 +45,7 @@ class EqualizerRepositoryImpl(private val prefs: SharedPreferences): EqualizerSe
             this.putBoolean(IS_EQ_ENABLED, equalizerSettings.isEqEnabled)
             this.putBoolean(IS_VIRTUALIZER_ENABLED, equalizerSettings.isVirtualizerEnabled)
             this.putBoolean(IS_BASS_ENABLED, equalizerSettings.isBassEnabled)
+            this.putBoolean(IS_REVERB_ENABLED, equalizerSettings.isReverbEnabled)
             this.putInt(BAND_1, equalizerSettings.band1Level.toInt())
             this.putInt(BAND_2, equalizerSettings.band2Level.toInt())
             this.putInt(BAND_3, equalizerSettings.band3Level.toInt())
@@ -49,12 +54,25 @@ class EqualizerRepositoryImpl(private val prefs: SharedPreferences): EqualizerSe
             this.putInt(BAND_BASS_BOOST, equalizerSettings.bandBassBoost.toInt())
             this.putInt(BAND_VIRTUALIZER, equalizerSettings.bandVirtualizer.toInt())
             this.putInt(PRESET, equalizerSettings.preset.toInt())
+            this.putInt(REVERB_PRESET, equalizerSettings.reverbPreset.toInt())
         }.apply()
     }
 
     override fun savePreset(preset: Short) {
         prefs.edit().apply {
             this.putInt(PRESET, preset.toInt())
+        }.apply()
+    }
+
+    override fun saveReverbPreset(preset: Short) {
+        prefs.edit().apply {
+            this.putInt(REVERB_PRESET, preset.toInt())
+        }.apply()
+    }
+
+    override fun saveReverbSwitch(isEnabled: Boolean) {
+        prefs.edit().apply {
+            this.putBoolean(IS_REVERB_ENABLED, isEnabled)
         }.apply()
     }
 

@@ -3,17 +3,13 @@ package com.hellguy39.collapse.presentaton.fragments.home
 import android.content.res.ColorStateList
 import android.icu.util.Calendar
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.CompoundButton
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.FragmentHomeBinding
-import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.utils.AudioEffectController
 import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
 import com.hellguy39.domain.usecases.eq_settings.EqualizerSettingsUseCases
@@ -22,8 +18,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(R.layout.fragment_home),
-    View.OnClickListener,
-    CompoundButton.OnCheckedChangeListener {
+    View.OnClickListener {
 
     @Inject
     lateinit var getColorFromThemeUseCase: GetColorFromThemeUseCase
@@ -35,7 +30,6 @@ class HomeFragment : Fragment(R.layout.fragment_home),
     lateinit var effectController: AudioEffectController
 
     private lateinit var binding: FragmentHomeBinding
-    private lateinit var viewModel: HomeFragmentViewModel
 
     private lateinit var primaryColorStateList: ColorStateList
     private lateinit var onSurfaceColorStateList: ColorStateList
@@ -44,7 +38,6 @@ class HomeFragment : Fragment(R.layout.fragment_home),
         super.onCreate(savedInstanceState)
         setupMaterialFadeThought()
         getColors()
-        viewModel = ViewModelProvider(this)[HomeFragmentViewModel::class.java]
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -53,15 +46,21 @@ class HomeFragment : Fragment(R.layout.fragment_home),
         binding.topAppBar.title = getTittle()
 
         binding.cardEQ.setOnClickListener(this)
-        
-        binding.eqSwitch.setOnCheckedChangeListener(this)
-        binding.bassSwitch.setOnCheckedChangeListener(this)
-        binding.virtualizerSwitch.setOnCheckedChangeListener(this)
+
+        binding.eqSwitch.setOnClickListener(this)
+        binding.bassSwitch.setOnClickListener(this)
+        binding.virtualizerSwitch.setOnClickListener(this)
+
+        checkIsEffectsAvailable()
+        setEqObserver()
     }
 
-    override fun onStart() {
-        super.onStart()
-        updateEqCardSwitches()
+    private fun setEqObserver() {
+        effectController.getCurrentSettings().observe(viewLifecycleOwner) { settings ->
+            binding.eqSwitch.isChecked = settings.isEqEnabled
+            binding.bassSwitch.isChecked = settings.isBassEnabled
+            binding.virtualizerSwitch.isChecked = settings.isVirtualizerEnabled
+        }
     }
 
     private fun setupMaterialFadeThought() {
@@ -108,16 +107,22 @@ class HomeFragment : Fragment(R.layout.fragment_home),
             binding.cardStat.id -> {
 
             }
+            binding.eqSwitch.id -> {
+                val p1 = binding.eqSwitch.isChecked
+                effectController.setEqEnabled(p1)
+                setupIconColor(binding.eqSwitch.id, p1)
+            }
+            binding.bassSwitch.id -> {
+                val p1 = binding.bassSwitch.isChecked
+                effectController.setBassEnabled(p1)
+                setupIconColor(binding.bassSwitch.id, p1)
+            }
+            binding.virtualizerSwitch.id -> {
+                val p1 = binding.virtualizerSwitch.isChecked
+                effectController.setVirtualizeEnabled(p1)
+                setupIconColor(binding.virtualizerSwitch.id, p1)
+            }
         }
-    }
-
-    override fun onCheckedChanged(p0: CompoundButton?, p1: Boolean) {
-        when(p0?.id) {
-            binding.eqSwitch.id -> effectController.setEqEnabled(p1)
-            binding.bassSwitch.id -> effectController.setBassEnabled(p1)
-            binding.virtualizerSwitch.id -> effectController.setVirtualizeEnabled(p1)
-        }
-        setupIconColor(p0?.id ?: 0, p1)
     }
 
     private fun setupIconColor(id: Int, enabled: Boolean) {
@@ -135,21 +140,15 @@ class HomeFragment : Fragment(R.layout.fragment_home),
         }
     }
 
-    private fun updateEqCardSwitches() {
-        val settings = effectController.getCurrentEqualizerSettings()
+    private fun checkIsEffectsAvailable() {
+
         val properties = effectController.getProperties()
 
-        binding.eqSwitch.isChecked = settings.isEqEnabled
-
-        if (properties.bassBoostSupport) {
-            binding.bassSwitch.isChecked = settings.isBassEnabled
-        } else {
+        if (!properties.bassBoostSupport) {
             binding.bassSwitch.isEnabled = false
         }
 
-        if (properties.virtualizerSupport) {
-            binding.virtualizerSwitch.isChecked = settings.isVirtualizerEnabled
-        } else {
+        if (!properties.virtualizerSupport) {
             binding.virtualizerSwitch.isEnabled = false
         }
     }
