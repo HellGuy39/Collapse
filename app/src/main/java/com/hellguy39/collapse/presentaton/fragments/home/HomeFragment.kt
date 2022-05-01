@@ -1,9 +1,13 @@
 package com.hellguy39.collapse.presentaton.fragments.home
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
+import android.graphics.drawable.InsetDrawable
 import android.icu.util.Calendar
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.View
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
@@ -46,13 +50,41 @@ class HomeFragment : Fragment(R.layout.fragment_home),
         binding.topAppBar.title = getTittle()
 
         binding.cardEQ.setOnClickListener(this)
+        binding.cardStat.setOnClickListener(this)
 
         binding.eqSwitch.setOnClickListener(this)
         binding.bassSwitch.setOnClickListener(this)
         binding.virtualizerSwitch.setOnClickListener(this)
 
+        setupToolbarMenu()
+
         checkIsEffectsAvailable()
         setEqObserver()
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun setupToolbarMenu() {
+        val menuBuilder = binding.topAppBar.menu as MenuBuilder
+        menuBuilder.setOptionalIconsVisible(true)
+        for (item in menuBuilder.visibleItems) {
+            val iconMarginPx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics).toInt()
+            if (item.icon != null) {
+                item.icon = InsetDrawable(item.icon, iconMarginPx, 0, iconMarginPx,0)
+            }
+        }
+
+        binding.topAppBar.setOnMenuItemClickListener { item ->
+            when(item.itemId) {
+                R.id.settings -> {
+                    true
+                }
+                R.id.aboutApp -> {
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     private fun setEqObserver() {
@@ -105,7 +137,10 @@ class HomeFragment : Fragment(R.layout.fragment_home),
                 )
             }
             binding.cardStat.id -> {
-
+                findNavController().navigate(
+                    HomeFragmentDirections.actionHomeFragmentToStatisticFragment(),
+                    FragmentNavigatorExtras(binding.cardStat to "statistic_transition")
+                )
             }
             binding.eqSwitch.id -> {
                 val p1 = binding.eqSwitch.isChecked

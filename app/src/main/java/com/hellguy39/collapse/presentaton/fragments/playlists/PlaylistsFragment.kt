@@ -16,7 +16,7 @@ import com.hellguy39.collapse.databinding.PlaylistsFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.PlaylistsAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
-import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.*
 import com.hellguy39.collapse.utils.getVerticalLayoutManager
 import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Playlist
@@ -42,7 +42,6 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     private lateinit var searchView: SearchView
 
     private var playlists = mutableListOf<Playlist>()
-    private lateinit var adapter: PlaylistsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,21 +92,17 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
         setObservers()
     }
 
-    private fun setupRecyclerView() {
-
+    private fun setupRecyclerView() = binding.rvPlaylists.apply {
+        layoutManager = getVerticalLayoutManager(context)
         adapter = PlaylistsAdapter(
             playlists = playlists,
-            listener = this,
+            listener = this@PlaylistsFragment,
             convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase
         )
-
-        binding.rvPlaylists.layoutManager = getVerticalLayoutManager(context)
-
-        binding.rvPlaylists.adapter = adapter
-
-        binding.rvPlaylists.doOnPreDraw {
+        doOnPreDraw {
             startPostponedEnterTransition()
         }
+        addItemDecoration(this.getPlaylistItemVerticalDivider(requireContext()))
     }
 
     private  fun setObservers() {

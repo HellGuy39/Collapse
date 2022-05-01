@@ -21,6 +21,7 @@ import com.hellguy39.collapse.presentaton.fragments.trackMenuBottomSheet.TrackMe
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.getTrackItemVerticalDivider
 import com.hellguy39.collapse.utils.getVerticalLayoutManager
 import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Playlist
@@ -68,8 +69,6 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
     private lateinit var receivedPlaylist: Playlist
 
     private var recyclerTracks = mutableListOf<Track>()
-
-    private lateinit var adapter: TracksAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -181,7 +180,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
     }
 
     private fun updateListPlayingPosition(position: Int) {
-        adapter.updatePlayingItem(position)
+        (binding.rvTrackList.adapter as TracksAdapter).updatePlayingItem(position)
     }
 
     private fun onTracksReceived(receivedTracks: List<Track>, playlistType: PlaylistType, name: String) {
@@ -212,21 +211,20 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
         updateRecyclerView(receivedTracks)
     }
 
-    private fun setupRecyclerView() {
-        binding.rvTrackList.doOnPreDraw {
+    private fun setupRecyclerView() = binding.rvTrackList.apply {
+        addItemDecoration(this.getTrackItemVerticalDivider(requireContext()))
+        layoutManager = getVerticalLayoutManager(requireContext())
+        doOnPreDraw {
             startPostponedEnterTransition()
         }
-        binding.rvTrackList.layoutManager = getVerticalLayoutManager(requireContext())
-
         adapter = TracksAdapter(
             trackList = recyclerTracks,
             resources = resources,
-            listener = this,
+            listener = this@TrackListFragment,
             getImageBitmapUseCase = getImageBitmapUseCase,
             context = requireContext(),
             playlistType = receivedPlaylist.type,
         )
-        binding.rvTrackList.adapter = adapter
     }
 
     override fun onTrackMenuClick(track: Track, position: Int, playlistType: Enum<PlaylistType>) {

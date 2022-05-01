@@ -61,22 +61,6 @@ class DataModule {
         ).build()
     }
 
-//    @Provides
-//    @Singleton
-//    fun provideSavedServiceStateDatabase(app: Application): SavedServiceStateDatabase {
-//        return Room.databaseBuilder(
-//            app,
-//            SavedServiceStateDatabase::class.java,
-//            SAVED_STATE_DB_NAME
-//        ).build()
-//    }
-
-    @Provides
-    @Singleton
-    fun provideEqualizerSettingsRepository(prefs: SharedPreferences): EqualizerRepositoryImpl {
-        return EqualizerRepositoryImpl(prefs)
-    }
-
     @Provides
     @Singleton
     fun provideTracksRepository(context: Context) : TracksRepository {

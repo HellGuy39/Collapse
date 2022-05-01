@@ -20,17 +20,4 @@ class AppModule {
     fun provideContext(app: Application): Context {
         return app.applicationContext
     }
-
-    @Provides
-    @Singleton
-    fun provideAudioEffectController(
-        getEqualizerPropertiesUseCase: GetEqualizerPropertiesUseCase,
-        equalizerSettingsUseCases: EqualizerSettingsUseCases
-    ): AudioEffectController {
-        return AudioEffectController(
-            getEqualizerPropertiesUseCase,
-            equalizerSettingsUseCases
-        )
-    }
-
 }

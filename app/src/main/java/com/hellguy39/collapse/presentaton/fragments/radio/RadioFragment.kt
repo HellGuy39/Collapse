@@ -3,6 +3,7 @@ package com.hellguy39.collapse.presentaton.fragments.radio
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.FragmentNavigatorExtras
@@ -18,6 +19,8 @@ import com.hellguy39.collapse.presentaton.adapters.RadioStationsAdapter
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
 import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.getRadioStationItemVerticalDivider
+import com.hellguy39.collapse.utils.getTrackItemVerticalDivider
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.models.ServiceContentWrapper
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
@@ -52,15 +55,9 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
         super.onViewCreated(view, savedInstanceState)
         binding = RadioFragmentBinding.bind(view)
 
-        binding.rvStations.apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-            adapter = RadioStationsAdapter(
-                stations = stations,
-                listener = this@RadioFragment,
-                convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase,
-                context = context
-            )
-        }
+        postponeEnterTransition()
+
+        setupRecyclerView()
 
         binding.fabAdd.setOnClickListener {
             setupMaterialElevationScale()
@@ -78,6 +75,20 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
         searchView.setOnQueryTextListener(this)
 
         setObservers()
+    }
+
+    private fun setupRecyclerView() = binding.rvStations.apply {
+        doOnPreDraw {
+            startPostponedEnterTransition()
+        }
+        layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        adapter = RadioStationsAdapter(
+            stations = stations,
+            listener = this@RadioFragment,
+            convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase,
+            context = context
+        )
+        addItemDecoration(this.getRadioStationItemVerticalDivider(requireContext()))
     }
 
     private fun setupMaterialFadeThought() {

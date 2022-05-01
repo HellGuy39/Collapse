@@ -1,9 +1,11 @@
 package com.hellguy39.collapse.di
 
-import com.hellguy39.data.repositories.*
+import com.hellguy39.data.repositories.FavouritesRepositoryImpl
+import com.hellguy39.data.repositories.PlaylistsRepositoryImpl
+import com.hellguy39.data.repositories.RadioStationsRepositoryImpl
+import com.hellguy39.data.repositories.SavedServiceStateRepositoryImpl
 import com.hellguy39.domain.repositories.TracksRepository
 import com.hellguy39.domain.usecases.*
-import com.hellguy39.domain.usecases.eq_settings.*
 import com.hellguy39.domain.usecases.favourites.*
 import com.hellguy39.domain.usecases.playlist.*
 import com.hellguy39.domain.usecases.radio.*
@@ -27,25 +29,6 @@ class DomainModule {
         return SavedServiceStateUseCases(
             getSavedServiceStateUseCase = GetSavedServiceStateUseCase(repository),
             insertSavedServiceStateUseCase = InsertSavedServiceStateUseCase(repository)
-        )
-    }
-
-    @Provides
-    @Singleton
-    fun provideEqualizerSettingsUseCases(repository: EqualizerRepositoryImpl): EqualizerSettingsUseCases {
-        return EqualizerSettingsUseCases(
-            getEqualizerSettingsUseCase = GetEqualizerSettingsUseCase(repository),
-            saveEqualizerSettingsUseCase = SaveEqualizerSettingsUseCase(repository),
-            saveEqPresetUseCase = SaveEqPresetUseCase(repository),
-            saveEqSwitchUseCase = SaveEqSwitchUseCase(repository),
-            saveEqBandsLevelUseCase = SaveEqBandsLevelUseCase(repository),
-            saveBassBoostValueUseCase = SaveBassBoostValueUseCase(repository),
-            saveVirtualizerValueUseCase = SaveVirtualizerValueUseCase(repository),
-            saveBassBoostSwitchUseCase = SaveBassBoostSwitchUseCase(repository),
-            saveVirtualizerSwitchUseCase = SaveVirtualizerSwitchUseCase(repository),
-            saveBandLevelUseCase = SaveBandLevelUseCase(repository),
-            saveReverbPresetUseCase = SaveReverbPresetUseCase(repository),
-            saveReverbSwitchUseCase = SaveReverbSwitchUseCase(repository)
         )
     }
 
@@ -101,12 +84,6 @@ class DomainModule {
             deleteFromFavouritesWithoutIdUseCase = DeleteFromFavouritesWithoutIdUseCase(repository),
             isTrackFavouriteUseCase = IsTrackFavouriteUseCase(repository)
         )
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetEqualizerPropertiesUseCase(): GetEqualizerPropertiesUseCase {
-        return GetEqualizerPropertiesUseCase()
     }
 
     @Provides

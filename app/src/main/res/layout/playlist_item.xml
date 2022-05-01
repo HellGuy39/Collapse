@@ -5,61 +5,43 @@
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root"
-    android:orientation="vertical">
+    android:padding="12dp"
+    android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="12dp">
-
-        <ImageView
-            android:id="@+id/ivPlaylistCover"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:layout_weight="0"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toTopOf="@+id/tvTittle"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_round_queue_music_24" />
-
-
-            <TextView
-                android:id="@+id/tvTittle"
-                android:layout_weight="1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:text="Songs on Innocence"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:layout_marginEnd="12dp"
-                android:layout_marginStart="8dp"
-                android:layout_gravity="center"
-                android:textSize="24sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
-        <ImageView
-            android:layout_weight="0"
-            android:layout_width="24dp"
-            android:layout_gravity="center"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_round_arrow_forward_ios_24" />
-
-    </LinearLayout>
-
-    <View
-        android:id="@+id/view"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_gravity="bottom"
-        android:layout_marginStart="116dp"
-        android:background="?attr/colorOnSurface"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <ImageView
+        android:id="@+id/ivPlaylistCover"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_weight="0"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toTopOf="@+id/tvTittle"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_round_queue_music_24" />
 
 
+        <TextView
+            android:id="@+id/tvTittle"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Songs on Innocence"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:layout_marginEnd="12dp"
+            android:layout_marginStart="8dp"
+            android:layout_gravity="center"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:layout_weight="0"
+        android:layout_width="24dp"
+        android:layout_gravity="center"
+        android:layout_height="24dp"
+        android:visibility="gone"
+        android:src="@drawable/ic_round_arrow_forward_ios_24" />
 </LinearLayout>

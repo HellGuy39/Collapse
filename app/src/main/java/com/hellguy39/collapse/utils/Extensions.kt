@@ -5,7 +5,10 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.divider.MaterialDividerItemDecoration
+import com.hellguy39.collapse.R
 
 internal fun MaterialToolbar.setOnBackFragmentNavigation(navController: NavController) {
     this.setNavigationOnClickListener {
@@ -29,4 +32,28 @@ internal fun getVerticalLayoutManager(context: Context?): LinearLayoutManager {
 
 internal fun Fragment.setAnimations() {
 
+}
+
+internal fun RecyclerView.getTrackItemVerticalDivider(context: Context): MaterialDividerItemDecoration {
+    val divider = MaterialDividerItemDecoration(context, LinearLayoutManager.VERTICAL)
+    divider.setDividerInsetStartResource(context, R.dimen.track_item_divider_start)
+    return divider
+}
+
+internal fun RecyclerView.getPlaylistItemVerticalDivider(context: Context): MaterialDividerItemDecoration {
+    val divider = MaterialDividerItemDecoration(context, LinearLayoutManager.VERTICAL)
+    divider.setDividerInsetStartResource(context, R.dimen.playlist_item_divider_start)
+    return divider
+}
+
+internal fun RecyclerView.getRadioStationItemVerticalDivider(context: Context): MaterialDividerItemDecoration {
+    val divider = MaterialDividerItemDecoration(context, LinearLayoutManager.VERTICAL)
+    divider.setDividerInsetStartResource(context, R.dimen.radio_item_divider_start)
+    return divider
+}
+
+internal fun RecyclerView.getArtistItemVerticalDivider(context: Context): MaterialDividerItemDecoration {
+    val divider = MaterialDividerItemDecoration(context, LinearLayoutManager.VERTICAL)
+    divider.setDividerInsetStartResource(context, R.dimen.artist_item_divider_start)
+    return divider
 }

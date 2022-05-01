@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Dividers -->
+    <dimen name="artist_item_divider_start">64dp</dimen>
+    <dimen name="track_item_divider_start">64dp</dimen>
+    <dimen name="radio_item_divider_start">116dp</dimen>
+    <dimen name="playlist_item_divider_start">116dp</dimen>
+
+
+
+</resources>

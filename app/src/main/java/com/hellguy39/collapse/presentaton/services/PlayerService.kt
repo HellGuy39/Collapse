@@ -25,6 +25,7 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.hellguy39.collapse.presentaton.adapters.DescriptionAdapter
 import com.hellguy39.collapse.utils.AudioEffectController
+import com.hellguy39.collapse.utils.StatisticController
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.models.SavedState
 import com.hellguy39.domain.models.ServiceContentWrapper
@@ -49,6 +50,9 @@ class PlayerService : LifecycleService() {
 
     @Inject
     lateinit var effectController: AudioEffectController
+
+    @Inject
+    lateinit var statisticController: StatisticController
 
     private lateinit var playerNotificationManager: PlayerNotificationManager
 
@@ -307,10 +311,12 @@ class PlayerService : LifecycleService() {
         timer = object : CountDownTimer(timerDuration, TIMER_INTERVAL) {
             override fun onTick(millisUntilFinished: Long) {
                 trackDurationLiveData.value = trackDurationLiveData.value?.plus(TIMER_INTERVAL)
+                statisticController.updateTotalListeningTime(TIMER_INTERVAL)
             }
 
             override fun onFinish() {
                 trackDurationLiveData.value = trackDurationLiveData.value?.plus(TIMER_INTERVAL)
+                statisticController.updateTotalListeningTime(TIMER_INTERVAL)
             }
         }.start()
     }

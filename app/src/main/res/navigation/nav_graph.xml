@@ -117,6 +117,9 @@
             <action
                 android:id="@+id/action_homeFragment_to_equalizerFragment"
                 app:destination="@id/equalizerFragment" />
+            <action
+                android:id="@+id/action_homeFragment_to_statisticFragment"
+                app:destination="@id/statisticFragment" />
         </fragment>
 
         <fragment
@@ -124,6 +127,11 @@
             android:name="com.hellguy39.collapse.presentaton.fragments.equalizer.EqualizerFragment"
             android:label="equalizer_fragment"
             tools:layout="@layout/equalizer_fragment" />
+        <fragment
+            android:id="@+id/statisticFragment"
+            android:name="com.hellguy39.collapse.presentaton.fragments.statistic.StatisticFragment"
+            android:label="fragment_statistic"
+            tools:layout="@layout/fragment_statistic" />
     </navigation>
 
 </navigation>

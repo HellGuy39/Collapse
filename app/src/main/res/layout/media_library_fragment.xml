@@ -92,13 +92,11 @@
                 app:cardCornerRadius="0dp"
                 app:cardElevation="0dp">
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_gravity="bottom"
-                    android:layout_marginStart="16dp"
-                    android:backgroundTint="?attr/colorOnSurface"
-                    android:background="@drawable/item_bottom_line_rect" />
+                    android:layout_height="wrap_content"
+                    app:dividerInsetStart="16dp"
+                    android:layout_gravity="bottom"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -131,6 +129,7 @@
                         android:layout_height="24dp"
                         android:layout_gravity="center"
                         android:layout_weight="0"
+                        android:visibility="gone"
                         android:src="@drawable/ic_round_arrow_forward_ios_24" />
 
                 </LinearLayout>
@@ -145,13 +144,11 @@
                 app:cardCornerRadius="0dp"
                 app:cardElevation="0dp">
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_gravity="bottom"
-                    android:layout_marginStart="16dp"
-                    android:backgroundTint="?attr/colorOnSurface"
-                    android:background="@drawable/item_bottom_line_rect" />
+                    android:layout_height="wrap_content"
+                    app:dividerInsetStart="16dp"
+                    android:layout_gravity="bottom"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -165,6 +162,7 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_weight="0"
+                        android:layout_gravity="center"
                         android:src="@drawable/ic_round_queue_music_24"
                         app:tint="?attr/colorPrimary" />
 
@@ -183,6 +181,7 @@
                         android:layout_height="24dp"
                         android:layout_gravity="center"
                         android:layout_weight="0"
+                        android:visibility="gone"
                         android:src="@drawable/ic_round_arrow_forward_ios_24" />
 
                 </LinearLayout>
@@ -198,13 +197,11 @@
                 app:cardCornerRadius="0dp"
                 app:cardElevation="0dp">
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_gravity="bottom"
-                    android:layout_marginStart="16dp"
-                    android:backgroundTint="?attr/colorOnSurface"
-                    android:background="@drawable/item_bottom_line_rect" />
+                    android:layout_height="wrap_content"
+                    app:dividerInsetStart="16dp"
+                    android:layout_gravity="bottom"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -218,6 +215,7 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_weight="0"
+                        android:layout_gravity="center"
                         android:src="@drawable/ic_round_audiotrack_24"
                         app:tint="?attr/colorPrimary" />
 
@@ -236,6 +234,7 @@
                         android:layout_height="24dp"
                         android:layout_gravity="center"
                         android:layout_weight="0"
+                        android:visibility="gone"
                         android:src="@drawable/ic_round_arrow_forward_ios_24" />
 
 
@@ -252,13 +251,11 @@
                 app:cardCornerRadius="0dp"
                 app:cardElevation="0dp">
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_gravity="bottom"
-                    android:layout_marginStart="16dp"
-                    android:backgroundTint="?attr/colorOnSurface"
-                    android:background="@drawable/item_bottom_line_rect" />
+                    android:layout_height="wrap_content"
+                    app:dividerInsetStart="16dp"
+                    android:layout_gravity="bottom"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -272,6 +269,7 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_weight="0"
+                        android:layout_gravity="center"
                         android:src="@drawable/ic_round_recent_actors_24"
                         app:tint="?attr/colorPrimary" />
 
@@ -290,6 +288,7 @@
                         android:layout_height="24dp"
                         android:layout_gravity="center"
                         android:layout_weight="0"
+                        android:visibility="gone"
                         android:src="@drawable/ic_round_arrow_forward_ios_24" />
 
 
