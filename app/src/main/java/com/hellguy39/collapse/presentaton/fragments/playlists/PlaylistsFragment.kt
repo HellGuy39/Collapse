@@ -93,7 +93,7 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     }
 
     private fun setupRecyclerView() = binding.rvPlaylists.apply {
-        layoutManager = getVerticalLayoutManager(context)
+        layoutManager = getGridLayoutManager(context)//getVerticalLayoutManager(context)
         adapter = PlaylistsAdapter(
             playlists = playlists,
             listener = this@PlaylistsFragment,
@@ -102,7 +102,7 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
         doOnPreDraw {
             startPostponedEnterTransition()
         }
-        addItemDecoration(this.getPlaylistItemVerticalDivider(requireContext()))
+        //addItemDecoration(this.getPlaylistItemVerticalDivider(requireContext()))
     }
 
     private  fun setObservers() {

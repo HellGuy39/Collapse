@@ -93,11 +93,11 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
         binding.tvDbMax.text = (upperBandLevel / 100).toString() + " dB"
         binding.tvDbMin.text = (lowestBandLevel / 100).toString() + " dB"
 
-        binding.tvBand1CenterFreq.text = bandsCenterFreq[0].toString() + " Hz"
-        binding.tvBand2CenterFreq.text = bandsCenterFreq[1].toString() + " Hz"
-        binding.tvBand3CenterFreq.text = bandsCenterFreq[2].toString() + " Hz"
-        binding.tvBand4CenterFreq.text = bandsCenterFreq[3].toString() + " Hz"
-        binding.tvBand5CenterFreq.text = bandsCenterFreq[4].toString() + " Hz"
+        binding.tvBand1CenterFreq.text = formatBandFreq(bandsCenterFreq[0])
+        binding.tvBand2CenterFreq.text = formatBandFreq(bandsCenterFreq[1])
+        binding.tvBand3CenterFreq.text = formatBandFreq(bandsCenterFreq[2])
+        binding.tvBand4CenterFreq.text = formatBandFreq(bandsCenterFreq[3])
+        binding.tvBand5CenterFreq.text = formatBandFreq(bandsCenterFreq[4])
 
         binding.eqSwitch.setOnCheckedChangeListener(this)
         binding.virtualizerSwitch.setOnCheckedChangeListener(this)
@@ -202,6 +202,12 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
 
         if (binding.surroundBand.isEnabled)
             binding.surroundBand.value = (settings.bandVirtualizer / 100).toFloat()
+    }
+
+    private fun formatBandFreq(freq: Int): String = if (freq > 1000) {
+            "${freq.toDouble() / 1000} kHz"
+        } else {
+            "$freq Hz"
     }
 
 //

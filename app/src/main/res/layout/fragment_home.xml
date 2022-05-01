@@ -172,10 +172,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp">
+                android:layout_margin="@dimen/item_card_margin"
+                app:cardElevation="@dimen/item_card_elevation"
+                app:cardCornerRadius="@dimen/item_card_corner_radius"
+                style="@style/Widget.Material3.CardView.Elevated">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -221,10 +221,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:transitionName="statistic_transition"
-                android:layout_marginStart="16dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp">
+                android:layout_margin="@dimen/item_card_margin"
+                app:cardElevation="@dimen/item_card_elevation"
+                app:cardCornerRadius="@dimen/item_card_corner_radius"
+                style="@style/Widget.Material3.CardView.Elevated">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -268,10 +268,11 @@
             android:id="@+id/cardEQ"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:transitionName="equalizer_transition"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp">
+            app:cardElevation="@dimen/item_card_elevation"
+            android:layout_margin="@dimen/item_card_margin"
+            app:cardCornerRadius="@dimen/item_card_corner_radius"
+            style="@style/Widget.Material3.CardView.Elevated"
+            android:transitionName="equalizer_transition">
 
                 <LinearLayout
                     android:layout_width="match_parent"

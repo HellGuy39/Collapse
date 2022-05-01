@@ -1,12 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <!-- Dividers -->
     <dimen name="artist_item_divider_start">64dp</dimen>
     <dimen name="track_item_divider_start">64dp</dimen>
     <dimen name="radio_item_divider_start">116dp</dimen>
     <dimen name="playlist_item_divider_start">116dp</dimen>
 
+    <!-- Cards -->
+    <dimen name="item_card_image_view_height">180dp</dimen>
+    <dimen name="item_card_elevation">4dp</dimen>
+    <dimen name="item_card_corner_radius">12dp</dimen>
+    <dimen name="item_card_margin">8dp</dimen>
 
+    <!-- Text size -->
+    <dimen name="super_huge_text_size">32sp</dimen>
+    <dimen name="huge_text_size">24sp</dimen>
+    <dimen name="large_text_size">22sp</dimen>
+    <dimen name="medium_text_size">20sp</dimen>
+    <dimen name="small_text_size">18sp</dimen>
+    <dimen name="super_small_text_size">16sp</dimen>
+
+    <!-- Content padding -->
+    <dimen name="large_content_padding">12dp</dimen>
+    <dimen name="default_content_padding">12dp</dimen>
+    <dimen name="small_content_padding">8dp</dimen>
+
+    <!-- List item image view -->
+    <dimen name="list_item_image_height">48dp</dimen>
+    <dimen name="list_item_image_width">48dp</dimen>
 
 </resources>

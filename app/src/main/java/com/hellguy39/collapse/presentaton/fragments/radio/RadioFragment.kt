@@ -19,6 +19,7 @@ import com.hellguy39.collapse.presentaton.adapters.RadioStationsAdapter
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
 import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.getGridLayoutManager
 import com.hellguy39.collapse.utils.getRadioStationItemVerticalDivider
 import com.hellguy39.collapse.utils.getTrackItemVerticalDivider
 import com.hellguy39.domain.models.RadioStation
@@ -81,14 +82,14 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
         doOnPreDraw {
             startPostponedEnterTransition()
         }
-        layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        layoutManager = getGridLayoutManager(requireContext())
         adapter = RadioStationsAdapter(
             stations = stations,
             listener = this@RadioFragment,
             convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase,
             context = context
         )
-        addItemDecoration(this.getRadioStationItemVerticalDivider(requireContext()))
+        //addItemDecoration(this.getRadioStationItemVerticalDivider(requireContext()))
     }
 
     private fun setupMaterialFadeThought() {

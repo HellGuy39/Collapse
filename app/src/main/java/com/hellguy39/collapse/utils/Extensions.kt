@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
@@ -26,6 +27,15 @@ internal fun getVerticalLayoutManager(context: Context?): LinearLayoutManager {
     return LinearLayoutManager(
         context,
         LinearLayoutManager.VERTICAL,
+        false
+    )
+}
+
+internal fun getGridLayoutManager(context: Context?): GridLayoutManager {
+    return GridLayoutManager(
+        context,
+        2,
+        GridLayoutManager.VERTICAL,
         false
     )
 }
