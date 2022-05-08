@@ -7,16 +7,14 @@ import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.FragmentArtistsListBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.ArtistsAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.getArtistItemVerticalDivider
-import com.hellguy39.collapse.utils.getTrackItemVerticalDivider
 import com.hellguy39.collapse.utils.getVerticalLayoutManager
+import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimations
 import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Playlist
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,12 +32,7 @@ class ArtistsListFragment : Fragment(R.layout.fragment_artists_list),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
-
+        setMaterialFadeThoughtAnimations()
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
     }
 

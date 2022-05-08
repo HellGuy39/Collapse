@@ -4,10 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentaton.fragments.AboutAppFragment">
+    android:fitsSystemWindows="true"
+    tools:context=".presentaton.fragments.about_app.AboutAppFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
+        android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -24,6 +26,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floating_action_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_round_play_arrow_24"
+            app:layout_constraintEnd_toEndOf="@+id/linearLayout"
+            app:layout_constraintStart_toStartOf="@+id/linearLayout"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
         <LinearLayout
             android:id="@+id/linearLayout"
@@ -68,7 +81,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Designed by Vladislav Kovalev in California"
+                android:text="Designed by Vladislav Kovalev in Yablonovskyi"
                 android:textSize="18sp"
                 android:textStyle="italic" />
 
@@ -78,7 +91,7 @@
                 android:gravity="center"
                 android:textSize="18sp"
                 android:textStyle="italic"
-                tools:text="Assembled in Krasnodar" />
+                android:text="Assembled in Krasnodar" />
         </LinearLayout>
 
         <LinearLayout
@@ -104,7 +117,7 @@
                 android:gravity="center"
                 android:textSize="18sp"
                 android:textStyle="italic"
-                tools:text="2022" />
+                android:text="2022" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 

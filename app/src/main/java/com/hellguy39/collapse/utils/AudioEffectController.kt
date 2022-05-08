@@ -4,11 +4,9 @@ import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.PresetReverb
 import android.media.audiofx.Virtualizer
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.google.android.exoplayer2.audio.AuxEffectInfo
-import com.hellguy39.collapse.presentaton.services.PlayerService
+import com.hellguy39.domain.models.EqualizerPreset
 import com.hellguy39.domain.models.EqualizerProperties
 import com.hellguy39.domain.models.EqualizerSettings
 import com.hellguy39.domain.usecases.GetEqualizerPropertiesUseCase
@@ -18,6 +16,12 @@ class AudioEffectController(
     private val getEqualizerPropertiesUseCase: GetEqualizerPropertiesUseCase,
     private val equalizerSettingsUseCases: EqualizerSettingsUseCases
 ) {
+
+    companion object {
+        const val NONE_PRESET: Short = -1
+        //const val CUSTOM_PRESET: Short = -2
+    }
+
     private val equalizerProperties: EqualizerProperties = getEqualizerPropertiesUseCase.invoke()
     private val equalizerSettings = MutableLiveData<EqualizerSettings>(
         equalizerSettingsUseCases.getEqualizerSettingsUseCase.invoke()
@@ -59,14 +63,10 @@ class AudioEffectController(
 
         setEqEnabled(settings.isEqEnabled)
 
-        if(settings.preset == (-1).toShort()) {
-            setBandLevel(0, settings.band1Level)
-            setBandLevel(1, settings.band2Level)
-            setBandLevel(2, settings.band3Level)
-            setBandLevel(3, settings.band4Level)
-            setBandLevel(4, settings.band5Level)
-        } else {
-            setPreset(settings.preset)
+        when(settings.preset) {
+            else -> {
+
+            }
         }
 
         if(equalizerProperties.virtualizerSupport) {
@@ -102,18 +102,31 @@ class AudioEffectController(
         }
     }
 
-    fun setPreset(preset: Short) {
-        savePreset(preset)
-        eq?.usePreset(preset)
-        equalizerSettings.value?.preset = preset
-    }
+    fun setPreset(inputPresetNumber: Short) {
+        savePreset(inputPresetNumber)
+        when(inputPresetNumber) {
+            NONE_PRESET -> {
 
-    private fun toPresetMode() {
-        //equalizerSettings.value?.band1Level = eq?.getBandLevel(0) ?: return
-    }
-
-    private fun toCustomMode() {
-
+            }
+//            CUSTOM_PRESET -> {
+//
+//            }
+            else -> {
+                eq?.usePreset(inputPresetNumber)
+                equalizerSettings.value?.let {
+                    for (preset in equalizerProperties.presets) {
+                        if (preset.presetNumber == inputPresetNumber) {
+                            it.band1Level = preset.band1Level
+                            it.band2Level = preset.band2Level
+                            it.band3Level = preset.band3Level
+                            it.band4Level = preset.band4Level
+                            it.band5Level = preset.band5Level
+                            it.preset = preset.presetNumber
+                        }
+                    }
+                }
+            }
+        }
     }
 
     //***** BassBoost

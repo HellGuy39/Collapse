@@ -4,12 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:transitionName="equalizer_transition"
     tools:context=".presentaton.fragments.equalizer.EqualizerFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBar"
@@ -17,11 +19,10 @@
             android:layout_height="?attr/actionBarSize"
             tools:title="Tittle"
             tools:subtitle="Subtitle"
-            app:menu="@menu/more_top_menu"
+            app:title="Advanced"
             app:navigationIcon="@drawable/ic_round_arrow_down_ios_24" />
 
     </com.google.android.material.appbar.AppBarLayout>
-
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -53,25 +54,28 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Equalizer"
-                        android:textSize="24sp"
+                        android:textSize="@dimen/medium_text_size"
                         android:layout_marginBottom="8dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    <HorizontalScrollView
+                        android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:requiresFadingEdge="horizontal"
+                        android:scrollbars="none"
+                        android:fadingEdgeLength="16dp">
 
-                        <AutoCompleteTextView
-                            android:id="@+id/acPreset"
-                            android:layout_width="match_parent"
+                        <com.google.android.material.chip.ChipGroup
+                            android:id="@+id/presetChipGroup"
+                            app:singleLine="true"
                             android:layout_height="wrap_content"
-                            android:hint="Preset"
-                            android:inputType="none" />
+                            android:layout_width="wrap_content">
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                        </com.google.android.material.chip.ChipGroup>
+
+                    </HorizontalScrollView>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -92,7 +96,7 @@
                                 android:gravity="start"
                                 android:layout_marginStart="72dp"
                                 tools:text="-15 dB"
-                                android:textSize="20sp" />
+                                android:textSize="@dimen/small_text_size" />
 
                             <TextView
                                 android:id="@+id/tvDbMax"
@@ -102,7 +106,7 @@
                                 android:gravity="end"
                                 android:layout_marginEnd="8dp"
                                 tools:text="15 dB"
-                                android:textSize="20sp" />
+                                android:textSize="@dimen/small_text_size" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -240,10 +244,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Bass"
-                            android:textSize="20sp"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            android:textSize="@dimen/medium_text_size" />
 
                         <com.google.android.material.slider.Slider
                             android:id="@+id/bassBoostBand"
@@ -274,10 +275,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Surround"
-                            android:textSize="20sp"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            android:textSize="@dimen/medium_text_size" />
 
                         <com.google.android.material.slider.Slider
                             android:id="@+id/surroundBand"
@@ -308,26 +306,24 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Reverb"
-                        android:textSize="20sp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        android:textSize="20sp" />
 
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    <HorizontalScrollView
+                        android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:requiresFadingEdge="horizontal"
+                        android:scrollbars="none"
+                        android:fadingEdgeLength="16dp">
 
-                        <AutoCompleteTextView
-                            android:id="@+id/acReverb"
-                            android:layout_width="match_parent"
+                        <com.google.android.material.chip.ChipGroup
+                            android:id="@+id/reverbChipGroup"
+                            app:singleLine="true"
                             android:layout_height="wrap_content"
-                            android:hint="Reverb"
-                            android:inputType="none" />
+                            android:layout_width="wrap_content">
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                        </com.google.android.material.chip.ChipGroup>
 
+                    </HorizontalScrollView>
 
                 </LinearLayout>
 

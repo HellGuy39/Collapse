@@ -120,6 +120,12 @@
             <action
                 android:id="@+id/action_homeFragment_to_statisticFragment"
                 app:destination="@id/statisticFragment" />
+            <action
+                android:id="@+id/action_homeFragment_to_aboutAppFragment"
+                app:destination="@id/aboutAppFragment" />
+            <action
+                android:id="@+id/action_homeFragment_to_settingsFragment"
+                app:destination="@id/settingsFragment" />
         </fragment>
 
         <fragment
@@ -132,6 +138,15 @@
             android:name="com.hellguy39.collapse.presentaton.fragments.statistic.StatisticFragment"
             android:label="fragment_statistic"
             tools:layout="@layout/fragment_statistic" />
+        <fragment
+            android:id="@+id/aboutAppFragment"
+            android:name="com.hellguy39.collapse.presentaton.fragments.about_app.AboutAppFragment"
+            android:label="fragment_about_app"
+            tools:layout="@layout/fragment_about_app" />
+        <fragment
+            android:id="@+id/settingsFragment"
+            android:name="com.hellguy39.collapse.presentaton.fragments.settings.SettingsFragment"
+            android:label="SettingsFragment" />
     </navigation>
 
 </navigation>

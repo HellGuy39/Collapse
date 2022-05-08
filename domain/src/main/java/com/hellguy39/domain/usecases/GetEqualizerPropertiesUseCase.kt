@@ -4,12 +4,13 @@ import android.media.MediaPlayer
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
+import com.hellguy39.domain.models.EqualizerPreset
 import com.hellguy39.domain.models.EqualizerProperties
 
 class GetEqualizerPropertiesUseCase {
     operator fun invoke(): EqualizerProperties {
 
-        val presetNames: MutableList<String> = mutableListOf()
+        val presets: MutableList<EqualizerPreset> = mutableListOf()
         val bandsCenterFreq: ArrayList<Int> = ArrayList(0)
 
         val mediaPlayer = MediaPlayer()
@@ -23,11 +24,11 @@ class GetEqualizerPropertiesUseCase {
             .map { equalizer.getCenterFreq(it.toShort()) }
             .mapTo(bandsCenterFreq) { it / 1000 }
 
-        (0 until equalizer.numberOfPresets).forEach { n ->
-            presetNames.add(equalizer.getPresetName(n.toShort()))
-        }
+        presets.add(EqualizerPreset("None", -1))
 
-        presetNames.add("Custom")
+        (0 until equalizer.numberOfPresets).forEach { n ->
+            presets.add(getPresetBandsValue(equalizer, n.toShort()))
+        }
 
         return EqualizerProperties(
             bassBoostSupport = bassBoost.strengthSupported,
@@ -37,12 +38,25 @@ class GetEqualizerPropertiesUseCase {
             upperBandLevel = equalizer.bandLevelRange[1],
             numberOfPresets = equalizer.numberOfPresets,
             bandsCenterFreq = bandsCenterFreq,
-            presetNames = presetNames
+            presets = presets
         ).also {
             equalizer.release()
             bassBoost.release()
             virtualizer.release()
             mediaPlayer.release()
         }
+    }
+
+    private fun getPresetBandsValue(equalizer: Equalizer, preset: Short): EqualizerPreset {
+        equalizer.usePreset(preset)
+        return EqualizerPreset(
+            name = equalizer.getPresetName(preset),
+            presetNumber = preset,
+            band1Level = equalizer.getBandLevel(0),
+            band2Level = equalizer.getBandLevel(1),
+            band3Level = equalizer.getBandLevel(2),
+            band4Level = equalizer.getBandLevel(3),
+            band5Level = equalizer.getBandLevel(4)
+        )
     }
 }

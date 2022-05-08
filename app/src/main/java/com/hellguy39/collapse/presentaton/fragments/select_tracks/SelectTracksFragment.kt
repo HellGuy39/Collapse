@@ -3,6 +3,7 @@ package com.hellguy39.collapse.presentaton.fragments.select_tracks
 import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
+import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
@@ -15,7 +16,9 @@ import com.hellguy39.collapse.databinding.SelectTracksFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.SelectableTracksAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
+import com.hellguy39.collapse.utils.getTrackItemVerticalDivider
 import com.hellguy39.collapse.utils.getVerticalLayoutManager
+import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimations
 import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
@@ -37,8 +40,6 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
 
     private lateinit var dataViewModel: MediaLibraryDataViewModel
 
-    private lateinit var adapter: SelectableTracksAdapter
-
     private var allTracks = mutableListOf<Track>()
     private var positions = mutableListOf<Int>()
 
@@ -47,28 +48,34 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
+        setMaterialFadeThoughtAnimations()
 
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
-        adapter = SelectableTracksAdapter(
-            tracks = allTracks,
-            getImageBitmapUseCase = getImageBitmapUseCase,
-            listener = this
-        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = SelectTracksFragmentBinding.bind(view)
 
-        binding.topAppBar.setOnBackFragmentNavigation(findNavController())
-        binding.rvTracks.adapter = adapter
-        binding.rvTracks.layoutManager = getVerticalLayoutManager(requireContext())
+        postponeEnterTransition()
 
+        binding.topAppBar.setOnBackFragmentNavigation(findNavController())
+
+        setupRecyclerView()
         setObservers()
+    }
+
+    private fun setupRecyclerView() = binding.rvTracks.apply {
+        addItemDecoration(this.getTrackItemVerticalDivider(requireContext()))
+        layoutManager = getVerticalLayoutManager(requireContext())
+        doOnPreDraw {
+            startPostponedEnterTransition()
+        }
+        adapter = SelectableTracksAdapter(
+            tracks = allTracks,
+            getImageBitmapUseCase = getImageBitmapUseCase,
+            listener = this@SelectTracksFragment
+        )
     }
 
     private fun setObservers() {
@@ -93,7 +100,8 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
 
         for (n in selectedTracks.indices) {
             if (allTracks.contains(selectedTracks[n])) {
-                adapter.addSelectedPosition(allTracks.indexOf(selectedTracks[n]))
+                (binding.rvTracks.adapter as SelectableTracksAdapter)
+                    .addSelectedPosition(allTracks.indexOf(selectedTracks[n]))
             }
         }
 
@@ -118,7 +126,10 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
         val returnableList = mutableListOf<Track>()
 
         for (n in positions.indices) {
-            returnableList.add(adapter.getTrackByPosition(positions[n]))
+            returnableList.add(
+                (binding.rvTracks.adapter as SelectableTracksAdapter)
+                    .getTrackByPosition(positions[n])
+            )
         }
 
         return returnableList

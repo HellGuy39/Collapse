@@ -13,13 +13,14 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.transition.platform.MaterialArcMotion
 import com.google.android.material.transition.platform.MaterialContainerTransform
-import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.AddRadioStationFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
 import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimations
 import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
@@ -66,6 +67,8 @@ class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setMaterialFadeThoughtAnimations()
+
         sharedElementEnterTransition = MaterialContainerTransform().apply {
             drawingViewId = R.id.fragmentContainer
             //scrimColor = Color.TRANSPARENT
@@ -75,12 +78,8 @@ class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
                     com.google.android.material.R.attr.colorSurface
                 )
             )
+            pathMotion = MaterialArcMotion()
         }
-
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
 
         dataViewModel = ViewModelProvider(activity as MainActivity)[RadioStationsDataViewModel::class.java]
     }

@@ -1,6 +1,7 @@
 package com.hellguy39.collapse.presentaton.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
@@ -34,7 +35,7 @@ class PlaylistsAdapter(
     override fun getItemCount(): Int = playlists.size
 
     interface OnPlaylistListener {
-        fun onPlaylistClick(playlist: Playlist)
+        fun onPlaylistClick(playlist: Playlist, view: View)
     }
 
 }

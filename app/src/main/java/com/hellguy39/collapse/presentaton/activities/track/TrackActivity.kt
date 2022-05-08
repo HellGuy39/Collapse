@@ -8,6 +8,7 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.palette.graphics.Palette
 import com.bumptech.glide.Glide
@@ -69,6 +70,8 @@ class TrackActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
         binding = ActivityTrackBinding.inflate(layoutInflater)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         initColors()
 

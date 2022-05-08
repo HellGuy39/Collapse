@@ -21,12 +21,17 @@
     <dimen name="super_small_text_size">16sp</dimen>
 
     <!-- Content padding -->
-    <dimen name="large_content_padding">12dp</dimen>
+    <dimen name="large_content_padding">16dp</dimen>
     <dimen name="default_content_padding">12dp</dimen>
     <dimen name="small_content_padding">8dp</dimen>
 
     <!-- List item image view -->
     <dimen name="list_item_image_height">48dp</dimen>
     <dimen name="list_item_image_width">48dp</dimen>
+
+    <dimen name="image_corner">16dp</dimen>
+
+    <dimen name="ui_icon_width">24dp</dimen>
+    <dimen name="ui_icon_height">24dp</dimen>
 
 </resources>

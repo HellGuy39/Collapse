@@ -2,17 +2,17 @@ package com.hellguy39.collapse.presentaton.fragments.equalizer
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.CompoundButton
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.chip.Chip
 import com.google.android.material.slider.Slider
 import com.google.android.material.transition.platform.MaterialContainerTransform
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.EqualizerFragmentBinding
 import com.hellguy39.collapse.utils.AudioEffectController
+import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimations
 import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
 import com.hellguy39.domain.usecases.eq_settings.EqualizerSettingsUseCases
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,26 +48,20 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
         )
     }
 
-    //private lateinit var viewModel: EqualizerViewModel
     private lateinit var binding: EqualizerFragmentBinding
-
-    private var selectedPreset = 0
-    private var isPresetMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setMaterialFadeThoughtAnimations()
+
         sharedElementEnterTransition = MaterialContainerTransform().apply {
             drawingViewId = R.id.fragmentContainer
-            //scrimColor = Color.TRANSPARENT
             setAllContainerColors(getColorFromThemeUseCase.invoke(
                 requireActivity().theme,
                 com.google.android.material.R.attr.colorSurface
             ))
         }
-
-        //enterTransition = MaterialFadeThrough()
-        //viewModel = ViewModelProvider(this)[EqualizerViewModel::class.java]
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -80,7 +74,6 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
 
         setupUI()
         displayAudioEffectControllerValues()
-
     }
 
     private fun setupUI() {
@@ -164,23 +157,23 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
             binding.surroundBand.isEnabled = false
         }
 
-        val reverbPresetAdapter = ArrayAdapter(requireContext(), R.layout.list_item, reverbPresetNames)
-        binding.acReverb.setAdapter(reverbPresetAdapter)
+        setupPresetChips()
+        setupReverbChips()
 
-        binding.acReverb.setOnItemClickListener { adapterView, view, i, l ->
-            val item = binding.acReverb.adapter.getItem(i).toString()
-            val presets = effectController.getReverbPresetList()
-
-            when(item) {
-                reverbPresetNames[0] -> effectController.setReverbPreset(presets[0])
-                reverbPresetNames[1] -> effectController.setReverbPreset(presets[1])
-                reverbPresetNames[2] -> effectController.setReverbPreset(presets[2])
-                reverbPresetNames[3] -> effectController.setReverbPreset(presets[3])
-                reverbPresetNames[4] -> effectController.setReverbPreset(presets[4])
-                reverbPresetNames[5] -> effectController.setReverbPreset(presets[5])
-                reverbPresetNames[6] -> effectController.setReverbPreset(presets[6])
-            }
-        }
+//        binding.acReverb.setOnItemClickListener { adapterView, view, i, l ->
+//            val item = binding.acReverb.adapter.getItem(i).toString()
+//            val presets = effectController.getReverbPresetList()
+//
+//            when(item) {
+//                reverbPresetNames[0] -> effectController.setReverbPreset(presets[0])
+//                reverbPresetNames[1] -> effectController.setReverbPreset(presets[1])
+//                reverbPresetNames[2] -> effectController.setReverbPreset(presets[2])
+//                reverbPresetNames[3] -> effectController.setReverbPreset(presets[3])
+//                reverbPresetNames[4] -> effectController.setReverbPreset(presets[4])
+//                reverbPresetNames[5] -> effectController.setReverbPreset(presets[5])
+//                reverbPresetNames[6] -> effectController.setReverbPreset(presets[6])
+//            }
+//        }
 
     }
 
@@ -204,90 +197,57 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
             binding.surroundBand.value = (settings.bandVirtualizer / 100).toFloat()
     }
 
-    private fun formatBandFreq(freq: Int): String = if (freq > 1000) {
+    private fun formatBandFreq(freq: Int): String =
+        if (freq > 1000)
             "${freq.toDouble() / 1000} kHz"
-        } else {
+        else
             "$freq Hz"
+
+    private fun setupPresetChips() {
+        val presets = effectController.getProperties().presets
+
+        binding.presetChipGroup.isSingleSelection = true
+
+        for (preset in presets) {
+            val chip: Chip = Chip(requireContext())
+
+            chip.isCheckable = true
+            chip.tag = preset.presetNumber
+            chip.text = preset.name
+
+            chip.setOnCheckedChangeListener { compoundButton, isChecked ->
+                onEqPresetChange(compoundButton.tag.toString().toShort())
+            }
+
+            binding.presetChipGroup.addView(chip)
+        }
     }
 
-//
-//    private fun applySettings() {
-//        val settings = viewModel.getEqualizerSettings()
-//        val properties = effectController.getProperties()
-//
-//        binding.eqSwitch.isChecked = settings.isEqEnabled
-//        binding.bassSwitch.isChecked = settings.isBassEnabled
-//        binding.virtualizerSwitch.isChecked = settings.isVirtualizerEnabled
-//
-//        if (settings.preset == (-1).toShort()) {
-//
-//            isPresetMode = false
-//
-//            binding.band1.value = (settings.band1Level / 100).toFloat()
-//            binding.band2.value = (settings.band2Level / 100).toFloat()
-//            binding.band3.value = (settings.band3Level / 100).toFloat()
-//            binding.band4.value = (settings.band4Level / 100).toFloat()
-//            binding.band5.value = (settings.band5Level / 100).toFloat()
-//            binding.acPreset.setText(
-//                binding.acPreset.adapter.getItem(
-//                    properties.presetNames.lastIndex
-//                ).toString(),
-//                false
-//            )
-//        } else {
-//            isPresetMode = true
-//            selectedPreset = settings.preset.toInt()
-//            binding.acPreset.setText(
-//                binding.acPreset.adapter.getItem(
-//                    settings.preset.toInt()
-//                ).toString(),
-//                false
-//            )
-//
-//            updateBands(PlayerService.getBandsLevels())
-//        }
-//
-//        if (properties.bassBoostSupport)
-//            binding.bassBoostBand.value = (settings.bandBassBoost / 100).toFloat()
-//
-//        if (properties.virtualizerSupport)
-//            binding.surroundBand.value = (settings.bandVirtualizer / 100).toFloat()
-//    }
+    private fun setupReverbChips() {
 
-    private fun setupPreset() {
-//        val presets = PlayerService.getPresetNames()
-//        val presetAdapter = ArrayAdapter(requireContext(), R.layout.list_item, presets)
-//        binding.acPreset.setAdapter(presetAdapter)
-//
-//        binding.acPreset.setOnItemClickListener { adapterView, view, i, l ->
-//            if (binding.acPreset.text.toString() == "Custom") {
-//                isPresetMode = false
-//                selectedPreset = -1
-//            } else {
-//                isPresetMode = true
-//                selectedPreset = i
-//            }
-//
-//            viewModel.savePreset(selectedPreset)
-//
-//            if (selectedPreset == -1) {
-//                applyCustomPreset()
-//            } else {
-//                PlayerService.usePreset(i.toShort())
-//                updateBands(PlayerService.getBandsLevels())
-//            }
-//        }
+        binding.reverbChipGroup.isSingleSelection = true
+
+        for(reverbPreset in reverbPresetNames) {
+            val chip: Chip = Chip(requireContext())
+
+            chip.isCheckable = true
+            chip.text = reverbPreset
+            chip.tag = reverbPreset
+
+            chip.setOnCheckedChangeListener { compoundButton, isChecked ->
+                onReverbPresetChange(compoundButton.tag.toString())
+            }
+
+            binding.reverbChipGroup.addView(chip)
+        }
     }
 
+    private fun onEqPresetChange(presetNumber: Short) {
+        effectController.setPreset(presetNumber)
+    }
 
-    private fun setupUItoCustomPreset() {
-//        isPresetMode = false
-//        binding.acPreset.setText(binding.acPreset.adapter.getItem(
-//            PlayerService.getPresetNames().lastIndex).toString(),
-//            false
-//        )
-//        viewModel.saveBandsLevel(PlayerService.getBandsLevels())
-//        viewModel.savePreset(-1)
+    private fun onReverbPresetChange(reverbPreset: String) {
+
     }
 
     private fun onSliderChangeValue(slider: Slider, value: Float, fromUser: Boolean) {

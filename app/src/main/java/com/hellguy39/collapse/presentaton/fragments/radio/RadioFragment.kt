@@ -18,10 +18,8 @@ import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.RadioStationsAdapter
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
-import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.*
 import com.hellguy39.collapse.utils.getGridLayoutManager
-import com.hellguy39.collapse.utils.getRadioStationItemVerticalDivider
-import com.hellguy39.collapse.utils.getTrackItemVerticalDivider
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.models.ServiceContentWrapper
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
@@ -48,7 +46,7 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupMaterialFadeThought()
+        setMaterialFadeThoughtAnimations()
         dataViewModel = ViewModelProvider(activity as MainActivity)[RadioStationsDataViewModel::class.java]
     }
 
@@ -61,7 +59,6 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
         setupRecyclerView()
 
         binding.fabAdd.setOnClickListener {
-            setupMaterialElevationScale()
             findNavController().navigate(
                 RadioFragmentDirections.actionRadioFragmentToAddRadioStationFragment(
                     Action.Create,
@@ -92,15 +89,11 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
         //addItemDecoration(this.getRadioStationItemVerticalDivider(requireContext()))
     }
 
-    private fun setupMaterialFadeThought() {
-        enterTransition = MaterialFadeThrough()
-        reenterTransition = MaterialFadeThrough()
-    }
 
-    private fun setupMaterialElevationScale() {
-        exitTransition = MaterialElevationScale(false)
-        reenterTransition = MaterialElevationScale(true)
-    }
+//    private fun setupMaterialElevationScale() {
+//        exitTransition = MaterialElevationScale(false)
+//        reenterTransition = MaterialElevationScale(true)
+//    }
 
     private fun setObservers() {
         dataViewModel.getRadioStationList().observe(viewLifecycleOwner) { receivedStations ->
@@ -139,7 +132,6 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
     }
 
     override fun onStationEdit(radioStation: RadioStation) {
-        setupMaterialFadeThought()
         findNavController().navigate(
             RadioFragmentDirections.actionRadioFragmentToAddRadioStationFragment(
                 Action.Update,

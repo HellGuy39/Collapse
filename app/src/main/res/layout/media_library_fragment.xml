@@ -3,11 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".presentaton.fragments.media_library.MediaLibraryFragment"
     android:animateLayoutChanges="true">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -24,6 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
         <LinearLayout
             android:id="@+id/layoutContent"
             android:orientation="vertical"
@@ -32,87 +35,25 @@
             android:animateLayoutChanges="true">
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardPermission"
-                style="@style/Widget.Material3.CardView.Elevated"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardElevation="4dp">
-
-                <LinearLayout
-                    android:id="@+id/layoutCardPermission"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:animateLayoutChanges="true"
-                    android:padding="12dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@drawable/ic_round_error_outline_24" />
-
-                        <TextView
-                            android:id="@+id/tvPermissionTittle"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="12dp"
-                            android:text="Grant access to read local storage"
-                            android:textSize="18sp" />
-
-                    </LinearLayout>
-
-                    <Button
-                        android:id="@+id/btnGetPermission"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginTop="12dp"
-                        android:text="Get it!" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-
-            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardFavourites"
                 style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="0dp"
-                app:cardElevation="0dp">
-
-                <com.google.android.material.divider.MaterialDivider
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:dividerInsetStart="16dp"
-                    android:layout_gravity="bottom"/>
+                android:layout_margin="@dimen/item_card_margin"
+                app:cardElevation="@dimen/item_card_elevation"
+                app:cardCornerRadius="@dimen/item_card_corner_radius">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingStart="16dp"
-                    android:paddingTop="16dp"
-                    android:paddingEnd="12dp"
-                    android:paddingBottom="16dp">
+                    android:padding="@dimen/default_content_padding">
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_gravity="center"
                         android:layout_weight="0"
-                        android:src="@drawable/ic_round_favorite_24"
-                        app:tint="?attr/colorPrimary" />
+                        android:src="@drawable/ic_round_favorite_24" />
 
                     <TextView
                         android:id="@+id/tvFavourites"
@@ -124,14 +65,6 @@
                         android:text="Favourites"
                         android:textSize="22sp" />
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:layout_weight="0"
-                        android:visibility="gone"
-                        android:src="@drawable/ic_round_arrow_forward_ios_24" />
-
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -141,30 +74,22 @@
                 style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="0dp"
-                app:cardElevation="0dp">
-
-                <com.google.android.material.divider.MaterialDivider
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:dividerInsetStart="16dp"
-                    android:layout_gravity="bottom"/>
+                android:layout_margin="@dimen/item_card_margin"
+                app:cardElevation="@dimen/item_card_elevation"
+                app:cardCornerRadius="@dimen/item_card_corner_radius">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingStart="16dp"
-                    android:paddingTop="16dp"
-                    android:paddingEnd="12dp"
-                    android:paddingBottom="16dp">
+                    android:padding="@dimen/default_content_padding">
 
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_weight="0"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_round_queue_music_24"
-                        app:tint="?attr/colorPrimary" />
+
+                <ImageView
+                    android:layout_width="@dimen/ui_icon_width"
+                    android:layout_height="@dimen/ui_icon_height"
+                    android:layout_weight="0"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_round_queue_music_24" />
 
                     <TextView
                         android:id="@+id/tvPlaylists"
@@ -194,30 +119,21 @@
                 style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="0dp"
-                app:cardElevation="0dp">
-
-                <com.google.android.material.divider.MaterialDivider
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:dividerInsetStart="16dp"
-                    android:layout_gravity="bottom"/>
+                android:layout_margin="@dimen/item_card_margin"
+                app:cardElevation="@dimen/item_card_elevation"
+                app:cardCornerRadius="@dimen/item_card_corner_radius">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingStart="16dp"
-                    android:paddingTop="16dp"
-                    android:paddingEnd="12dp"
-                    android:paddingBottom="16dp">
+                    android:padding="@dimen/default_content_padding">
 
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_weight="0"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_round_audiotrack_24"
-                        app:tint="?attr/colorPrimary" />
+                <ImageView
+                    android:layout_width="@dimen/ui_icon_width"
+                    android:layout_height="@dimen/ui_icon_height"
+                    android:layout_weight="0"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_round_audiotrack_24" />
 
                     <TextView
                         android:id="@+id/tvAllTracks"
@@ -248,30 +164,21 @@
                 style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="0dp"
-                app:cardElevation="0dp">
-
-                <com.google.android.material.divider.MaterialDivider
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:dividerInsetStart="16dp"
-                    android:layout_gravity="bottom"/>
+                android:layout_margin="@dimen/item_card_margin"
+                app:cardElevation="@dimen/item_card_elevation"
+                app:cardCornerRadius="@dimen/item_card_corner_radius">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingStart="16dp"
-                    android:paddingTop="16dp"
-                    android:paddingEnd="12dp"
-                    android:paddingBottom="16dp">
+                    android:padding="@dimen/default_content_padding">
 
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                <ImageView
+                        android:layout_width="@dimen/ui_icon_width"
+                        android:layout_height="@dimen/ui_icon_height"
                         android:layout_weight="0"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_round_recent_actors_24"
-                        app:tint="?attr/colorPrimary" />
+                        android:src="@drawable/ic_round_recent_actors_24" />
 
                     <TextView
                         android:id="@+id/tvArtists"
@@ -281,7 +188,7 @@
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
                         android:text="Artists"
-                        android:textSize="22sp" />
+                        android:textSize="@dimen/large_text_size" />
 
                     <ImageView
                         android:layout_width="24dp"
@@ -295,8 +202,6 @@
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
-
-
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

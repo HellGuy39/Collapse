@@ -11,7 +11,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.transition.platform.MaterialSharedAxis
+import com.google.android.material.transition.platform.MaterialContainerTransform
+import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackListFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
@@ -20,7 +21,7 @@ import com.hellguy39.collapse.presentaton.fragments.trackMenuBottomSheet.Playlis
 import com.hellguy39.collapse.presentaton.fragments.trackMenuBottomSheet.TrackMenuBottomSheet
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
-import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.*
 import com.hellguy39.collapse.utils.getTrackItemVerticalDivider
 import com.hellguy39.collapse.utils.getVerticalLayoutManager
 import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
@@ -28,6 +29,7 @@ import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.ServiceContentWrapper
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
+import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
 import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.utils.PlayerType
@@ -45,7 +47,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
     SearchView.OnQueryTextListener,
     View.OnClickListener,
     TrackMenuEvents,
-    PlaylistMenuEvents{
+    PlaylistMenuEvents {
 
     companion object {
         fun newInstance() = TrackListFragment()
@@ -60,6 +62,9 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
     @Inject
     lateinit var favouriteTracksUseCases: FavouriteTracksUseCases
 
+    @Inject
+    lateinit var getColorFromThemeUseCase: GetColorFromThemeUseCase
+
     private lateinit var dataViewModel: MediaLibraryDataViewModel
     private lateinit var binding: TrackListFragmentBinding
     private val args: TrackListFragmentArgs by navArgs()
@@ -73,15 +78,11 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
-
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
 
-        receivedPlaylist = args.playlist
+        setMaterialFadeThoughtAnimations()
 
+        receivedPlaylist = args.playlist
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -97,6 +98,9 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
 
         binding.btnPlay.setOnClickListener(this)
         binding.btnShuffle.setOnClickListener(this)
+
+        binding.toolbar.menu.findItem(R.id.search).isVisible = false
+        binding.toolbar.menu.findItem(R.id.more).isVisible = false
 
         searchView = binding.toolbar.menu.findItem(R.id.search).actionView as SearchView
         searchView.setOnQueryTextListener(this)
@@ -126,9 +130,9 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
         }
         PlaylistType.Custom -> {
             val bytes = receivedPlaylist.picture
-            if (bytes != null)
+            if (bytes != null) {
                 binding.toolbarImage.setImageBitmap(convertByteArrayToBitmapUseCase.invoke(bytes))
-            else
+            } else
                 binding.toolbarImage.visibility = View.GONE
         }
         PlaylistType.Artist -> {

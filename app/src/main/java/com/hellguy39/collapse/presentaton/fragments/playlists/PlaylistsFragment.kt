@@ -1,6 +1,7 @@
 package com.hellguy39.collapse.presentaton.fragments.playlists
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.doOnPreDraw
@@ -10,6 +11,7 @@ import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.transition.platform.MaterialElevationScale
+import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.PlaylistsFragmentBinding
@@ -46,21 +48,9 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setupSharedAxisAnimations()
+        setMaterialFadeThoughtAnimations()
 
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
-    }
-
-    private fun setupSharedAxisAnimations() {
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
-    }
-
-    private fun setupMaterialElevationScale() {
-        exitTransition = MaterialElevationScale(false)
-        reenterTransition = MaterialElevationScale(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -78,9 +68,6 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
         setupRecyclerView()
 
         binding.fabAdd.setOnClickListener {
-
-            setupMaterialElevationScale()
-
             findNavController().navigate(
                 PlaylistsFragmentDirections.actionPlaylistsFragmentToCreatePlaylistFragment(
                     Playlist(),
@@ -128,12 +115,12 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
         binding.rvPlaylists.adapter?.notifyItemRangeRemoved(0, size ?: 0)
     }
 
-    override fun onPlaylistClick(playlist: Playlist) {
-        setupSharedAxisAnimations()
+    override fun onPlaylistClick(playlist: Playlist, view: View) {
+        view.transitionName = "playlist_transition"
         findNavController().navigate(
             PlaylistsFragmentDirections.actionPlaylistsFragmentToTrackListFragment(
                 playlist
-            )
+            ),FragmentNavigatorExtras(view to "playlist_transition")
         )
     }
 
