@@ -1,7 +1,6 @@
 package com.hellguy39.collapse.presentaton.fragments.playlists
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.doOnPreDraw
@@ -9,29 +8,21 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.transition.platform.MaterialElevationScale
-import com.google.android.material.transition.platform.MaterialFadeThrough
-import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.PlaylistsFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.PlaylistsAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
-import com.hellguy39.collapse.utils.*
-import com.hellguy39.collapse.utils.getVerticalLayoutManager
+import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.getGridLayoutManager
+import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimation
 import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Playlist
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     PlaylistsAdapter.OnPlaylistListener, SearchView.OnQueryTextListener {
-
-    @Inject
-    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
 
     companion object {
         fun newInstance() = PlaylistsFragment()
@@ -48,7 +39,7 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setMaterialFadeThoughtAnimations()
+        setMaterialFadeThoughtAnimation()
 
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
     }
@@ -59,7 +50,7 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
         postponeEnterTransition()
 
         binding = PlaylistsFragmentBinding.bind(view)
-        binding.topAppBar.setOnBackFragmentNavigation(findNavController())
+        binding.topAppBar.setOnBackFragmentNavigation()
 
         val searchItem = binding.topAppBar.menu.findItem(R.id.search)
         searchView = searchItem.actionView as SearchView
@@ -80,16 +71,14 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     }
 
     private fun setupRecyclerView() = binding.rvPlaylists.apply {
-        layoutManager = getGridLayoutManager(context)//getVerticalLayoutManager(context)
+        layoutManager = getGridLayoutManager(context)
         adapter = PlaylistsAdapter(
             playlists = playlists,
             listener = this@PlaylistsFragment,
-            convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase
         )
         doOnPreDraw {
             startPostponedEnterTransition()
         }
-        //addItemDecoration(this.getPlaylistItemVerticalDivider(requireContext()))
     }
 
     private  fun setObservers() {

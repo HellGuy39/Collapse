@@ -5,8 +5,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.SelectableTrackItemBinding
 import com.hellguy39.collapse.presentaton.adapters.SelectableTracksAdapter
+import com.hellguy39.collapse.utils.getImageOfTrackByPath
 import com.hellguy39.domain.models.Track
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 
 class SelectableTrackViewHolder(
     v: View,
@@ -16,7 +16,6 @@ class SelectableTrackViewHolder(
 
     fun onBind(
         track: Track,
-        getImageBitmapUseCase: GetImageBitmapUseCase,
         listener: SelectableTracksAdapter.OnSelectableTrackListener,
         position: Int,
         isSelected: Boolean
@@ -24,7 +23,7 @@ class SelectableTrackViewHolder(
         binding.tvTrackName.text = track.name//.ifEmpty { "Unknown" }
         binding.tvAuthor.text = track.artist//.ifEmpty { "Unknown" }
 
-        val bitmap = getImageBitmapUseCase.invoke(track.path)
+        val bitmap = getImageOfTrackByPath(track.path)
 
         if (bitmap != null)
             binding.ivTrackImage.setImageBitmap(bitmap)

@@ -11,8 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.transition.platform.MaterialContainerTransform
-import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackListFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
@@ -22,15 +20,9 @@ import com.hellguy39.collapse.presentaton.fragments.trackMenuBottomSheet.TrackMe
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.*
-import com.hellguy39.collapse.utils.getTrackItemVerticalDivider
-import com.hellguy39.collapse.utils.getVerticalLayoutManager
-import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.ServiceContentWrapper
 import com.hellguy39.domain.models.Track
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
-import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.utils.PlaylistType
@@ -54,16 +46,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
     }
 
     @Inject
-    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
-
-    @Inject
-    lateinit var getImageBitmapUseCase: GetImageBitmapUseCase
-
-    @Inject
     lateinit var favouriteTracksUseCases: FavouriteTracksUseCases
-
-    @Inject
-    lateinit var getColorFromThemeUseCase: GetColorFromThemeUseCase
 
     private lateinit var dataViewModel: MediaLibraryDataViewModel
     private lateinit var binding: TrackListFragmentBinding
@@ -80,7 +63,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
 
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
 
-        setMaterialFadeThoughtAnimations()
+        setMaterialFadeThoughtAnimation()
 
         receivedPlaylist = args.playlist
     }
@@ -94,13 +77,10 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
 
         setupRecyclerView()
 
-        binding.toolbar.setOnBackFragmentNavigation(findNavController())
+        binding.toolbar.setOnBackFragmentNavigation()
 
         binding.btnPlay.setOnClickListener(this)
         binding.btnShuffle.setOnClickListener(this)
-
-        binding.toolbar.menu.findItem(R.id.search).isVisible = false
-        binding.toolbar.menu.findItem(R.id.more).isVisible = false
 
         searchView = binding.toolbar.menu.findItem(R.id.search).actionView as SearchView
         searchView.setOnQueryTextListener(this)
@@ -131,14 +111,14 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
         PlaylistType.Custom -> {
             val bytes = receivedPlaylist.picture
             if (bytes != null) {
-                binding.toolbarImage.setImageBitmap(convertByteArrayToBitmapUseCase.invoke(bytes))
+                binding.toolbarImage.setImageBitmap(bytes.toBitmap())
             } else
                 binding.toolbarImage.visibility = View.GONE
         }
         PlaylistType.Artist -> {
             val bytes = receivedPlaylist.picture
             if (bytes != null)
-                binding.toolbarImage.setImageBitmap(convertByteArrayToBitmapUseCase.invoke(bytes))
+                binding.toolbarImage.setImageBitmap(bytes.toBitmap())
             else
                 binding.toolbarImage.visibility = View.GONE
         }
@@ -195,7 +175,6 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
         setupToolbarImage(receivedPlaylist.type)
         binding.toolbar.menu.findItem(R.id.more).setOnMenuItemClickListener {
             val bottomSheet = PlaylistMenuBottomSheet(
-                convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase,
                 playlist = receivedPlaylist,
                 listener = this
             )
@@ -223,9 +202,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
         }
         adapter = TracksAdapter(
             trackList = recyclerTracks,
-            resources = resources,
             listener = this@TrackListFragment,
-            getImageBitmapUseCase = getImageBitmapUseCase,
             context = requireContext(),
             playlistType = receivedPlaylist.type,
         )
@@ -236,8 +213,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
             position = position,
             listener = this,
             playlistType = playlistType,
-            getImageBitmapUseCase = getImageBitmapUseCase,
-            isTrackFavouriteUseCase = favouriteTracksUseCases.isTrackFavouriteUseCase
+            isTrackFavouriteUseCase = favouriteTracksUseCases.isTrackFavouriteUseCase,
         )
         bottomSheet.show(childFragmentManager, TrackMenuBottomSheet.TRACK_MENU_TAG)
     }
@@ -374,7 +350,17 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
     }
 
     override fun onDeletePlaylist() {
-        showDeleteDialog()
+        showDialog(
+            title = "Are you sure want to delete this playlist?",
+            positiveButtonText = "Yes",
+            iconId = R.drawable.ic_round_delete_24,
+            dialogEventListener = object : DialogEventListener {
+                override fun onPositiveButtonClick() {
+                    dataViewModel.deletePlaylist(playlist = receivedPlaylist)
+                    findNavController().popBackStack()
+                }
+            }
+        )
     }
 
     private fun navigateToEditPlaylist() = findNavController().navigate(
@@ -383,18 +369,4 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
             Action.Update
         )
     )
-
-
-    private fun showDeleteDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Are you sure want to delete this playlist?")
-            .setNeutralButton("Cancel") { dialog, which ->
-                dialog.cancel()
-            }
-            .setPositiveButton("Yes") { dialog, which ->
-                dataViewModel.deletePlaylist(playlist = receivedPlaylist)
-                findNavController().popBackStack()
-            }
-            .show()
-    }
 }

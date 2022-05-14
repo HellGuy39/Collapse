@@ -24,8 +24,8 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.hellguy39.collapse.presentaton.adapters.DescriptionAdapter
-import com.hellguy39.collapse.utils.AudioEffectController
-import com.hellguy39.collapse.utils.StatisticController
+import com.hellguy39.collapse.controllers.audio_effect.AudioEffectController
+import com.hellguy39.collapse.controllers.StatisticController
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.models.SavedState
 import com.hellguy39.domain.models.ServiceContentWrapper
@@ -175,7 +175,7 @@ class PlayerService : LifecycleService() {
         super.onCreate()
         exoPlayer = ExoPlayer.Builder(this).build()
 
-        effectController.init(exoPlayer.audioSessionId)
+        effectController.updateAudioSession(exoPlayer.audioSessionId)
 
         deviceVolumeLiveData.value = exoPlayer.deviceVolume
 
@@ -398,7 +398,7 @@ class PlayerService : LifecycleService() {
         }
 
         override fun onAudioSessionIdChanged(audioSessionId: Int) {
-            effectController.init(audioSessionId)
+            effectController.updateAudioSession(audioSessionId)
         }
 
         override fun onPlayerError(error: PlaybackException) {

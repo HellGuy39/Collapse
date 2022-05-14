@@ -4,18 +4,18 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.hellguy39.data.models.TrackDb
+import com.hellguy39.data.models.TrackEntity
 
 @Dao
 interface FavouritesDao {
 
-    @Query("SELECT * FROM TrackDb")
-    suspend fun getAllFavouriteTracks(): List<TrackDb>
+    @Query("SELECT * FROM TrackEntity")
+    suspend fun getAllFavouriteTracks(): List<TrackEntity>
 
     @Insert
-    suspend fun insertFavouriteTrack(trackDb: TrackDb)
+    suspend fun insertFavouriteTrack(trackEntity: TrackEntity)
 
     @Delete
-    suspend fun deleteFavouriteTrack(trackDb: TrackDb)
+    suspend fun deleteFavouriteTrack(trackEntity: TrackEntity)
 
 }

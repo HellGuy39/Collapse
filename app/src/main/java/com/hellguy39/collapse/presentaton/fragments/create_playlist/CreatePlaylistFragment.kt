@@ -13,38 +13,21 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
-import com.google.android.material.transition.platform.MaterialArcMotion
-import com.google.android.material.transition.platform.MaterialContainerTransform
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.CreatePlaylistFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
-import com.hellguy39.collapse.utils.Action
-import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimations
-import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
+import com.hellguy39.collapse.utils.*
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.SelectedTracks
 import com.hellguy39.domain.models.Track
-import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
-import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
 import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.InputStream
-import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View.OnClickListener {
-
-    @Inject
-    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
-
-    @Inject
-    lateinit var convertBitmapToByteArrayUseCase: ConvertBitmapToByteArrayUseCase
-
-    @Inject
-    lateinit var getColorFromThemeUseCase: GetColorFromThemeUseCase
 
     companion object {
         fun newInstance() = CreatePlaylistFragment()
@@ -63,18 +46,9 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setMaterialFadeThoughtAnimations()
+        setMaterialFadeThoughtAnimation()
 
-        sharedElementEnterTransition = MaterialContainerTransform().apply {
-            drawingViewId = R.id.fragmentContainer
-            //scrimColor = Color.TRANSPARENT
-            setAllContainerColors(getColorFromThemeUseCase.invoke(
-                requireActivity().theme,
-                com.google.android.material.R.attr.colorSurface
-                )
-            )
-            pathMotion = MaterialArcMotion()
-        }
+        setSharedElementTransitionAnimation()
 
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
         createViewModel = ViewModelProvider(this)[CreatePlaylistViewModel::class.java]
@@ -85,10 +59,9 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
                 val selectedImage = BitmapFactory.decodeStream(imageStream)
                 binding.ivImage.setImageBitmap(selectedImage)
 
-                val bytes = convertBitmapToByteArrayUseCase.invoke(selectedImage)
-
-                if (bytes != null)
+                selectedImage.toByteArray().also { bytes ->
                     createViewModel.setPicture(bytes)
+                }
             }
         }
 
@@ -101,10 +74,11 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
 
         val bytes = playlist.picture
 
-        if (bytes != null) {
-            val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
-            Glide.with(this).load(bitmap).into(binding.ivImage)
-        } else
+        if (bytes != null)
+            bytes.toBitmap().also { bitmap ->
+                Glide.with(this).load(bitmap).into(binding.ivImage)
+            }
+        else
             binding.ivImage.setImageResource(R.drawable.ic_round_queue_music_24)
 
         updateTracksCounter(tracks.size)
@@ -114,7 +88,7 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
         super.onViewCreated(view, savedInstanceState)
         binding = CreatePlaylistFragmentBinding.bind(view)
 
-        binding.topAppBar.setOnBackFragmentNavigation(findNavController())
+        binding.topAppBar.setOnBackFragmentNavigation()
 
         binding.btnSelectTracks.setOnClickListener(this)
         binding.btnCreate.setOnClickListener(this)
@@ -142,10 +116,11 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
     }
 
     private fun setObservers() {
-        createViewModel.getPicture().observe(viewLifecycleOwner) {
-            if (it != null) {
-                val bitmap = convertByteArrayToBitmapUseCase.invoke(it)
-                binding.ivImage.setImageBitmap(bitmap)
+        createViewModel.getPicture().observe(viewLifecycleOwner) { bytes ->
+            bytes?.let { notNullBytes ->
+                notNullBytes.toBitmap().also { bitmap ->
+                    binding.ivImage.setImageBitmap(bitmap)
+                }
             }
         }
         createViewModel.getSelectedTracks().observe(viewLifecycleOwner) {

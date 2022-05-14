@@ -7,10 +7,7 @@ import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.SelectTracksFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
@@ -18,19 +15,14 @@ import com.hellguy39.collapse.presentaton.adapters.SelectableTracksAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.getTrackItemVerticalDivider
 import com.hellguy39.collapse.utils.getVerticalLayoutManager
-import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimations
+import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimation
 import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Track
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
     SelectableTracksAdapter.OnSelectableTrackListener {
-
-    @Inject
-    lateinit var getImageBitmapUseCase: GetImageBitmapUseCase
 
     companion object {
         fun newInstance() = SelectTracksFragment()
@@ -48,7 +40,7 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setMaterialFadeThoughtAnimations()
+        setMaterialFadeThoughtAnimation()
 
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
     }
@@ -59,7 +51,7 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
 
         postponeEnterTransition()
 
-        binding.topAppBar.setOnBackFragmentNavigation(findNavController())
+        binding.topAppBar.setOnBackFragmentNavigation()
 
         setupRecyclerView()
         setObservers()
@@ -73,7 +65,6 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
         }
         adapter = SelectableTracksAdapter(
             tracks = allTracks,
-            getImageBitmapUseCase = getImageBitmapUseCase,
             listener = this@SelectTracksFragment
         )
     }

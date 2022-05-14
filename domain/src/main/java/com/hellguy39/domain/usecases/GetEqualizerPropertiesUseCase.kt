@@ -24,8 +24,6 @@ class GetEqualizerPropertiesUseCase {
             .map { equalizer.getCenterFreq(it.toShort()) }
             .mapTo(bandsCenterFreq) { it / 1000 }
 
-        presets.add(EqualizerPreset("None", -1))
-
         (0 until equalizer.numberOfPresets).forEach { n ->
             presets.add(getPresetBandsValue(equalizer, n.toShort()))
         }
@@ -52,11 +50,13 @@ class GetEqualizerPropertiesUseCase {
         return EqualizerPreset(
             name = equalizer.getPresetName(preset),
             presetNumber = preset,
-            band1Level = equalizer.getBandLevel(0),
-            band2Level = equalizer.getBandLevel(1),
-            band3Level = equalizer.getBandLevel(2),
-            band4Level = equalizer.getBandLevel(3),
-            band5Level = equalizer.getBandLevel(4)
+            bandValues = mutableListOf(
+                equalizer.getBandLevel(0),
+                equalizer.getBandLevel(1),
+                equalizer.getBandLevel(2),
+                equalizer.getBandLevel(3),
+                equalizer.getBandLevel(4)
+            )
         )
     }
 }

@@ -66,36 +66,3 @@ class SavedServiceStateRepositoryImpl(
         }.apply()
     }
 }
-
-//class SavedServiceStateRepositoryImpl(
-//    private val dao: SavedServiceStateDao,
-//): SavedServiceStateRepository {
-//    override suspend fun getSavedState(): ServiceContentWrapper {
-//        val stateList = dao.getSavedState()
-//
-//        if (stateList.isNullOrEmpty())
-//            return ServiceContentWrapper(radioStation = null, playlist = null)
-//
-//        val state: SavedServiceStateDb = dao.getSavedState()[0]
-//        return ServiceContentWrapper(
-//            type = when(state.type) {
-//                PlayerType.Radio.name -> PlayerType.Radio
-//                PlayerType.LocalTrack.name -> PlayerType.LocalTrack
-//                else -> PlayerType.Undefined
-//            },
-//            radioStation = if (state.radioStationId != null) RadioStation(id = state.radioStationId!!) else null,
-//            playlist = if (state.playlistId != null) Playlist(id = state.playlistId!!) else null,
-//            playerPosition = state.playerPosition
-//        )
-//    }
-//
-//    override fun insertSavedState(serviceContent: ServiceContentWrapper) {
-//        dao.insertSavedState(SavedServiceStateDb(
-//            type = serviceContent.type.name,
-//            playerPosition = serviceContent.playerPosition,
-//            position = serviceContent.position,
-//            radioStationId = serviceContent.radioStation?.id,
-//            playlistId = serviceContent.playlist?.id
-//        ))
-//    }
-//}

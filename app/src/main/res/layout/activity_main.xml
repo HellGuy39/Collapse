@@ -51,7 +51,9 @@
             android:layout_height="match_parent"
             android:animateLayoutChanges="true"
             android:orientation="horizontal"
-            android:padding="8dp">
+            android:paddingHorizontal="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="12dp">
 
             <ImageView
                 android:id="@+id/ivTrackImage"

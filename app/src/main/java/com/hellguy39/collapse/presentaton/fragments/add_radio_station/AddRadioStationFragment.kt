@@ -4,47 +4,38 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.view.isVisible
-import androidx.core.widget.doOnTextChanged
+import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.transition.platform.MaterialArcMotion
-import com.google.android.material.transition.platform.MaterialContainerTransform
+import com.google.android.material.chip.Chip
+import com.google.android.material.snackbar.Snackbar
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.AddRadioStationFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
-import com.hellguy39.collapse.utils.Action
-import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimations
-import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
+import com.hellguy39.collapse.utils.*
 import com.hellguy39.domain.models.RadioStation
-import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
-import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
 import com.hellguy39.domain.utils.Protocol
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.InputStream
-import javax.inject.Inject
 
 @AndroidEntryPoint
-class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
-
-    @Inject
-    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
-
-    @Inject
-    lateinit var convertBitmapToByteArrayUseCase: ConvertBitmapToByteArrayUseCase
-
-    @Inject
-    lateinit var getColorFromThemeUseCase: GetColorFromThemeUseCase
+class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment), View.OnClickListener {
 
     companion object {
         fun newInstance() = AddRadioStationFragment()
+
+        val protocols = listOf<Enum<Protocol>>(
+            Protocol.HLS,
+            Protocol.SmoothStreaming,
+            Protocol.RTSP,
+            Protocol.Progressive,
+            Protocol.DASH,
+        )
     }
 
     private lateinit var dataViewModel: RadioStationsDataViewModel
@@ -54,32 +45,14 @@ class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
     private var selectedImage: Bitmap? = null
 
     private val args: AddRadioStationFragmentArgs by navArgs()
-
-    private val protocols = listOf<Enum<Protocol>>(
-        Protocol.HLS,
-        Protocol.SmoothStreaming,
-        Protocol.RTSP,
-        Protocol.Progressive,
-        Protocol.DASH,
-    )
     private var selectedProtocol = Protocol.HLS
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setMaterialFadeThoughtAnimations()
+        setMaterialFadeThoughtAnimation()
 
-        sharedElementEnterTransition = MaterialContainerTransform().apply {
-            drawingViewId = R.id.fragmentContainer
-            //scrimColor = Color.TRANSPARENT
-            setAllContainerColors(
-                getColorFromThemeUseCase.invoke(
-                    requireActivity().theme,
-                    com.google.android.material.R.attr.colorSurface
-                )
-            )
-            pathMotion = MaterialArcMotion()
-        }
+        setSharedElementTransitionAnimation()
 
         dataViewModel = ViewModelProvider(activity as MainActivity)[RadioStationsDataViewModel::class.java]
     }
@@ -88,65 +61,15 @@ class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
         super.onViewCreated(view, savedInstanceState)
         binding = AddRadioStationFragmentBinding.bind(view)
 
-        binding.fabAdd.hide()
+        binding.topAppBar.setOnBackFragmentNavigation()
 
-        binding.topAppBar.setOnBackFragmentNavigation(findNavController())
+        binding.btnCreate.setOnClickListener(this)
 
-        pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
-            if (it != null) {
-                val imageStream: InputStream? = context?.contentResolver?.openInputStream(it)
-                selectedImage = BitmapFactory.decodeStream(imageStream)
-                binding.ivImage.setImageBitmap(selectedImage)
-            }
-        }
+        setupPickImageListener()
 
-        binding.fabAdd.setOnClickListener {
-            if (checkEditTexts()) {
-                if (args.action == Action.Create) {
-                    dataViewModel.addNewRadioStation(RadioStation(
-                        name = getNameText(),
-                        url = getUrlText(),
-                        protocol = selectedProtocol,
-                        picture = convertBitmapToByteArrayUseCase.invoke(selectedImage)
-                    ))
-                } else if (args.action == Action.Update) {
-                    dataViewModel.updateRadioStation(
-                        RadioStation(
-                            id = args.radioStation.id,
-                            name = getNameText(),
-                            url = getUrlText(),
-                            protocol = selectedProtocol,
-                            picture = convertBitmapToByteArrayUseCase.invoke(selectedImage)
-                        )
-                    )
-                }
-                findNavController().popBackStack()
-            }
-        }
-
-        binding.ivImage.setOnClickListener {
-            pickImage.launch("image/*")
-        }
-
-        binding.etName.doOnTextChanged { text, start, before, count ->
-            updateExFab()
-        }
-
-        binding.etUrl.doOnTextChanged { text, start, before, count ->
-            updateExFab()
-        }
-
-        val adapter = ArrayAdapter(requireContext(), R.layout.list_item, protocols)
-        binding.acProtocol.setAdapter(adapter)
-        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(0).toString(), false)
-        binding.acProtocol.setOnItemClickListener { _, _, i, _ ->
-            when (binding.acProtocol.adapter.getItem(i).toString()) {
-                Protocol.HLS.name -> selectedProtocol = Protocol.HLS
-                Protocol.DASH.name -> selectedProtocol = Protocol.DASH
-                Protocol.SmoothStreaming.name -> selectedProtocol = Protocol.SmoothStreaming
-                Protocol.RTSP.name -> selectedProtocol = Protocol.RTSP
-                Protocol.Progressive.name -> selectedProtocol = Protocol.Progressive
-            }
+        setupProtocolChipGroup().also {
+            //Default selection
+            setChipSelected(Protocol.HLS)
         }
 
         when(args.action) {
@@ -158,34 +81,14 @@ class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
 
                 val bytes = args.radioStation.picture
                 if (bytes != null) {
-                    val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
-                    binding.ivImage.setImageBitmap(bitmap)
-                    selectedImage = bitmap
+                    bytes.toBitmap().also { bitmap ->
+                        binding.ivImage.setImageBitmap(bitmap)
+                        selectedImage = bitmap
+                    }
                 } else
                     binding.ivImage.setImageResource(R.drawable.ic_round_radio_24)
 
-                when(args.radioStation.protocol) {
-                    Protocol.HLS -> {
-                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(0).toString(), false)
-                        selectedProtocol = Protocol.HLS
-                    }
-                    Protocol.SmoothStreaming -> {
-                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(1).toString(), false)
-                        selectedProtocol = Protocol.SmoothStreaming
-                    }
-                    Protocol.RTSP -> {
-                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(2).toString(), false)
-                        selectedProtocol = Protocol.RTSP
-                    }
-                    Protocol.Progressive -> {
-                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(3).toString(), false)
-                        selectedProtocol = Protocol.Progressive
-                    }
-                    Protocol.DASH -> {
-                        binding.acProtocol.setText(binding.acProtocol.adapter.getItem(4).toString(), false)
-                        selectedProtocol = Protocol.DASH
-                    }
-                }
+                setChipSelected(args.radioStation.protocol)
             }
             Action.Create -> {
                 binding.topAppBar.title = "New radio station"
@@ -194,12 +97,55 @@ class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
         }
     }
 
-    private fun updateExFab() {
-        if (!checkEditTexts()) {
-            if (binding.fabAdd.isVisible)
-                binding.fabAdd.hide()
-        } else
-            binding.fabAdd.show()
+    private fun setupProtocolChipGroup() {
+        for (protocol in protocols) {
+            val chip = Chip(requireContext())
+
+            chip.text = protocol.name
+            chip.tag = protocol.name
+
+            chip.isCheckable = true
+
+            chip.setOnCheckedChangeListener { compoundButton, b ->
+
+                if (!b)
+                    return@setOnCheckedChangeListener
+
+                selectedProtocol = when(compoundButton.tag) {
+                    Protocol.HLS.name -> Protocol.HLS
+                    Protocol.DASH.name -> Protocol.DASH
+                    Protocol.Progressive.name -> Protocol.Progressive
+                    Protocol.RTSP.name -> Protocol.RTSP
+                    Protocol.SmoothStreaming.name -> Protocol.SmoothStreaming
+                    else -> return@setOnCheckedChangeListener
+                }
+            }
+
+            binding.protocolChipGroup.addView(chip)
+        }
+    }
+
+    private fun setupPickImageListener() {
+        pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
+            if (it != null) {
+                val imageStream: InputStream? = context?.contentResolver?.openInputStream(it)
+                selectedImage = BitmapFactory.decodeStream(imageStream)
+                binding.ivImage.setImageBitmap(selectedImage)
+            }
+        }
+
+        binding.ivImage.setOnClickListener {
+            pickImage.launch("image/*")
+        }
+    }
+
+    private fun setChipSelected(protocol: Enum<Protocol>) {
+        binding.protocolChipGroup.forEach { view ->
+            if (view.tag == protocol.name) {
+                (view as Chip).isChecked = true
+                return@forEach
+            }
+        }
     }
 
     private fun checkEditTexts(): Boolean {
@@ -209,5 +155,45 @@ class AddRadioStationFragment : Fragment(R.layout.add_radio_station_fragment) {
     private fun getNameText(): String = binding.etName.text.toString()
 
     private fun getUrlText(): String = binding.etUrl.text.toString()
+
+    override fun onClick(view: View?) {
+        when(view?.id) {
+            binding.btnCreate.id -> {
+                if (checkEditTexts()) {
+                    if (args.action == Action.Create) {
+                        onAddNewRadioStation()
+                    } else if (args.action == Action.Update) {
+                        onUpdateRadioStation()
+                    }
+                    findNavController().popBackStack()
+                } else {
+                    Snackbar.make(
+                        binding.root,
+                        "Some text fields are empty",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    private fun onAddNewRadioStation() = dataViewModel.addNewRadioStation(
+        RadioStation(
+            name = getNameText(),
+            url = getUrlText(),
+            protocol = selectedProtocol,
+            picture = selectedImage?.toByteArray()
+        )
+    )
+
+    private fun onUpdateRadioStation() = dataViewModel.updateRadioStation(
+        RadioStation(
+            id = args.radioStation.id,
+            name = getNameText(),
+            url = getUrlText(),
+            protocol = selectedProtocol,
+            picture = selectedImage?.toByteArray()
+        )
+    )
 
 }

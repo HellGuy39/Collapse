@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
-import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.WindowCompat
@@ -22,12 +21,11 @@ import com.hellguy39.collapse.databinding.ActivityTrackBinding
 import com.hellguy39.collapse.presentaton.fragments.trackMenuBottomSheet.TrackMenuBottomSheet
 import com.hellguy39.collapse.presentaton.fragments.track_list.TrackMenuEvents
 import com.hellguy39.collapse.presentaton.services.PlayerService
+import com.hellguy39.collapse.utils.formatAsDate
+import com.hellguy39.collapse.utils.getColorByResId
 import com.hellguy39.collapse.utils.setOnBackActivityNavigation
+import com.hellguy39.collapse.utils.toBitmap
 import com.hellguy39.domain.models.Track
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
-import com.hellguy39.domain.usecases.DateFormatUseCase
-import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.utils.PlaylistType
@@ -42,27 +40,9 @@ class TrackActivity : AppCompatActivity(),
     Slider.OnSliderTouchListener{
 
     @Inject
-    lateinit var getImageBitmapUseCase: GetImageBitmapUseCase
-
-    @Inject
-    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
-
-    @Inject
     lateinit var favouriteTracksUseCases: FavouriteTracksUseCases
 
-    @Inject
-    lateinit var getColorFromThemeUseCase: GetColorFromThemeUseCase
-
-    @Inject
-    lateinit var dateFormatUseCase: DateFormatUseCase
-
     private lateinit var binding: ActivityTrackBinding
-
-    private lateinit var primaryColorStateList: ColorStateList
-    private lateinit var onSurfaceColorStateList: ColorStateList
-    @ColorInt private var colorSurface: Int = 0
-    @ColorInt private var defTextColor: Int = 0
-    private lateinit var defIconTintColorStateList: ColorStateList
 
     private lateinit var viewModel: TrackActivityViewModel
 
@@ -73,17 +53,15 @@ class TrackActivity : AppCompatActivity(),
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        initColors()
-
         viewModel = ViewModelProvider(this)[TrackActivityViewModel::class.java]
 
         window.sharedElementEnterTransition = MaterialContainerTransform().apply {
             addTarget(binding.root)
-            setAllContainerColors(colorSurface)
+            setAllContainerColors(theme.getColorByResId(com.google.android.material.R.attr.colorSurface))
         }
         window.sharedElementReturnTransition = MaterialContainerTransform().apply {
             addTarget(binding.root)
-            setAllContainerColors(colorSurface)
+            setAllContainerColors(theme.getColorByResId(com.google.android.material.R.attr.colorSurface))
         }
 
         setContentView(binding.root)
@@ -101,8 +79,7 @@ class TrackActivity : AppCompatActivity(),
                 position = PlayerService.getContentPosition().value ?: 0,
                 listener = this,
                 playlistType = PlayerService.getServiceContent().playlist?.type ?: PlaylistType.Undefined,
-                getImageBitmapUseCase = getImageBitmapUseCase,
-                isTrackFavouriteUseCase = favouriteTracksUseCases.isTrackFavouriteUseCase
+                isTrackFavouriteUseCase = favouriteTracksUseCases.isTrackFavouriteUseCase,
             )
             bottomSheet.show(supportFragmentManager, TrackMenuBottomSheet.TRACK_MENU_TAG)
             true
@@ -151,7 +128,7 @@ class TrackActivity : AppCompatActivity(),
 
     private fun setupImage(bytes: ByteArray?) {
         if (bytes != null) {
-            val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
+            val bitmap = bytes.toBitmap()
             Glide.with(this).load(bitmap).into(binding.ivCover)
             updatePalette(bitmap)
         } else {
@@ -166,17 +143,6 @@ class TrackActivity : AppCompatActivity(),
         setShuffleObserver()
         setRepeatModeObserver()
         setTimelineObserver()
-    }
-
-    private fun initColors() {
-        @ColorInt val colorPrimary = getColorFromThemeUseCase.invoke(theme, com.google.android.material.R.attr.colorPrimary)
-        @ColorInt val colorOnSurface = getColorFromThemeUseCase.invoke(theme, com.google.android.material.R.attr.colorOnSurface)
-        primaryColorStateList = ColorStateList.valueOf(colorPrimary)
-        onSurfaceColorStateList = ColorStateList.valueOf(colorOnSurface)
-
-        defTextColor = binding.tvTrackName.currentTextColor
-        defIconTintColorStateList = binding.ibPlayPause.imageTintList ?: ColorStateList.valueOf(colorOnSurface)
-        colorSurface = getColorFromThemeUseCase.invoke(theme, com.google.android.material.R.attr.colorSurface)
     }
 
     private fun setupVolumeSlider() {
@@ -232,20 +198,27 @@ class TrackActivity : AppCompatActivity(),
             value = (it).toFloat()
         }
 
-        binding.tvCurrentTrackTime.text = dateFormatUseCase.invoke(it)
-        binding.tvRemainingTrackTime.text = dateFormatUseCase.invoke(duration - it)
+        binding.tvCurrentTrackTime.text = it.formatAsDate()
+        binding.tvRemainingTrackTime.text = (duration - it).formatAsDate()
 
     }
 
     private fun updateShuffle(b: Boolean) {
         if (b) {
-            binding.ibShuffle.imageTintList = primaryColorStateList
+            binding.ibShuffle.imageTintList = ColorStateList.valueOf(
+                theme.getColorByResId(com.google.android.material.R.attr.colorPrimary)
+            )
         } else {
-            binding.ibShuffle.imageTintList = onSurfaceColorStateList
+            binding.ibShuffle.imageTintList = ColorStateList.valueOf(
+                theme.getColorByResId(com.google.android.material.R.attr.colorOnSurface)
+            )
         }
     }
 
     private fun updateRepeatMode(repeatMode: Int) {
+        val primaryColorStateList = ColorStateList.valueOf(theme.getColorByResId(com.google.android.material.R.attr.colorOnSurface))
+        val onSurfaceColorStateList = ColorStateList.valueOf(theme.getColorByResId(com.google.android.material.R.attr.colorPrimary))
+        
         when (repeatMode) {
             Player.REPEAT_MODE_ALL -> {
                 binding.ibRepeatTrack.imageTintList = primaryColorStateList
@@ -265,7 +238,7 @@ class TrackActivity : AppCompatActivity(),
     private fun updateUI(mediaMetadata: MediaMetadata) {
 
         binding.sliderTime.setLabelFormatter {
-            dateFormatUseCase.invoke(it.toLong())
+            (it.toLong()).formatAsDate()
         }
 
         binding.topAppBar.title = PlayerService.getServiceContent().playlist?.name
@@ -336,19 +309,25 @@ class TrackActivity : AppCompatActivity(),
     }
 
     private fun setDefaultUIColors() {
-        binding.topAppBar.setNavigationIconTint(defIconTintColorStateList.defaultColor)
-        binding.topAppBar.setTitleTextColor(defTextColor)
-        binding.tvTrackName.setTextColor(defTextColor)
-        binding.tvPerformer.setTextColor(defTextColor)
-        binding.tvRemainingTrackTime.setTextColor(defTextColor)
-        binding.tvCurrentTrackTime.setTextColor(defTextColor)
-        binding.ibPlayPause.imageTintList = defIconTintColorStateList
-        binding.ibNextTrack.imageTintList = defIconTintColorStateList
-        binding.ibPreviousTrack.imageTintList = defIconTintColorStateList
-        binding.topAppBar.menu.findItem(R.id.more).iconTintList = defIconTintColorStateList
+        theme.getColorByResId(com.google.android.material.R.attr.colorOnSurface).also { colorOnSurface ->
+            binding.topAppBar.setTitleTextColor(colorOnSurface)
+            binding.tvTrackName.setTextColor(colorOnSurface)
+            binding.tvPerformer.setTextColor(colorOnSurface)
+            binding.tvRemainingTrackTime.setTextColor(colorOnSurface)
+            binding.tvCurrentTrackTime.setTextColor(colorOnSurface)
+            binding.topAppBar.setNavigationIconTint(colorOnSurface)
 
-        binding.topAppBar.setBackgroundColor(colorSurface)
-        binding.root.setBackgroundColor(colorSurface)
+            ColorStateList.valueOf(colorOnSurface).also { colorStateList ->
+                binding.ibPlayPause.imageTintList = colorStateList
+                binding.ibNextTrack.imageTintList = colorStateList
+                binding.ibPreviousTrack.imageTintList = colorStateList
+                binding.topAppBar.menu.findItem(R.id.more).iconTintList = colorStateList
+            }
+        }
+        theme.getColorByResId(com.google.android.material.R.attr.colorSurface).also { colorSurface ->
+            binding.topAppBar.setBackgroundColor(colorSurface)
+            binding.root.setBackgroundColor(colorSurface)
+        }
     }
 
     @SuppressLint("RestrictedApi")

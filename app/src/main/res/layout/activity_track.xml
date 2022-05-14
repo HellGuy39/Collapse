@@ -17,6 +17,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             tools:title="Tittle"
+            app:titleCentered="true"
+            app:subtitleCentered="true"
             tools:subtitle="Subtitle"
             app:menu="@menu/more_top_menu"
             app:navigationIcon="@drawable/ic_round_arrow_down_ios_24" />
@@ -173,6 +175,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
+                android:layout_marginTop="16dp"
                 android:orientation="horizontal">
 
                 <ImageView

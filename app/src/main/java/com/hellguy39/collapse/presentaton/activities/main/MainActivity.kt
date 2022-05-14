@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.view.View
-import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.WindowCompat
@@ -25,22 +24,15 @@ import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
+import com.hellguy39.collapse.utils.getColorByResId
+import com.hellguy39.collapse.utils.toBitmap
 import com.hellguy39.domain.models.RadioStation
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
-import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
 import com.hellguy39.domain.utils.PlayerType
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), View.OnClickListener {
-
-    @Inject
-    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
-
-    @Inject
-    lateinit var getColorFromThemeUseCase: GetColorFromThemeUseCase
 
     private lateinit var navController: NavController
     private lateinit var navHostFragment: NavHostFragment
@@ -58,9 +50,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(binding.root)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        //window.statusBarColor = getColorFromThemeUseCase.invoke(theme, com.google.android.material.R.attr.colorSurface)
-        //window.navigationBarColor = getColorFromThemeUseCase.invoke(theme, com.google.android.material.R.attr.colorSurface)
 
         initModels()
 
@@ -190,11 +179,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
 
-        if (PlayerService.isPlaying().value == true)
-            binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
-        else
-            binding.ibPlayPause.setImageResource(R.drawable.ic_round_play_arrow_24)
-
         if (bytes != null) {
             setCustomCardColorScheme(bytes = bytes, type = type)
         } else {
@@ -203,13 +187,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun setCustomCardColorScheme(bytes: ByteArray, type: Enum<PlayerType>) {
-        val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
+        val bitmap = bytes.toBitmap()
         val white = ResourcesCompat.getColor(resources, R.color.white,null)
+
+        binding.ivTrackImage.setImageBitmap(bitmap)
 
         Palette.from(bitmap).generate { palette ->
             if (palette != null) {
                 binding.trackCard.backgroundTintList = ColorStateList.valueOf(palette.getMutedColor(1))
-
                 binding.tvTrackName.setTextColor(white)
                 binding.tvArtist.setTextColor(white)
                 binding.ibPlayPause.imageTintList = ColorStateList.valueOf(white)
@@ -221,7 +206,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun setDefaultCardColorScheme(type: Enum<PlayerType>) {
-        val colorOnSurface = getColorFromThemeUseCase.invoke(theme, com.google.android.material.R.attr.colorOnSurface)
+        val colorOnSurface = theme.getColorByResId(com.google.android.material.R.attr.colorOnSurface)
 
         if (type == PlayerType.Radio)
             binding.ivTrackImage.setImageResource(R.drawable.ic_round_radio_24)

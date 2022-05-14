@@ -9,8 +9,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackMenuBottomSheetBinding
 import com.hellguy39.collapse.presentaton.fragments.track_list.TrackMenuEvents
+import com.hellguy39.collapse.utils.formatAsDate
+import com.hellguy39.collapse.utils.getImageOfTrackByPath
 import com.hellguy39.domain.models.Track
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import com.hellguy39.domain.usecases.favourites.IsTrackFavouriteUseCase
 import com.hellguy39.domain.utils.PlaylistType
 import kotlinx.coroutines.CoroutineScope
@@ -23,8 +24,7 @@ class TrackMenuBottomSheet(
     private val position:Int,
     private val playlistType: Enum<PlaylistType>,
     private val listener: TrackMenuEvents,
-    private val getImageBitmapUseCase: GetImageBitmapUseCase,
-    private val isTrackFavouriteUseCase: IsTrackFavouriteUseCase
+    private val isTrackFavouriteUseCase: IsTrackFavouriteUseCase,
 ): BottomSheetDialogFragment(), View.OnClickListener {
 
     private lateinit var binding: TrackMenuBottomSheetBinding
@@ -52,7 +52,8 @@ class TrackMenuBottomSheet(
     }
 
     private fun setupHeader() {
-        val bitmap = getImageBitmapUseCase.invoke(track.path)
+
+        val bitmap = getImageOfTrackByPath(track.path)
 
         if (bitmap != null)
             binding.ivCover.setImageBitmap(bitmap)
@@ -61,6 +62,7 @@ class TrackMenuBottomSheet(
 
         binding.tvTrackName.text = track.name
         binding.tvArtist.text = track.artist
+        binding.tvDuration.text = track.duration.formatAsDate()
     }
 
     private fun setupMenu() {

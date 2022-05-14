@@ -4,26 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.PlaylistMenuBottomSheetBinding
-import com.hellguy39.collapse.databinding.TrackMenuBottomSheetBinding
 import com.hellguy39.collapse.presentaton.fragments.track_list.PlaylistMenuEvents
-import com.hellguy39.collapse.presentaton.fragments.track_list.TrackMenuEvents
+import com.hellguy39.collapse.utils.toBitmap
 import com.hellguy39.domain.models.Playlist
-import com.hellguy39.domain.models.Track
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
-import com.hellguy39.domain.usecases.favourites.IsTrackFavouriteUseCase
 import com.hellguy39.domain.utils.PlaylistType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class PlaylistMenuBottomSheet(
-   private val convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase,
    private val playlist: Playlist,
    private val listener: PlaylistMenuEvents
 ): BottomSheetDialogFragment(), View.OnClickListener {
@@ -53,10 +42,11 @@ class PlaylistMenuBottomSheet(
     private fun setupHeader() {
         val bytes = playlist.picture
 
-        if (bytes != null) {
-            val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
-            binding.ivCover.setImageBitmap(bitmap)
-        } else
+        if (bytes != null)
+            bytes.toBitmap().also { bitmap ->
+                binding.ivCover.setImageBitmap(bitmap)
+            }
+         else
             binding.ivCover.setImageResource(R.drawable.ic_round_audiotrack_24)
 
         binding.tvPlaylistName.text = playlist.name

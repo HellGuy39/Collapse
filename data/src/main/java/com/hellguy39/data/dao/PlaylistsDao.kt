@@ -1,24 +1,24 @@
 package com.hellguy39.data.dao
 
 import androidx.room.*
-import com.hellguy39.data.models.PlaylistDb
+import com.hellguy39.data.models.PlaylistEntity
 
 @Dao
 interface PlaylistsDao {
 
-    @Query("SELECT * FROM PlaylistDb")
-    suspend fun getAllPlaylists(): List<PlaylistDb>
+    @Query("SELECT * FROM PlaylistEntity")
+    suspend fun getAllPlaylists(): List<PlaylistEntity>
 
-    @Query("SELECT * FROM PlaylistDb WHERE id = :id")
-    suspend fun getPlaylistById(id: Int): PlaylistDb
+    @Query("SELECT * FROM PlaylistEntity WHERE id = :id")
+    suspend fun getPlaylistById(id: Int): PlaylistEntity
 
     @Insert
-    suspend fun insertPlaylist(playlistDb: PlaylistDb)
+    suspend fun insertPlaylist(playlistEntity: PlaylistEntity)
 
     @Delete
-    suspend fun deletePlaylist(playlistDb: PlaylistDb)
+    suspend fun deletePlaylist(playlistEntity: PlaylistEntity)
 
     @Update
-    suspend fun updatePlaylist(playlistDb: PlaylistDb)
+    suspend fun updatePlaylist(playlistEntity: PlaylistEntity)
 
 }

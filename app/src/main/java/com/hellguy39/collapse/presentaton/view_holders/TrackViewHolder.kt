@@ -7,13 +7,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackItemBinding
 import com.hellguy39.collapse.presentaton.adapters.TracksAdapter
+import com.hellguy39.collapse.utils.getImageOfTrackByPath
 import com.hellguy39.domain.models.Track
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import com.hellguy39.domain.utils.PlaylistType
 
 class TrackViewHolder(
     v: View,
-    private val getImageBitmapUseCase: GetImageBitmapUseCase,
     private val context: Context
 ): RecyclerView.ViewHolder(v) {
 
@@ -30,7 +29,7 @@ class TrackViewHolder(
         binding.tvTrackName.text = track.name//.ifEmpty { "Unknown" }
         binding.tvAuthor.text = track.artist//.ifEmpty { "Unknown" }
 
-        val bitmap = getImageBitmapUseCase.invoke(track.path)
+        val bitmap = getImageOfTrackByPath(track.path)
 
         if (bitmap != null)
             binding.ivTrackImage.setImageBitmap(bitmap)

@@ -91,5 +91,4 @@ class DataModule {
     fun provideSavedServiceStateRepository(prefs: SharedPreferences): SavedServiceStateRepositoryImpl {
         return SavedServiceStateRepositoryImpl(prefs = prefs)
     }
-
 }

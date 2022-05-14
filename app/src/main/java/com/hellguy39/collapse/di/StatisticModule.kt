@@ -1,7 +1,7 @@
 package com.hellguy39.collapse.di
 
 import android.content.SharedPreferences
-import com.hellguy39.collapse.utils.StatisticController
+import com.hellguy39.collapse.controllers.StatisticController
 import com.hellguy39.data.repositories.StatisticRepositoryImpl
 import com.hellguy39.domain.usecases.statistics.GetStatisticsUseCase
 import com.hellguy39.domain.usecases.statistics.SaveTotalListeningTimeUseCase

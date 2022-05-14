@@ -14,7 +14,7 @@ import com.hellguy39.collapse.presentaton.adapters.ArtistsAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.getArtistItemVerticalDivider
 import com.hellguy39.collapse.utils.getVerticalLayoutManager
-import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimations
+import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimation
 import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Playlist
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,7 +32,7 @@ class ArtistsListFragment : Fragment(R.layout.fragment_artists_list),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setMaterialFadeThoughtAnimations()
+        setMaterialFadeThoughtAnimation()
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
     }
 
@@ -47,7 +47,7 @@ class ArtistsListFragment : Fragment(R.layout.fragment_artists_list),
         searchView = binding.topAppBar.menu.findItem(R.id.search).actionView as SearchView
         searchView.setOnQueryTextListener(this)
 
-        binding.topAppBar.setOnBackFragmentNavigation(findNavController())
+        binding.topAppBar.setOnBackFragmentNavigation()
         setArtistsObserver()
     }
 

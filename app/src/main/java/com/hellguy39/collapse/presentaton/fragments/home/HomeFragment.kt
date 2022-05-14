@@ -1,34 +1,24 @@
 package com.hellguy39.collapse.presentaton.fragments.home
 
 import android.annotation.SuppressLint
-import android.content.res.ColorStateList
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.EqualizerHomeFragmentCardviewBinding
 import com.hellguy39.collapse.databinding.FragmentHomeBinding
-import com.hellguy39.collapse.utils.AudioEffectController
-import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimations
+import com.hellguy39.collapse.controllers.audio_effect.AudioEffectController
+import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimation
 import com.hellguy39.collapse.utils.setupIcons
-import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
-import com.hellguy39.domain.usecases.eq_settings.EqualizerSettingsUseCases
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(R.layout.fragment_home),
     View.OnClickListener {
-
-    @Inject
-    lateinit var getColorFromThemeUseCase: GetColorFromThemeUseCase
-
-    @Inject
-    lateinit var equalizerSettingsUseCases: EqualizerSettingsUseCases
 
     @Inject
     lateinit var effectController: AudioEffectController
@@ -38,7 +28,7 @@ class HomeFragment : Fragment(R.layout.fragment_home),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setMaterialFadeThoughtAnimations()
+        setMaterialFadeThoughtAnimation()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -84,11 +74,11 @@ class HomeFragment : Fragment(R.layout.fragment_home),
     }
 
     private fun setEqObserver() {
-        effectController.getCurrentSettings().observe(viewLifecycleOwner) { settings ->
-            eqCardBinding.eqSwitch.isChecked = settings.isEqEnabled
-            eqCardBinding.bassSwitch.isChecked = settings.isBassEnabled
-            eqCardBinding.virtualizerSwitch.isChecked = settings.isVirtualizerEnabled
-        }
+//        effectController.getCurrentSettings().observe(viewLifecycleOwner) { settings ->
+//            eqCardBinding.eqSwitch.isChecked = settings.isEqEnabled
+//            eqCardBinding.bassSwitch.isChecked = settings.isBassEnabled
+//            eqCardBinding.virtualizerSwitch.isChecked = settings.isVirtualizerEnabled
+//        }
     }
 
     private fun getTittle(): String {
@@ -113,44 +103,17 @@ class HomeFragment : Fragment(R.layout.fragment_home),
             eqCardBinding.eqSwitch.id -> {
                 val p1 = eqCardBinding.eqSwitch.isChecked
                 effectController.setEqEnabled(p1)
-                setupIconColor(eqCardBinding.eqSwitch.id, p1)
+                //setupIconColor(eqCardBinding.eqSwitch.id, p1)
             }
             eqCardBinding.bassSwitch.id -> {
                 val p1 = eqCardBinding.bassSwitch.isChecked
                 effectController.setBassEnabled(p1)
-                setupIconColor(eqCardBinding.bassSwitch.id, p1)
+                //setupIconColor(eqCardBinding.bassSwitch.id, p1)
             }
             eqCardBinding.virtualizerSwitch.id -> {
                 val p1 = eqCardBinding.virtualizerSwitch.isChecked
                 effectController.setVirtualizeEnabled(p1)
-                setupIconColor(eqCardBinding.virtualizerSwitch.id, p1)
-            }
-        }
-    }
-
-    private fun setupIconColor(id: Int, enabled: Boolean) {
-        val primaryColorStateList = ColorStateList.valueOf(
-            getColorFromThemeUseCase.invoke(
-                requireActivity().theme,
-                com.google.android.material.R.attr.colorPrimary
-            )
-        )
-        val onSurfaceColorStateList = ColorStateList.valueOf(
-            getColorFromThemeUseCase.invoke(
-                requireActivity().theme,
-                com.google.android.material.R.attr.colorOnSurface
-            )
-        )
-        val enableColorStateList = if (enabled) primaryColorStateList else onSurfaceColorStateList
-        when(id) {
-            eqCardBinding.eqSwitch.id -> {
-                eqCardBinding.ivEq.imageTintList = enableColorStateList
-            }
-            eqCardBinding.bassSwitch.id -> {
-                eqCardBinding.ivBass.imageTintList = enableColorStateList
-            }
-            eqCardBinding.virtualizerSwitch.id -> {
-                eqCardBinding.ivSurround.imageTintList = enableColorStateList
+                //setupIconColor(eqCardBinding.virtualizerSwitch.id, p1)
             }
         }
     }

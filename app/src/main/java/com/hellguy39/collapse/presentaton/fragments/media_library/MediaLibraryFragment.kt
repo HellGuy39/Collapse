@@ -6,20 +6,17 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.dialog.MaterialDialogs
-import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.MediaLibraryFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
+import com.hellguy39.collapse.utils.DialogEventListener
+import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimation
+import com.hellguy39.collapse.utils.showDialog
 import com.hellguy39.domain.models.Playlist
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnClickListener {
@@ -28,16 +25,12 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
         fun newInstance() = MediaLibraryFragment()
     }
 
-    @Inject
-    lateinit var getImageBitmapUseCase: GetImageBitmapUseCase
-
     private lateinit var binding: MediaLibraryFragmentBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        reenterTransition = MaterialFadeThrough()
-        enterTransition = MaterialFadeThrough()
+        setMaterialFadeThoughtAnimation()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -61,21 +54,6 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
         }
     }
 
-    private fun showDialogPermission() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Permission")
-            .setMessage("Need to get permission to read data from local storage")
-            .setNegativeButton("Cancel") { dialog, which ->
-                dialog.dismiss()
-            }
-            .setPositiveButton("Get it!") { dialog, which ->
-                dialog.dismiss()
-                requestPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-            }
-            .setIcon(R.drawable.ic_baseline_perm_media_24)
-            .show()
-    }
-
     private fun isPermissionGranted(): Boolean =
         (ActivityCompat.checkSelfPermission(
             activity as MainActivity,
@@ -86,7 +64,17 @@ class MediaLibraryFragment : Fragment(R.layout.media_library_fragment), View.OnC
     override fun onClick(p0: View?) {
 
         if (!isPermissionGranted())
-            return showDialogPermission()
+            return showDialog(
+                title = "Permission",
+                message = "Need to get permission to read data from local storage",
+                positiveButtonText = "Get it!",
+                iconId = R.drawable.ic_baseline_perm_media_24,
+                dialogEventListener = object : DialogEventListener {
+                    override fun onPositiveButtonClick() {
+                        requestPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    }
+                }
+            )
 
         when(p0?.id) {
             R.id.cardArtists -> {

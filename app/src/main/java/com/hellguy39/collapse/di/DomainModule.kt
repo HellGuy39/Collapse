@@ -1,11 +1,8 @@
 package com.hellguy39.collapse.di
 
-import com.hellguy39.data.repositories.FavouritesRepositoryImpl
-import com.hellguy39.data.repositories.PlaylistsRepositoryImpl
-import com.hellguy39.data.repositories.RadioStationsRepositoryImpl
-import com.hellguy39.data.repositories.SavedServiceStateRepositoryImpl
+import com.hellguy39.data.repositories.*
 import com.hellguy39.domain.repositories.TracksRepository
-import com.hellguy39.domain.usecases.*
+import com.hellguy39.domain.usecases.audio_effect.eq.*
 import com.hellguy39.domain.usecases.favourites.*
 import com.hellguy39.domain.usecases.playlist.*
 import com.hellguy39.domain.usecases.radio.*
@@ -30,12 +27,6 @@ class DomainModule {
             getSavedServiceStateUseCase = GetSavedServiceStateUseCase(repository),
             insertSavedServiceStateUseCase = InsertSavedServiceStateUseCase(repository)
         )
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetImageBitmapUseCase(): GetImageBitmapUseCase {
-        return GetImageBitmapUseCase()
     }
 
     @Provides
@@ -85,29 +76,4 @@ class DomainModule {
             isTrackFavouriteUseCase = IsTrackFavouriteUseCase(repository)
         )
     }
-
-    @Provides
-    @Singleton
-    fun provideConvertBitmapToByteArrayUseCase(): ConvertBitmapToByteArrayUseCase {
-        return ConvertBitmapToByteArrayUseCase()
-    }
-
-    @Provides
-    @Singleton
-    fun provideConvertByteArrayToBitmapUseCase(): ConvertByteArrayToBitmapUseCase {
-        return ConvertByteArrayToBitmapUseCase()
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetColorFromThemeUseCase(): GetColorFromThemeUseCase {
-        return GetColorFromThemeUseCase()
-    }
-
-    @Provides
-    @Singleton
-    fun provideDateFormatUseCase(): DateFormatUseCase {
-        return DateFormatUseCase()
-    }
-
 }

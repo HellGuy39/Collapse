@@ -8,10 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.transition.platform.MaterialElevationScale
-import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.RadioFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
@@ -22,18 +19,13 @@ import com.hellguy39.collapse.utils.*
 import com.hellguy39.collapse.utils.getGridLayoutManager
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.models.ServiceContentWrapper
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 import com.hellguy39.domain.utils.PlayerType
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class RadioFragment : Fragment(R.layout.radio_fragment),
     RadioStationsAdapter.OnRadioStationListener,
     SearchView.OnQueryTextListener {
-
-    @Inject
-    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
 
     companion object {
         fun newInstance() = RadioFragment()
@@ -46,7 +38,7 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setMaterialFadeThoughtAnimations()
+        setMaterialFadeThoughtAnimation()
         dataViewModel = ViewModelProvider(activity as MainActivity)[RadioStationsDataViewModel::class.java]
     }
 
@@ -83,17 +75,9 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
         adapter = RadioStationsAdapter(
             stations = stations,
             listener = this@RadioFragment,
-            convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase,
             context = context
         )
-        //addItemDecoration(this.getRadioStationItemVerticalDivider(requireContext()))
     }
-
-
-//    private fun setupMaterialElevationScale() {
-//        exitTransition = MaterialElevationScale(false)
-//        reenterTransition = MaterialElevationScale(true)
-//    }
 
     private fun setObservers() {
         dataViewModel.getRadioStationList().observe(viewLifecycleOwner) { receivedStations ->

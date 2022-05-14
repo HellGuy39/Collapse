@@ -1,7 +1,6 @@
 package com.hellguy39.collapse.presentaton.view_holders
 
 import android.content.Context
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.MenuRes
@@ -10,12 +9,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.RadioItemBinding
 import com.hellguy39.collapse.presentaton.adapters.RadioStationsAdapter
+import com.hellguy39.collapse.utils.toBitmap
 import com.hellguy39.domain.models.RadioStation
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 
 class RadioStationViewHolder(
     v: View,
-    private val convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase,
     private val context: Context
 ): RecyclerView.ViewHolder(v){
 
@@ -29,10 +27,11 @@ class RadioStationViewHolder(
 
         val bytes = radioStation.picture
 
-        if (bytes != null) {
-            val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
-            binding.ivStationCover.setImageBitmap(bitmap)
-        } else
+        if (bytes != null)
+            bytes.toBitmap().also { bitmap ->
+                binding.ivStationCover.setImageBitmap(bitmap)
+            }
+        else
             binding.ivStationCover.setImageResource(R.drawable.ic_round_radio_24)
 
         binding.tvTittle.text = radioStation.name
@@ -77,7 +76,7 @@ class RadioStationViewHolder(
         popup.setOnDismissListener {
 
         }
-
+        popup.setForceShowIcon(true)
         popup.show()
     }
 
