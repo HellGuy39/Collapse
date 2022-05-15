@@ -79,22 +79,25 @@
                     app:layout_constraintTop_toBottomOf="@+id/tvPlaylistName">
 
                     <Button
-                        android:id="@+id/btnPlay"
-                        android:layout_width="120dp"
+                        android:id="@+id/btnShuffle"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
                         android:layout_weight="1"
-                        android:text="Play"
-                        app:icon="@drawable/ic_round_play_arrow_24" />
+                        android:layout_marginEnd="8dp"
+                        android:maxLines="1"
+                        android:text="Shuffle"
+                        app:icon="@drawable/ic_round_shuffle_24" />
 
                     <Button
-                        android:id="@+id/btnShuffle"
-                        android:layout_width="120dp"
+                        android:id="@+id/btnPlay"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
-                        android:text="Shuffle"
-                        app:icon="@drawable/ic_round_shuffle_24" />
+                        android:text="Play   "
+                        android:maxLines="1"
+                        app:icon="@drawable/ic_round_play_arrow_24" />
+
                 </LinearLayout>
 
             </LinearLayout>

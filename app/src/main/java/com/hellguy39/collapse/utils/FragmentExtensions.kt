@@ -1,14 +1,26 @@
 package com.hellguy39.collapse.utils
 
-import android.Manifest
+import android.content.Context
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.transition.platform.MaterialArcMotion
 import com.google.android.material.transition.platform.MaterialContainerTransform
 import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.hellguy39.collapse.R
+import com.hellguy39.collapse.di.PREFS_NAME
+
+private const val IS_ANIMATIONS_ENABLED = "is_animations_enabled"
+private const val IS_SAVE_STATE_ENABLED = "is_save_state_enabled"
+
+private fun isAnimationsEnabled(context: Context): Boolean {
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    return prefs.getBoolean(IS_ANIMATIONS_ENABLED, true)
+}
 
 internal fun Fragment.setSharedElementTransitionAnimation() {
+    if (!isAnimationsEnabled(requireContext()))
+        return
+
     sharedElementEnterTransition = MaterialContainerTransform().apply {
         drawingViewId = R.id.fragmentContainer
         //scrimColor = Color.TRANSPARENT
@@ -17,10 +29,14 @@ internal fun Fragment.setSharedElementTransitionAnimation() {
                 com.google.android.material.R.attr.colorSurface
             )
         )
+        pathMotion = MaterialArcMotion()
     }
 }
 
 internal fun Fragment.setMaterialFadeThoughtAnimation() {
+    if (!isAnimationsEnabled(requireContext()))
+        return
+
     enterTransition = MaterialFadeThrough()
     reenterTransition = MaterialFadeThrough()
 }

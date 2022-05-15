@@ -1,5 +1,6 @@
 package com.hellguy39.collapse.controllers.audio_effect
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.hellguy39.domain.models.EqualizerPreset
@@ -11,7 +12,6 @@ class EqState(
 
     companion object {
         const val CUSTOM_PRESET: Short = -1
-        //const val CUSTOM_PRESET: Short = -2
     }
 
     private val isEnabledLiveData = MutableLiveData<Boolean>()

@@ -5,7 +5,6 @@ import com.hellguy39.collapse.controllers.audio_effect.*
 import com.hellguy39.data.repositories.BassBoostRepositoryImpl
 import com.hellguy39.data.repositories.EqualizerRepositoryImpl
 import com.hellguy39.data.repositories.VirtualizerRepositoryImpl
-import com.hellguy39.domain.repositories.VirtualizerRepository
 import com.hellguy39.domain.usecases.GetEqualizerPropertiesUseCase
 import com.hellguy39.domain.usecases.audio_effect.bass_boost.*
 import com.hellguy39.domain.usecases.audio_effect.eq.*

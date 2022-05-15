@@ -20,7 +20,7 @@
             tools:title="Tittle"
             tools:subtitle="Subtitle"
             app:title="Advanced"
-            app:navigationIcon="@drawable/ic_round_arrow_down_ios_24" />
+            app:navigationIcon="@drawable/ic_round_arrow_back_ios_24" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -97,7 +97,7 @@
                                 android:gravity="start"
                                 android:layout_marginStart="72dp"
                                 tools:text="-15 dB"
-                                android:textSize="@dimen/small_text_size" />
+                                android:textSize="@dimen/super_small_text_size" />
 
                             <TextView
                                 android:id="@+id/tvDbMax"
@@ -107,7 +107,7 @@
                                 android:gravity="end"
                                 android:layout_marginEnd="8dp"
                                 tools:text="15 dB"
-                                android:textSize="@dimen/small_text_size" />
+                                android:textSize="@dimen/super_small_text_size" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -122,7 +122,7 @@
                                 android:gravity="center"
                                 tools:text="- Hz"
                                 android:layout_gravity="center"
-                                android:textSize="@dimen/super_small_text_size" />
+                                android:textSize="@dimen/hyper_small_text_size" />
 
                             <com.google.android.material.slider.Slider
                                 android:id="@+id/band1"
@@ -142,7 +142,7 @@
                                 android:gravity="center"
                                 android:layout_gravity="center"
                                 tools:text="- Hz"
-                                android:textSize="@dimen/super_small_text_size" />
+                                android:textSize="@dimen/hyper_small_text_size"/>
 
                             <com.google.android.material.slider.Slider
                                 android:id="@+id/band2"
@@ -163,7 +163,7 @@
                                 android:gravity="center"
                                 android:layout_gravity="center"
                                 tools:text="- Hz"
-                                android:textSize="@dimen/super_small_text_size" />
+                                android:textSize="@dimen/hyper_small_text_size"/>
 
                             <com.google.android.material.slider.Slider
                                 android:id="@+id/band3"
@@ -184,7 +184,7 @@
                                 android:gravity="center"
                                 android:layout_gravity="center"
                                 tools:text="- Hz"
-                                android:textSize="@dimen/super_small_text_size" />
+                                android:textSize="@dimen/hyper_small_text_size"/>
 
                             <com.google.android.material.slider.Slider
                                 android:id="@+id/band4"
@@ -206,7 +206,7 @@
                                 android:gravity="center"
                                 android:layout_gravity="center"
                                 tools:text="- Hz"
-                                android:textSize="@dimen/super_small_text_size" />
+                                android:textSize="@dimen/hyper_small_text_size" />
 
                             <com.google.android.material.slider.Slider
                                 android:id="@+id/band5"
@@ -289,12 +289,13 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardReverb"
+                style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardElevation="@dimen/item_card_elevation"
-                app:cardCornerRadius="@dimen/item_card_corner_radius"
                 android:layout_margin="@dimen/item_card_margin"
-                style="@style/Widget.Material3.CardView.Elevated">
+                android:visibility="gone"
+                app:cardCornerRadius="@dimen/item_card_corner_radius"
+                app:cardElevation="@dimen/item_card_elevation">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -310,17 +311,18 @@
                         android:textSize="20sp" />
 
                     <HorizontalScrollView
-                        android:layout_height="wrap_content"
                         android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fadingEdgeLength="16dp"
                         android:requiresFadingEdge="horizontal"
-                        android:scrollbars="none"
-                        android:fadingEdgeLength="16dp">
+                        android:scrollbars="none">
 
                         <com.google.android.material.chip.ChipGroup
                             android:id="@+id/reverbChipGroup"
-                            app:singleLine="true"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_width="wrap_content">
+                            app:singleLine="true"
+                            app:singleSelection="true">
 
                         </com.google.android.material.chip.ChipGroup>
 

@@ -68,7 +68,7 @@
                     android:fontFamily="@font/roboto_medium"
                     android:maxLines="1"
                     android:gravity="center"
-                    android:textSize="32sp"
+                    android:textSize="@dimen/huge_text_size"
                     tools:text="Smells Like Teen Spirit" />
 
                 <TextView
@@ -76,7 +76,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:fontFamily="@font/roboto_regular"
-                    android:textSize="24sp"
+                    android:textSize="@dimen/medium_text_size"
                     android:maxLines="1"
                     android:ellipsize="marquee"
                     android:gravity="center"
@@ -105,6 +105,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="start"
+                    android:textSize="@dimen/hyper_small_text_size"
                     android:layout_marginStart="16dp"
                     tools:text="0:00" />
 
@@ -115,6 +116,7 @@
                     android:layout_weight="1"
                     android:layout_marginEnd="16dp"
                     android:gravity="end"
+                    android:textSize="@dimen/hyper_small_text_size"
                     tools:text="3:49" />
             </LinearLayout>
 

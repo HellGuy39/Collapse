@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.models.ServiceContentWrapper
+import com.hellguy39.domain.usecases.app_settings.AppSettingsUseCases
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
 import com.hellguy39.domain.usecases.state.SavedServiceStateUseCases
@@ -23,10 +24,17 @@ class MainActivityViewModel @Inject constructor(
     private val savedServiceStateUseCases: SavedServiceStateUseCases,
     private val tracksUseCases: TracksUseCases,
     private val favouriteTracksUseCases: FavouriteTracksUseCases,
-    private val playlistUseCases: PlaylistUseCases
+    private val playlistUseCases: PlaylistUseCases,
+    private val appSettingsUseCases: AppSettingsUseCases
 ): ViewModel() {
 
     fun checkServiceSavedState(context: Context) = viewModelScope.launch(Dispatchers.IO) {
+
+        val settings = appSettingsUseCases.getAppSettingsUseCase.invoke()
+
+        if (!settings.isSaveStateEnabled)
+            return@launch
+
         val savedState = savedServiceStateUseCases.getSavedServiceStateUseCase.invoke()
 
         when(savedState.playerType) {

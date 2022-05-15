@@ -19,7 +19,7 @@ private const val RADIO_STATIONS_DB_NAME = "radio_stations_db"
 private const val FAVOURITES_DB_NAME = "favourites_db"
 private const val PLAYLISTS_DB_NAME = "playlists_db"
 private const val SAVED_STATE_DB_NAME = "saved_state_db"
-private const val PREFS_NAME = "prefs_name"
+const val PREFS_NAME = "prefs_name"
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -90,5 +90,11 @@ class DataModule {
     @Singleton
     fun provideSavedServiceStateRepository(prefs: SharedPreferences): SavedServiceStateRepositoryImpl {
         return SavedServiceStateRepositoryImpl(prefs = prefs)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAppSettingsRepository(prefs: SharedPreferences): AppSettingsRepositoryImpl {
+        return AppSettingsRepositoryImpl(prefs = prefs)
     }
 }

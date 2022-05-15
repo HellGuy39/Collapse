@@ -13,10 +13,6 @@ import com.hellguy39.collapse.controllers.audio_effect.AudioEffectController
 import com.hellguy39.collapse.controllers.audio_effect.EqState
 import com.hellguy39.collapse.databinding.EqualizerFragmentBinding
 import com.hellguy39.collapse.utils.*
-import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimation
-import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
-import com.hellguy39.collapse.utils.setSharedElementTransitionAnimation
-import com.hellguy39.collapse.utils.toSliderValue
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -31,21 +27,22 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
 
     companion object {
         fun newInstance() = EqualizerFragment()
+
         private const val STEP_SIZE = 1f
         private const val MAX_BASS_BOOST_VALUE = 10f
         private const val MIN_BASS_BOOST_VALUE = 0f
         private const val MAX_VIRTUALIZER_VALUE = 10f
         private const val MIN_VIRTUALIZER_VALUE = 0f
 
-        val reverbPresetNames = listOf(
-            "None",
-            "Small room",
-            "Medium room",
-            "Large room",
-            "Medium hall",
-            "Large hall",
-            "Plate"
-        )
+//        private val reverbPresetMap: Map<String, Short> = mutableMapOf(
+//            "None" to PresetReverb.PRESET_NONE,
+//            "Small room" to PresetReverb.PRESET_SMALLROOM,
+//            "Medium room" to PresetReverb.PRESET_MEDIUMROOM,
+//            "Large room" to PresetReverb.PRESET_LARGEROOM,
+//            "Medium hall" to PresetReverb.PRESET_MEDIUMHALL,
+//            "Large hall" to PresetReverb.PRESET_LARGEHALL,
+//            "Plate" to PresetReverb.PRESET_PLATE
+//        )
     }
 
     private lateinit var binding: EqualizerFragmentBinding
@@ -150,23 +147,7 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
         }
 
         setupPresetChips()
-        setupReverbChips()
-
-//        binding.acReverb.setOnItemClickListener { adapterView, view, i, l ->
-//            val item = binding.acReverb.adapter.getItem(i).toString()
-//            val presets = effectController.getReverbPresetList()
-//
-//            when(item) {
-//                reverbPresetNames[0] -> effectController.setReverbPreset(presets[0])
-//                reverbPresetNames[1] -> effectController.setReverbPreset(presets[1])
-//                reverbPresetNames[2] -> effectController.setReverbPreset(presets[2])
-//                reverbPresetNames[3] -> effectController.setReverbPreset(presets[3])
-//                reverbPresetNames[4] -> effectController.setReverbPreset(presets[4])
-//                reverbPresetNames[5] -> effectController.setReverbPreset(presets[5])
-//                reverbPresetNames[6] -> effectController.setReverbPreset(presets[6])
-//            }
-//        }
-
+        //setupReverbChips()
     }
 
     private fun setObservers() {
@@ -244,32 +225,29 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
         }
     }
 
-    private fun setupReverbChips() {
-
-        binding.reverbChipGroup.isSingleSelection = true
-
-        for(reverbPreset in reverbPresetNames) {
-            val chip: Chip = Chip(requireContext())
-
-            chip.isCheckable = true
-            chip.text = reverbPreset
-            chip.tag = reverbPreset
-
-            chip.setOnCheckedChangeListener { compoundButton, isChecked ->
-                onReverbPresetChange(compoundButton.tag.toString())
-            }
-
-            binding.reverbChipGroup.addView(chip)
-        }
-    }
+//    private fun setupReverbChips() {
+//        for(reverbPreset in reverbPresetMap) {
+//            Chip(requireContext()).apply {
+//                isCheckable = true
+//                text = reverbPreset.key
+//                tag = reverbPreset.value
+//                setOnCheckedChangeListener { compoundButton, isChecked ->
+//                    if (isChecked)
+//                        onReverbPresetChange(compoundButton.tag.toString().toShort())
+//                }
+//            }.also { newChip ->
+//                binding.reverbChipGroup.addView(newChip)
+//            }
+//        }
+//    }
 
     private fun onEqPresetChange(presetNumber: Short) {
         effectController.setPreset(presetNumber)
     }
 
-    private fun onReverbPresetChange(reverbPreset: String) {
-        //effectController.setReverbPreset(reverbPreset)
-    }
+//    private fun onReverbPresetChange(reverbPreset: Short) {
+//        effectController.setReverbPreset(reverbPreset)
+//    }
 
     private fun onSliderChangeValue(slider: Slider, value: Float, fromUser: Boolean) {
         if (!fromUser)

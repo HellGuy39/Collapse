@@ -3,10 +3,11 @@ package com.hellguy39.data.repositories
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 import com.hellguy39.data.mappers.isContainArtist
-import com.hellguy39.domain.models.Playlist
-import com.hellguy39.domain.models.Track
+import com.hellguy39.domain.models.*
 import com.hellguy39.domain.repositories.TracksRepository
 import com.hellguy39.domain.utils.PlaylistType
 
@@ -22,11 +23,20 @@ class TracksRepositoryImpl(
             MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.ARTIST,
-            //MediaStore.Audio.GenresColumns.NAME,
             MediaStore.Audio.Media.YEAR
         )
 
-        const val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
+        const val MUSIC_SELECTION = MediaStore.Audio.Media.IS_MUSIC + " != 0"
+
+        const val PODCAST_SELECTION = MediaStore.Audio.Media.IS_PODCAST + " != 0"
+
+        @RequiresApi(Build.VERSION_CODES.Q)
+        const val AUDIOBOOK_SELECTION = MediaStore.Audio.Media.IS_AUDIOBOOK + " != 0"
+
+        @RequiresApi(Build.VERSION_CODES.S)
+        const val RECORDING_SELECTION = MediaStore.Audio.Media.IS_RECORDING + " != 0"
+
+        const val RINGTONE_SELECTION = MediaStore.Audio.Media.IS_RINGTONE + " != 0"
 
         const val ITEM_NOT_CONTAINS = -1
     }
@@ -34,7 +44,7 @@ class TracksRepositoryImpl(
     override suspend fun getAllTracks(): List<Track> {
         val audioDataList: MutableList<Track> = mutableListOf()
 
-        val cursor = initCursor() ?: return emptyList()
+        val cursor = initCursor(MUSIC_SELECTION) ?: return emptyList()
 
         while (cursor.moveToNext())
             audioDataList.add(getTrackMetadata(cursor))
@@ -47,7 +57,7 @@ class TracksRepositoryImpl(
     override suspend fun getAllTracksByArtist(artist: String): List<Track> {
         val audioDataList: MutableList<Track> = mutableListOf()
 
-        val cursor = initCursor() ?: return emptyList()
+        val cursor = initCursor(MUSIC_SELECTION) ?: return emptyList()
 
         while (cursor.moveToNext()) {
 
@@ -67,7 +77,7 @@ class TracksRepositoryImpl(
 
         val artistList = mutableListOf<Playlist>()
 
-        val cursor = initCursor() ?: return emptyList()
+        val cursor = initCursor(MUSIC_SELECTION) ?: return emptyList()
 
         while (cursor.moveToNext()) {
 
@@ -92,7 +102,29 @@ class TracksRepositoryImpl(
         return artistList
     }
 
-    private fun initCursor(): Cursor? = context.contentResolver?.query(
+    override suspend fun getAllPodcasts(): List<Podcast> {
+//        val podcastList = mutableListOf<Podcast>()
+//        val cursor = initCursor(PODCAST_SELECTION) ?: return emptyList()
+//
+//        while (cursor.moveToNext()) {
+//            val podcast = getTrackMetadata(cursor)
+//        }
+        return emptyList()
+    }
+
+    override suspend fun getAllAudioBooks(): List<AudioBook> {
+        return emptyList()
+    }
+
+    override suspend fun getAllRecordings(): List<Recording> {
+        return emptyList()
+    }
+
+    override suspend fun getAllRingtones(): List<Ringtone> {
+        return emptyList()
+    }
+
+    private fun initCursor(selection: String): Cursor? = context.contentResolver?.query(
         contentUri,
         projection,
         selection,
@@ -106,7 +138,6 @@ class TracksRepositoryImpl(
             path = cursor.getString(1),
             duration = cursor.getLong(2),
             artist = cursor.getString(3),
-            //genre = cursor.getString(4),
             year = cursor.getInt(4)
         )
     }

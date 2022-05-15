@@ -4,13 +4,13 @@ import android.annotation.SuppressLint
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.view.View
+import android.widget.CompoundButton
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import com.hellguy39.collapse.R
+import com.hellguy39.collapse.controllers.audio_effect.AudioEffectController
 import com.hellguy39.collapse.databinding.EqualizerHomeFragmentCardviewBinding
 import com.hellguy39.collapse.databinding.FragmentHomeBinding
-import com.hellguy39.collapse.controllers.audio_effect.AudioEffectController
 import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimation
 import com.hellguy39.collapse.utils.setupIcons
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,6 +49,7 @@ class HomeFragment : Fragment(R.layout.fragment_home),
     private fun setupEqCard() {
         eqCardBinding = EqualizerHomeFragmentCardviewBinding.bind(binding.cardEq.root)
         eqCardBinding.root.setOnClickListener(this)
+
         eqCardBinding.eqSwitch.setOnClickListener(this)
         eqCardBinding.bassSwitch.setOnClickListener(this)
         eqCardBinding.virtualizerSwitch.setOnClickListener(this)
@@ -74,11 +75,17 @@ class HomeFragment : Fragment(R.layout.fragment_home),
     }
 
     private fun setEqObserver() {
-//        effectController.getCurrentSettings().observe(viewLifecycleOwner) { settings ->
-//            eqCardBinding.eqSwitch.isChecked = settings.isEqEnabled
-//            eqCardBinding.bassSwitch.isChecked = settings.isBassEnabled
-//            eqCardBinding.virtualizerSwitch.isChecked = settings.isVirtualizerEnabled
-//        }
+        effectController.eqState.getIsEnabled().observe(viewLifecycleOwner) { isEnabled ->
+            eqCardBinding.eqSwitch.isChecked = isEnabled
+        }
+
+        effectController.bassBoostState.getIsEnabled().observe(viewLifecycleOwner) { isEnabled ->
+            eqCardBinding.bassSwitch.isChecked = isEnabled
+        }
+
+        effectController.virtualizerState.getIsEnabled().observe(viewLifecycleOwner) { isEnabled ->
+            eqCardBinding.virtualizerSwitch.isChecked = isEnabled
+        }
     }
 
     private fun getTittle(): String {
@@ -101,19 +108,13 @@ class HomeFragment : Fragment(R.layout.fragment_home),
             binding.cardStat.id -> navigateToStatistic()
 
             eqCardBinding.eqSwitch.id -> {
-                val p1 = eqCardBinding.eqSwitch.isChecked
-                effectController.setEqEnabled(p1)
-                //setupIconColor(eqCardBinding.eqSwitch.id, p1)
+                effectController.setEqEnabled(eqCardBinding.eqSwitch.isChecked)
             }
             eqCardBinding.bassSwitch.id -> {
-                val p1 = eqCardBinding.bassSwitch.isChecked
-                effectController.setBassEnabled(p1)
-                //setupIconColor(eqCardBinding.bassSwitch.id, p1)
+                effectController.setBassEnabled(eqCardBinding.bassSwitch.isChecked)
             }
             eqCardBinding.virtualizerSwitch.id -> {
-                val p1 = eqCardBinding.virtualizerSwitch.isChecked
-                effectController.setVirtualizeEnabled(p1)
-                //setupIconColor(eqCardBinding.virtualizerSwitch.id, p1)
+                effectController.setVirtualizeEnabled(eqCardBinding.virtualizerSwitch.isChecked)
             }
         }
     }
@@ -133,12 +134,12 @@ class HomeFragment : Fragment(R.layout.fragment_home),
 
     private fun navigateToEqualizer() = findNavController().navigate(
         HomeFragmentDirections.actionHomeFragmentToEqualizerFragment(),
-        FragmentNavigatorExtras(eqCardBinding.root to "equalizer_transition")
+        //FragmentNavigatorExtras(eqCardBinding.root to "equalizer_transition")
     )
 
     private fun navigateToStatistic() = findNavController().navigate(
         HomeFragmentDirections.actionHomeFragmentToStatisticFragment(),
-        FragmentNavigatorExtras(binding.cardStat to "statistic_transition")
+        //FragmentNavigatorExtras(binding.cardStat to "statistic_transition")
     )
 
     private fun navigateToAboutApp() = findNavController().navigate(
@@ -148,4 +149,18 @@ class HomeFragment : Fragment(R.layout.fragment_home),
     private fun navigateToSettings() = findNavController().navigate(
         HomeFragmentDirections.actionHomeFragmentToSettingsFragment()
     )
+
+//    override fun onCheckedChanged(p0: CompoundButton?, p1: Boolean) {
+//        when(p0?.id) {
+//            eqCardBinding.eqSwitch.id -> {
+//                effectController.setEqEnabled(p1)
+//            }
+//            eqCardBinding.bassSwitch.id -> {
+//                effectController.setBassEnabled(p1)
+//            }
+//            eqCardBinding.virtualizerSwitch.id -> {
+//                effectController.setVirtualizeEnabled(p1)
+//            }
+//        }
+//    }
 }

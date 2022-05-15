@@ -19,6 +19,7 @@
     <dimen name="medium_text_size">20sp</dimen>
     <dimen name="small_text_size">18sp</dimen>
     <dimen name="super_small_text_size">16sp</dimen>
+    <dimen name="hyper_small_text_size">14sp</dimen>
 
     <!-- Content padding -->
     <dimen name="large_content_padding">16dp</dimen>

@@ -23,9 +23,9 @@ import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import com.hellguy39.collapse.presentaton.adapters.DescriptionAdapter
-import com.hellguy39.collapse.controllers.audio_effect.AudioEffectController
 import com.hellguy39.collapse.controllers.StatisticController
+import com.hellguy39.collapse.controllers.audio_effect.AudioEffectController
+import com.hellguy39.collapse.presentaton.adapters.DescriptionAdapter
 import com.hellguy39.domain.models.RadioStation
 import com.hellguy39.domain.models.SavedState
 import com.hellguy39.domain.models.ServiceContentWrapper
@@ -115,7 +115,7 @@ class PlayerService : LifecycleService() {
         }
 
         fun getCurrentTrack(): Track? {
-            val pos = serviceContentLiveData.value?.position
+            val pos = contentPositionLiveData.value
             return if (pos != null)
                 serviceContentLiveData.value?.playlist?.tracks?.get(pos)
             else null
@@ -140,6 +140,10 @@ class PlayerService : LifecycleService() {
         fun getRepeatMode(): LiveData<Int> = repeatModeLiveData
 
         fun getCurrentDuration(): LiveData<Long> = trackDurationLiveData
+
+//        fun setAuxEffect(id: Int) {
+//            exoPlayer.setAuxEffectInfo(AuxEffectInfo(id, 1f))
+//        }
 
         //Control
         fun onPlay() {
@@ -245,7 +249,7 @@ class PlayerService : LifecycleService() {
 
     private fun initDefaultPlayer(trackList: List<Track>) {
 
-        if (trackList.isNullOrEmpty())
+        if (trackList.isEmpty())
             return
 
         for (n in trackList.indices) {

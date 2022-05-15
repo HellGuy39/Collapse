@@ -5,6 +5,7 @@ import android.media.audiofx.Equalizer
 import android.media.audiofx.PresetReverb
 import android.media.audiofx.Virtualizer
 import android.util.Log
+import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.domain.models.EqualizerProperties
 import com.hellguy39.domain.usecases.GetEqualizerPropertiesUseCase
 
@@ -40,7 +41,7 @@ class AudioEffectController(
         eqState.loadSavedState(presets = equalizerProperties.presets)
         bassBoostState.loadSavedState()
         virtualizerState.loadSavedState()
-        reverbState.loadSavedState()
+        //reverbState.loadSavedState()
     }
 
     private fun applyValuesToEq(values: MutableList<Short>) {
@@ -53,14 +54,21 @@ class AudioEffectController(
 
     fun updateAudioSession(audioSessionId: Int) {
 
-        eq = Equalizer(1000, audioSessionId).also { applyEqValues() }
-        reverb = PresetReverb(1000, audioSessionId).also { applyReverbValues() }
+        eq = Equalizer(1000, audioSessionId)
+        //reverb = PresetReverb(1000, audioSessionId)
 
-        if (equalizerProperties.virtualizerSupport)
-            virtualizer = Virtualizer(1000, audioSessionId).also { applyVirtualizerValues() }
+        if (equalizerProperties.virtualizerSupport) {
+            virtualizer = Virtualizer(1000, audioSessionId)
+            applyVirtualizerValues()
+        }
 
-        if (equalizerProperties.bassBoostSupport)
-            bassBoost = BassBoost(1000, audioSessionId).also { applyBassBoostValues() }
+        if (equalizerProperties.bassBoostSupport) {
+            bassBoost = BassBoost(1000, audioSessionId)
+            applyBassBoostValues()
+        }
+
+        applyEqValues()
+        //applyReverbValues()
     }
 
     private fun applyEqValues() {
@@ -141,10 +149,13 @@ class AudioEffectController(
     //***** Reverb
 
     fun setReverbPreset(preset: Short) {
-        reverb?.preset = preset
+        //reverb?.preset = preset
+//        reverb?.let {
+//            PlayerService.setAuxEffect(it.id)
+//        }
     }
 
     fun setReverbEnabled(enabled: Boolean) {
-        reverb?.enabled = enabled
+        //reverb?.enabled = enabled
     }
 }

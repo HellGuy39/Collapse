@@ -60,14 +60,12 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_gravity="bottom"
-            android:backgroundTint="?attr/colorOnSurface"
-            android:background="@drawable/item_bottom_line_rect" />
+            android:layout_gravity="bottom"/>
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardWarning"

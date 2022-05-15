@@ -63,7 +63,7 @@
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
                         android:text="Favourites"
-                        android:textSize="22sp" />
+                        android:textSize="@dimen/medium_text_size" />
 
                 </LinearLayout>
 
@@ -99,7 +99,7 @@
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
                         android:text="Playlists"
-                        android:textSize="22sp" />
+                        android:textSize="@dimen/medium_text_size" />
 
                     <ImageView
                         android:layout_width="24dp"
@@ -143,7 +143,7 @@
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
                         android:text="All tracks"
-                        android:textSize="22sp" />
+                        android:textSize="@dimen/medium_text_size"/>
 
                     <ImageView
                         android:layout_width="24dp"
@@ -188,7 +188,7 @@
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
                         android:text="Artists"
-                        android:textSize="@dimen/large_text_size" />
+                        android:textSize="@dimen/medium_text_size" />
 
                     <ImageView
                         android:layout_width="24dp"
@@ -202,6 +202,55 @@
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Material3.CardView.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/item_card_margin"
+                android:visibility="gone"
+                app:cardCornerRadius="@dimen/item_card_corner_radius"
+                app:cardElevation="@dimen/item_card_elevation"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:layout_marginEnd="8dp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:srcCompat="@drawable/ic_round_access_time_24" />
+
+                        <TextView
+                            android:id="@+id/rvRecent"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Recent"
+                            android:textSize="@dimen/medium_text_size" />
+                    </LinearLayout>
+
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvRecentPlaylists"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

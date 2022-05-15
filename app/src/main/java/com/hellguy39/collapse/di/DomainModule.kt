@@ -2,7 +2,10 @@ package com.hellguy39.collapse.di
 
 import com.hellguy39.data.repositories.*
 import com.hellguy39.domain.repositories.TracksRepository
-import com.hellguy39.domain.usecases.audio_effect.eq.*
+import com.hellguy39.domain.usecases.app_settings.AppSettingsUseCases
+import com.hellguy39.domain.usecases.app_settings.GetAppSettingsUseCase
+import com.hellguy39.domain.usecases.app_settings.SaveIsAnimationsEnabledUseCase
+import com.hellguy39.domain.usecases.app_settings.SaveIsSaveStateEnabledUseCase
 import com.hellguy39.domain.usecases.favourites.*
 import com.hellguy39.domain.usecases.playlist.*
 import com.hellguy39.domain.usecases.radio.*
@@ -74,6 +77,16 @@ class DomainModule {
             getAllFavouriteTracksUseCase = GetAllFavouriteTracksUseCase(repository),
             deleteFromFavouritesWithoutIdUseCase = DeleteFromFavouritesWithoutIdUseCase(repository),
             isTrackFavouriteUseCase = IsTrackFavouriteUseCase(repository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAppSettingsUseCases(repository: AppSettingsRepositoryImpl): AppSettingsUseCases {
+        return AppSettingsUseCases(
+            getAppSettingsUseCase = GetAppSettingsUseCase(repository),
+            saveIsAnimationsEnabledUseCase = SaveIsAnimationsEnabledUseCase(repository),
+            saveIsSaveStateEnabledUseCase = SaveIsSaveStateEnabledUseCase(repository)
         )
     }
 }

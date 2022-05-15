@@ -75,7 +75,8 @@ class TrackActivity : AppCompatActivity(),
         binding.ibRepeatTrack.setOnClickListener(this)
 
         binding.topAppBar.menu.findItem(R.id.more).setOnMenuItemClickListener {
-            val bottomSheet = TrackMenuBottomSheet(track = PlayerService.getCurrentTrack() ?: Track(),
+            val bottomSheet = TrackMenuBottomSheet(
+                track = PlayerService.getCurrentTrack() ?: Track(),
                 position = PlayerService.getContentPosition().value ?: 0,
                 listener = this,
                 playlistType = PlayerService.getServiceContent().playlist?.type ?: PlaylistType.Undefined,
@@ -285,9 +286,9 @@ class TrackActivity : AppCompatActivity(),
         Palette.from(bitmap).generate { palette ->
             if (palette != null) {
                 val mutedColor = palette.getMutedColor(1)
-                val darkMutedColor = palette.getDarkMutedColor(1)
+                //val darkMutedColor = palette.getDarkMutedColor(1)
                 val white = ResourcesCompat.getColor(resources, R.color.white,null)
-                val stateListMuted = ColorStateList.valueOf(mutedColor)
+                //val stateListMuted = ColorStateList.valueOf(mutedColor)
                 val stateListWhite = ColorStateList.valueOf(white)
 
                 binding.topAppBar.setNavigationIconTint(white)
