@@ -4,15 +4,13 @@ import android.animation.LayoutTransition
 import android.app.ActivityOptions
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.transition.AutoTransition
 import android.transition.TransitionManager
-import android.util.TypedValue
 import android.view.View
-import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -26,44 +24,15 @@ import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
-import com.hellguy39.domain.models.Playlist
+import com.hellguy39.collapse.utils.getColorByResId
+import com.hellguy39.collapse.utils.toBitmap
 import com.hellguy39.domain.models.RadioStation
-import com.hellguy39.domain.models.ServiceContentWrapper
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
-import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
-import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
-import com.hellguy39.domain.usecases.radio.RadioStationUseCases
-import com.hellguy39.domain.usecases.state.SavedServiceStateUseCases
-import com.hellguy39.domain.usecases.tracks.TracksUseCases
 import com.hellguy39.domain.utils.PlayerType
-import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), View.OnClickListener {
-
-    @Inject
-    lateinit var radioStationUseCases: RadioStationUseCases
-
-    @Inject
-    lateinit var savedServiceStateUseCases: SavedServiceStateUseCases
-
-    @Inject
-    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
-
-    @Inject
-    lateinit var playlistUseCases: PlaylistUseCases
-
-    @Inject
-    lateinit var tracksUseCases: TracksUseCases
-
-    @Inject
-    lateinit var favouriteTracksUseCases: FavouriteTracksUseCases
 
     private lateinit var navController: NavController
     private lateinit var navHostFragment: NavHostFragment
@@ -71,6 +40,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private lateinit var mediaLibraryDataViewModel: MediaLibraryDataViewModel
     private lateinit var radioStationsDataViewModel: RadioStationsDataViewModel
+    private lateinit var viewModel: MainActivityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,28 +49,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        mediaLibraryDataViewModel = ViewModelProvider(this)[MediaLibraryDataViewModel::class.java]
-        radioStationsDataViewModel = ViewModelProvider(this)[RadioStationsDataViewModel::class.java]
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer) as NavHostFragment
-        navController = navHostFragment.navController
+        initModels()
+
+        setupBottomNavigation()
 
         binding.rootLayout.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-
-        NavigationUI.setupWithNavController(
-            binding.bottomNavigation,navController
-        )
-
-        binding.trackCard.setOnClickListener(this)
-        binding.ibPlayPause.setOnClickListener(this)
-        binding.ibNextTrack.setOnClickListener(this)
-
-        setObservers()
-
         binding.layoutCardPlayer.visibility = View.GONE
         binding.layoutCardPlayer.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
-        checkServiceSavedState()
+        setupListeners()
+
+        setObservers()
+
+        viewModel.checkServiceSavedState(this)
     }
 
     override fun onRestart() {
@@ -108,47 +71,67 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         initSetupMediaLibraryDataViewModel()
     }
 
+    private fun initModels() {
+        viewModel = ViewModelProvider(this)[MainActivityViewModel::class.java]
+        mediaLibraryDataViewModel = ViewModelProvider(this)[MediaLibraryDataViewModel::class.java]
+        radioStationsDataViewModel = ViewModelProvider(this)[RadioStationsDataViewModel::class.java]
+    }
+
+    private fun setupBottomNavigation() {
+        navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer) as NavHostFragment
+        navController = navHostFragment.navController
+
+        NavigationUI.setupWithNavController(
+            binding.bottomNavigation,navController
+        )
+    }
+
+    private fun setupListeners() {
+        binding.trackCard.setOnClickListener(this)
+        binding.ibPlayPause.setOnClickListener(this)
+        binding.ibNextTrack.setOnClickListener(this)
+    }
+
     private fun setObservers() {
         PlayerService.isPlaying().observe(this) {
             if (it) {
                 binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
             } else {
-                binding.ibPlayPause.setImageResource(R.drawable.ic_round_play_arrow_24)
+                binding.ibPlayPause.setImageResource(R.drawable.ic_round_play_arrow_48)
             }
         }
 
         PlayerService.isRunningService().observe(this) { isRunning ->
-            if (isRunning) {
-                when(PlayerService.getServiceContent().type) {
-                    PlayerType.LocalTrack -> {
-                        val metadata = PlayerService.getCurrentMetadata().value
-                        if (metadata != null)
-                            updateCardUIWithMetadata(metadata)
-                    }
-                    PlayerType.Radio -> {
-                        val radioStation = PlayerService.getServiceContent().radioStation
-
-                        if (radioStation != null)
-                            updateCardUIWithRadioStation(radioStation)
-                    }
-                }
-                showTrackCard()
-            } else {
-                hideTrackCard()
-            }
+            onServiceStateChanged()
         }
 
         PlayerService.getCurrentMetadata().observe(this) { metadata ->
-            val type = PlayerService.getServiceContent().type
+            onServiceStateChanged()
+        }
 
-            when (type) {
-                PlayerType.Radio -> {
+        PlayerService.getCurrentDuration().observe(this) {
+            if (PlayerService.isRunningService().value == true) {
+                val duration = PlayerService.getDuration()
 
-                }
-                PlayerType.LocalTrack -> {
-                    updateCardUIWithMetadata(metadata)
-                }
+                if (duration < 0 || it < 0)
+                    return@observe
+
+                binding.trackProgressIndicator.max = duration.toInt()
+                binding.trackProgressIndicator.progress = it.toInt()
             }
+        }
+    }
+
+    private fun onServiceStateChanged() {
+        if (PlayerService.isRunningService().value == true) {
+            updateCardUI(
+                type = PlayerService.getServiceContent().type,
+                metadata = PlayerService.getCurrentMetadata().value,
+                radioStation = PlayerService.getServiceContent().radioStation,
+            )
+            showTrackCard()
+        } else {
+            hideTrackCard()
         }
     }
 
@@ -156,211 +139,101 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         mediaLibraryDataViewModel.initSetup()
     }
 
+    private fun updateCardUI(
+        type: Enum<PlayerType>,
+        metadata: MediaMetadata? = null,
+        radioStation: RadioStation? = null
+    ) {
+        var bytes: ByteArray? = null
 
-    private fun checkServiceSavedState() = CoroutineScope(Dispatchers.IO).launch {
-        val savedState = savedServiceStateUseCases.getSavedServiceStateUseCase.invoke()
-
-        when(savedState.playerType) {
+        when(type) {
             PlayerType.LocalTrack -> {
-                val playlistId = savedState.playlistId
-                val artistName = savedState.artistName
-                val position = savedState.position
-                val playerPosition = savedState.playerPosition
+                if (metadata != null) {
+                    binding.ibNextTrack.visibility = View.VISIBLE
 
-                when(savedState.playlistType) {
-                    PlaylistType.AllTracks -> {
-                        val trackList = tracksUseCases.getAllTracksUseCase.invoke()
-                        startPlayer(receivedPlaylist = Playlist(
-                            tracks = trackList.toMutableList(),
-                            name = "All tracks",
-                            type = PlaylistType.AllTracks
-                        ),
-                            position = position,
-                            playerPosition = playerPosition,
-                            skipPauseClick = true,
-                            startWithShuffle = false
-                        )
-                    }
-                    PlaylistType.Favourites -> {
-                        val favourites = favouriteTracksUseCases.getAllFavouriteTracksUseCase.invoke()
-                        startPlayer(receivedPlaylist = Playlist(
-                            tracks = favourites.toMutableList(),
-                            name = "All tracks",
-                            type = PlaylistType.AllTracks
-                        ),
-                            position = position,
-                            playerPosition = playerPosition,
-                            skipPauseClick = true,
-                            startWithShuffle = false
-                        )
-                    }
-                    PlaylistType.Artist -> {
-                        if (artistName != null) {
-                            val artistTrackList = tracksUseCases.getAllTrackByArtistUseCase.invoke(artistName)
-                            startPlayer(receivedPlaylist = Playlist(
-                                tracks = artistTrackList.toMutableList(),
-                                name = artistName,
-                                type = PlaylistType.Artist
-                                ),
-                                position = position,
-                                playerPosition = playerPosition,
-                                skipPauseClick = true,
-                                startWithShuffle = false
-                            )
-                        }
-                    }
-                    PlaylistType.Custom -> {
-                        if (playlistId != null) {
-                            val playlist = playlistUseCases.getPlaylistByIdUseCase.invoke(id = playlistId)
-                            startPlayer(
-                                receivedPlaylist = playlist,
-                                position = position,
-                                skipPauseClick = true,
-                                startWithShuffle = false,
-                                playerPosition = playerPosition
-                            )
-                        }
-                    }
-                    PlaylistType.Undefined -> {
+                    binding.tvTrackName.text = if (metadata.title.isNullOrEmpty())
+                        "Unknown"
+                    else
+                        metadata.title
 
-                    }
-                    else -> {}
+                    binding.tvArtist.text = if (metadata.artist.isNullOrEmpty())
+                        "Unknown"
+                    else
+                        metadata.artist
+
+                    bytes = metadata.artworkData
                 }
-
             }
             PlayerType.Radio -> {
+                if (radioStation != null) {
+                    binding.ibNextTrack.visibility = View.GONE
+
+                    binding.tvTrackName.text = radioStation.name
+                    binding.tvArtist.text = ""
+
+                    bytes = radioStation.picture
+                }
+            }
+            else -> {
 
             }
-            PlayerType.Undefined -> {
-
-            }
-            else -> {}
         }
-    }
-
-
-    private fun startPlayer(
-        receivedPlaylist: Playlist,
-        position: Int,
-        startWithShuffle: Boolean = false,
-        skipPauseClick: Boolean = false,
-        playerPosition: Long
-    ) = CoroutineScope(Dispatchers.Main).launch {
-        if (receivedPlaylist.tracks.size == 0) {
-            return@launch
-        }
-
-        PlayerService.startService(this@MainActivity, ServiceContentWrapper(
-            type = PlayerType.LocalTrack,
-            position = position,
-            playlist = receivedPlaylist,
-            playerPosition = playerPosition,
-            startWithShuffle = startWithShuffle,
-            skipPauseClick = skipPauseClick,
-            fromSavedState = true
-            )
-        )
-    }
-
-    private fun updateCardUIWithMetadata(metadata: MediaMetadata) {
-
-        binding.ibNextTrack.visibility = View.VISIBLE
-
-        if (PlayerService.isPlaying().value == true)
-            binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
-        else
-            binding.ibPlayPause.setImageResource(R.drawable.ic_round_play_arrow_24)
-
-        binding.tvTrackName.text = if (metadata.title.isNullOrEmpty()) "Unknown" else metadata.title
-        binding.tvArtist.text  = if (metadata.artist.isNullOrEmpty()) "Unknown" else metadata.artist
-
-        val bytes = metadata.artworkData
 
         if (bytes != null) {
-            val white = ResourcesCompat.getColor(resources, R.color.white,null)
-            val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
-            binding.ivTrackImage.setImageBitmap(bitmap)
-            updatePalette(bitmap)
-            binding.tvTrackName.setTextColor(white)
-            binding.tvArtist.setTextColor(white)
-            binding.ibPlayPause.imageTintList = ColorStateList.valueOf(white)
-            binding.ibNextTrack.imageTintList = ColorStateList.valueOf(white)
+            setCustomCardColorScheme(bytes = bytes, type = type)
         } else {
-            val typedValue = TypedValue()
-            val theme = this.theme
-            theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValue, true)
-            @ColorInt val colorOnSurface = typedValue.data
-
-            binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
-            binding.trackCard.backgroundTintList = null
-            binding.ibPlayPause.imageTintList = ColorStateList.valueOf(colorOnSurface)
-            binding.ibNextTrack.imageTintList = ColorStateList.valueOf(colorOnSurface)
-            binding.tvTrackName.setTextColor(colorOnSurface)
-            binding.tvArtist.setTextColor(colorOnSurface)
+            setDefaultCardColorScheme(type = type)
         }
-
     }
 
-    private fun updateCardUIWithRadioStation(radioStation: RadioStation) {
+    private fun setCustomCardColorScheme(bytes: ByteArray, type: Enum<PlayerType>) {
+        val bitmap = bytes.toBitmap()
+        val white = ResourcesCompat.getColor(resources, R.color.white,null)
 
-        binding.ibNextTrack.visibility = View.GONE
+        binding.ivTrackImage.setImageBitmap(bitmap)
 
-        if (PlayerService.isPlaying().value == true)
-            binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
-        else
-            binding.ibPlayPause.setImageResource(R.drawable.ic_round_play_arrow_24)
-
-        binding.tvTrackName.text = radioStation.name
-        binding.tvArtist.text = ""
-
-        val bytes = radioStation.picture
-
-        if (bytes != null) {
-            val white = ResourcesCompat.getColor(resources, R.color.white,null)
-            val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
-            binding.ivTrackImage.setImageBitmap(bitmap)
-            updatePalette(bitmap)
-            binding.tvTrackName.setTextColor(white)
-            binding.tvArtist.setTextColor(white)
-            binding.ibPlayPause.imageTintList = ColorStateList.valueOf(white)
-            binding.ibNextTrack.imageTintList = ColorStateList.valueOf(white)
-        } else {
-            val typedValue = TypedValue()
-            val theme = this.theme
-            theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValue, true)
-            @ColorInt val colorOnSurface = typedValue.data
-
-            binding.ivTrackImage.setImageResource(R.drawable.ic_round_radio_24)
-            binding.trackCard.backgroundTintList = null
-            binding.trackCard.backgroundTintList = null
-            binding.ibPlayPause.imageTintList = ColorStateList.valueOf(colorOnSurface)
-            binding.ibNextTrack.imageTintList = ColorStateList.valueOf(colorOnSurface)
-            binding.tvTrackName.setTextColor(colorOnSurface)
-            binding.tvArtist.setTextColor(colorOnSurface)
-        }
-
-    }
-
-    private fun updatePalette(bitmap: Bitmap) {
         Palette.from(bitmap).generate { palette ->
             if (palette != null) {
                 binding.trackCard.backgroundTintList = ColorStateList.valueOf(palette.getMutedColor(1))
+                binding.tvTrackName.setTextColor(white)
+                binding.tvArtist.setTextColor(white)
+                binding.ibPlayPause.imageTintList = ColorStateList.valueOf(white)
+                binding.ibNextTrack.imageTintList = ColorStateList.valueOf(white)
+            } else {
+                setDefaultCardColorScheme(type)
             }
         }
     }
 
+    private fun setDefaultCardColorScheme(type: Enum<PlayerType>) {
+        val colorOnSurface = theme.getColorByResId(com.google.android.material.R.attr.colorOnSurface)
+
+        if (type == PlayerType.Radio)
+            binding.ivTrackImage.setImageResource(R.drawable.ic_round_radio_24)
+        else
+            binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
+
+        binding.trackCard.backgroundTintList = null
+
+        binding.ibPlayPause.imageTintList = ColorStateList.valueOf(colorOnSurface)
+        binding.ibNextTrack.imageTintList = ColorStateList.valueOf(colorOnSurface)
+
+        binding.tvTrackName.setTextColor(colorOnSurface)
+        binding.tvArtist.setTextColor(colorOnSurface)
+    }
 
     private fun showTrackCard() {
-
-        binding.ibPlayPause.setImageResource(R.drawable.ic_round_pause_24)
-
         TransitionManager.beginDelayedTransition(binding.layoutCardPlayer, AutoTransition())
         binding.layoutCardPlayer.visibility = View.VISIBLE
+
+        binding.trackProgressIndicator.visibility = View.VISIBLE
     }
 
     private fun hideTrackCard() {
         TransitionManager.beginDelayedTransition(binding.layoutCardPlayer, AutoTransition())
         binding.layoutCardPlayer.visibility = View.GONE
+
+        binding.trackProgressIndicator.visibility = View.GONE
     }
 
     override fun onClick(p0: View?) {
@@ -370,7 +243,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     this,
                     binding.trackCard,
                     "track_card_transition"
-                )//ActivityOptions.makeSceneTransitionAnimation(this)
+                )
                 startActivity(Intent(this, TrackActivity::class.java), options.toBundle())
             }
             binding.ibPlayPause.id -> {

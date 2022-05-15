@@ -6,11 +6,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.presentaton.view_holders.SelectableTrackViewHolder
 import com.hellguy39.domain.models.Track
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 
 class SelectableTracksAdapter(
     private val tracks: List<Track>,
-    private val getImageBitmapUseCase: GetImageBitmapUseCase,
     private val listener: OnSelectableTrackListener
 ): RecyclerView.Adapter<SelectableTrackViewHolder>() {
 
@@ -29,7 +27,6 @@ class SelectableTracksAdapter(
     ) {
         holder.onBind(
             track = tracks[position],
-            getImageBitmapUseCase = getImageBitmapUseCase,
             position = position,
             listener = listener,
             isSelected = selectedPositions.contains(position)

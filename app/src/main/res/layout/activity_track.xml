@@ -17,6 +17,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             tools:title="Tittle"
+            app:titleCentered="true"
+            app:subtitleCentered="true"
             tools:subtitle="Subtitle"
             app:menu="@menu/more_top_menu"
             app:navigationIcon="@drawable/ic_round_arrow_down_ios_24" />
@@ -66,7 +68,7 @@
                     android:fontFamily="@font/roboto_medium"
                     android:maxLines="1"
                     android:gravity="center"
-                    android:textSize="32sp"
+                    android:textSize="@dimen/huge_text_size"
                     tools:text="Smells Like Teen Spirit" />
 
                 <TextView
@@ -74,7 +76,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:fontFamily="@font/roboto_regular"
-                    android:textSize="24sp"
+                    android:textSize="@dimen/medium_text_size"
                     android:maxLines="1"
                     android:ellipsize="marquee"
                     android:gravity="center"
@@ -103,6 +105,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="start"
+                    android:textSize="@dimen/hyper_small_text_size"
                     android:layout_marginStart="16dp"
                     tools:text="0:00" />
 
@@ -113,6 +116,7 @@
                     android:layout_weight="1"
                     android:layout_marginEnd="16dp"
                     android:gravity="end"
+                    android:textSize="@dimen/hyper_small_text_size"
                     tools:text="3:49" />
             </LinearLayout>
 
@@ -139,7 +143,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:backgroundTint="@android:color/transparent"
-                    android:src="@drawable/ic_round_skip_previous_24" />
+                    android:src="@drawable/ic_round_skip_previous_48" />
 
 
                 <ImageButton
@@ -148,7 +152,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:backgroundTint="@android:color/transparent"
-                    android:src="@drawable/ic_baseline_play_circle_filled_24" />
+                    android:src="@drawable/ic_baseline_play_circle_filled_64" />
 
                 <ImageButton
                     android:id="@+id/ibNextTrack"
@@ -156,7 +160,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:backgroundTint="@android:color/transparent"
-                    android:src="@drawable/ic_round_skip_next_24" />
+                    android:src="@drawable/ic_round_skip_next_48" />
 
                 <ImageButton
                     android:id="@+id/ibRepeatTrack"
@@ -173,6 +177,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
+                android:layout_marginTop="16dp"
                 android:orientation="horizontal">
 
                 <ImageView

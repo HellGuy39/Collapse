@@ -2,11 +2,10 @@ package com.hellguy39.collapse.di
 
 import com.hellguy39.data.repositories.*
 import com.hellguy39.domain.repositories.TracksRepository
-import com.hellguy39.domain.usecases.ConvertBitmapToByteArrayUseCase
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
-import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
-import com.hellguy39.domain.usecases.eq_settings.*
+import com.hellguy39.domain.usecases.app_settings.AppSettingsUseCases
+import com.hellguy39.domain.usecases.app_settings.GetAppSettingsUseCase
+import com.hellguy39.domain.usecases.app_settings.SaveIsAnimationsEnabledUseCase
+import com.hellguy39.domain.usecases.app_settings.SaveIsSaveStateEnabledUseCase
 import com.hellguy39.domain.usecases.favourites.*
 import com.hellguy39.domain.usecases.playlist.*
 import com.hellguy39.domain.usecases.radio.*
@@ -31,28 +30,6 @@ class DomainModule {
             getSavedServiceStateUseCase = GetSavedServiceStateUseCase(repository),
             insertSavedServiceStateUseCase = InsertSavedServiceStateUseCase(repository)
         )
-    }
-
-    @Provides
-    @Singleton
-    fun provideEqualizerSettingsUseCases(repository: EqualizerRepositoryImpl): EqualizerSettingsUseCases {
-        return EqualizerSettingsUseCases(
-            getEqualizerSettings = GetEqualizerSettingsUseCase(repository),
-            saveEqualizerSettingsUseCase = SaveEqualizerSettingsUseCase(repository),
-            saveEqPresetUseCase = SaveEqPresetUseCase(repository),
-            saveEqSwitchUseCase = SaveEqSwitchUseCase(repository),
-            saveEqBandsLevelUseCase = SaveEqBandsLevelUseCase(repository),
-            saveBassBoostValueUseCase = SaveBassBoostValueUseCase(repository),
-            saveVirtualizerValueUseCase = SaveVirtualizerValueUseCase(repository),
-            saveBassBoostSwitchUseCase = SaveBassBoostSwitchUseCase(repository),
-            saveVirtualizerSwitchUseCase = SaveVirtualizerSwitchUseCase(repository)
-        )
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetImageBitmapUseCase(): GetImageBitmapUseCase {
-        return GetImageBitmapUseCase()
     }
 
     @Provides
@@ -105,20 +82,11 @@ class DomainModule {
 
     @Provides
     @Singleton
-    fun provideConvertBitmapToByteArrayUseCase(): ConvertBitmapToByteArrayUseCase {
-        return ConvertBitmapToByteArrayUseCase()
+    fun provideAppSettingsUseCases(repository: AppSettingsRepositoryImpl): AppSettingsUseCases {
+        return AppSettingsUseCases(
+            getAppSettingsUseCase = GetAppSettingsUseCase(repository),
+            saveIsAnimationsEnabledUseCase = SaveIsAnimationsEnabledUseCase(repository),
+            saveIsSaveStateEnabledUseCase = SaveIsSaveStateEnabledUseCase(repository)
+        )
     }
-
-    @Provides
-    @Singleton
-    fun provideConvertByteArrayToBitmapUseCase(): ConvertByteArrayToBitmapUseCase {
-        return ConvertByteArrayToBitmapUseCase()
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetColorFromThemeUseCase(): GetColorFromThemeUseCase {
-        return GetColorFromThemeUseCase()
-    }
-
 }

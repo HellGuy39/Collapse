@@ -19,7 +19,7 @@ private const val RADIO_STATIONS_DB_NAME = "radio_stations_db"
 private const val FAVOURITES_DB_NAME = "favourites_db"
 private const val PLAYLISTS_DB_NAME = "playlists_db"
 private const val SAVED_STATE_DB_NAME = "saved_state_db"
-private const val PREFS_NAME = "prefs_name"
+const val PREFS_NAME = "prefs_name"
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -61,22 +61,6 @@ class DataModule {
         ).build()
     }
 
-//    @Provides
-//    @Singleton
-//    fun provideSavedServiceStateDatabase(app: Application): SavedServiceStateDatabase {
-//        return Room.databaseBuilder(
-//            app,
-//            SavedServiceStateDatabase::class.java,
-//            SAVED_STATE_DB_NAME
-//        ).build()
-//    }
-
-    @Provides
-    @Singleton
-    fun provideEqualizerSettingsRepository(prefs: SharedPreferences): EqualizerRepositoryImpl {
-        return EqualizerRepositoryImpl(prefs)
-    }
-
     @Provides
     @Singleton
     fun provideTracksRepository(context: Context) : TracksRepository {
@@ -86,20 +70,20 @@ class DataModule {
     @Provides
     @Singleton
     fun provideRadioStationRepository(database: RadioStationsDatabase): RadioStationsRepositoryImpl {
-        return RadioStationsRepositoryImpl(database.radioStationsDao())
+        return RadioStationsRepositoryImpl(database.dao())
     }
 
 
     @Singleton
     @Provides
     fun providePlaylistsRepository(database: PlaylistsDatabase): PlaylistsRepositoryImpl {
-        return PlaylistsRepositoryImpl(database.playlistsDao())
+        return PlaylistsRepositoryImpl(database.dao())
     }
 
     @Provides
     @Singleton
     fun provideFavouritesRepository(database: FavouritesDatabase): FavouritesRepositoryImpl {
-        return FavouritesRepositoryImpl(favouritesDao = database.favouritesDao())
+        return FavouritesRepositoryImpl(favouritesDao = database.dao())
     }
 
     @Provides
@@ -108,4 +92,9 @@ class DataModule {
         return SavedServiceStateRepositoryImpl(prefs = prefs)
     }
 
+    @Provides
+    @Singleton
+    fun provideAppSettingsRepository(prefs: SharedPreferences): AppSettingsRepositoryImpl {
+        return AppSettingsRepositoryImpl(prefs = prefs)
+    }
 }

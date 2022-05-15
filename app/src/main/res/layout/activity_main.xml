@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:fitsSystemWindows="true"
     android:orientation="vertical"
     tools:context=".presentaton.activities.main.MainActivity">
 
@@ -44,8 +43,6 @@
             android:layout_gravity="bottom"
             android:layout_marginStart="0dp"
             android:layout_marginEnd="0dp"
-            android:progress="0"
-            android:visibility="gone"
             app:trackCornerRadius="4dp" />
 
         <LinearLayout
@@ -54,7 +51,9 @@
             android:layout_height="match_parent"
             android:animateLayoutChanges="true"
             android:orientation="horizontal"
-            android:padding="8dp">
+            android:paddingHorizontal="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="12dp">
 
             <ImageView
                 android:id="@+id/ivTrackImage"
@@ -96,7 +95,7 @@
                 android:layout_height="48dp"
                 android:layout_weight="0"
                 android:backgroundTint="@android:color/transparent"
-                android:src="@drawable/ic_round_play_arrow_24" />
+                android:src="@drawable/ic_round_play_arrow_48" />
 
             <ImageButton
                 android:id="@+id/ibNextTrack"
@@ -104,7 +103,7 @@
                 android:layout_height="48dp"
                 android:layout_weight="0"
                 android:backgroundTint="@android:color/transparent"
-                android:src="@drawable/ic_round_skip_next_24" />
+                android:src="@drawable/ic_round_skip_next_48" />
 
         </LinearLayout>
 
@@ -115,10 +114,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
+        style="@style/Widget.Material3.BottomNavigationView"
         app:menu="@menu/bottom_navigation_menu">
 
     </com.google.android.material.bottomnavigation.BottomNavigationView>

@@ -7,12 +7,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.presentaton.view_holders.RadioStationViewHolder
 import com.hellguy39.domain.models.RadioStation
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 
 class RadioStationsAdapter(
     private val stations: List<RadioStation>,
     private val listener: OnRadioStationListener,
-    private val convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase,
     private val context: Context
 ): RecyclerView.Adapter<RadioStationViewHolder>() {
 
@@ -23,7 +21,6 @@ class RadioStationsAdapter(
         return RadioStationViewHolder(
             v = LayoutInflater.from(parent.context)
                 .inflate(R.layout.radio_item,parent,false),
-            convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase,
             context = context
         )
     }

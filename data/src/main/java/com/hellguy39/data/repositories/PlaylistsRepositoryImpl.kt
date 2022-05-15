@@ -1,8 +1,10 @@
 package com.hellguy39.data.repositories
 
-import android.util.Log
 import com.hellguy39.data.dao.PlaylistsDao
-import com.hellguy39.data.models.PlaylistDb
+import com.hellguy39.data.mappers.toPlaylist
+import com.hellguy39.data.mappers.toPlaylistEntity
+import com.hellguy39.data.mappers.toPlaylistList
+import com.hellguy39.data.models.PlaylistEntity
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.repositories.PlaylistsRepository
 
@@ -10,32 +12,22 @@ class PlaylistsRepositoryImpl(
     private val playlistsDao: PlaylistsDao
 ): PlaylistsRepository {
     override suspend fun getAllPlaylists(): List<Playlist> {
-        return toReturnableList(playlistsDao.getAllPlaylists())
+        return playlistsDao.getAllPlaylists().toPlaylistList()
     }
 
     override suspend fun getPlaylistById(id: Int): Playlist {
-        return playlistsDao.getPlaylistById(id = id).toDefaultModel()
+        return playlistsDao.getPlaylistById(id = id).toPlaylist()
     }
 
     override suspend fun insertPlaylist(playlist: Playlist) {
-        playlistsDao.insertPlaylist(playlistDb = PlaylistDb().toDbModel(playlist))
+        playlistsDao.insertPlaylist(playlistEntity = playlist.toPlaylistEntity())
     }
 
     override suspend fun deletePlaylist(playlist: Playlist) {
-        playlistsDao.deletePlaylist(playlistDb = PlaylistDb().toDbModel(playlist))
+        playlistsDao.deletePlaylist(playlistEntity = playlist.toPlaylistEntity())
     }
 
     override suspend fun updatePlaylist(playlist: Playlist) {
-        playlistsDao.updatePlaylist(playlistDb = PlaylistDb().toDbModel(playlist))
-    }
-
-    private fun toReturnableList(list: List<PlaylistDb>): List<Playlist> {
-        val returnableList = mutableListOf<Playlist>()
-
-        for (n in list.indices) {
-            returnableList.add(list[n].toDefaultModel())
-        }
-
-        return returnableList
+        playlistsDao.updatePlaylist(playlistEntity = playlist.toPlaylistEntity())
     }
 }

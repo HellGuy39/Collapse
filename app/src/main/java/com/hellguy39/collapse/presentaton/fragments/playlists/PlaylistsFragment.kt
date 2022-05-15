@@ -8,26 +8,21 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.transition.platform.MaterialElevationScale
-import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.PlaylistsFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.PlaylistsAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.utils.Action
+import com.hellguy39.collapse.utils.getGridLayoutManager
+import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimation
+import com.hellguy39.collapse.utils.setOnBackFragmentNavigation
 import com.hellguy39.domain.models.Playlist
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     PlaylistsAdapter.OnPlaylistListener, SearchView.OnQueryTextListener {
-
-    @Inject
-    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
 
     companion object {
         fun newInstance() = PlaylistsFragment()
@@ -40,26 +35,13 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
     private lateinit var searchView: SearchView
 
     private var playlists = mutableListOf<Playlist>()
-    private lateinit var adapter: PlaylistsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setupSharedAxisAnimations()
+        setMaterialFadeThoughtAnimation()
 
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
-    }
-
-    private fun setupSharedAxisAnimations() {
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X,true)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X,false)
-    }
-
-    private fun setupMaterialElevationScale() {
-        exitTransition = MaterialElevationScale(false)
-        reenterTransition = MaterialElevationScale(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,9 +50,7 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
         postponeEnterTransition()
 
         binding = PlaylistsFragmentBinding.bind(view)
-        binding.topAppBar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
+        binding.topAppBar.setOnBackFragmentNavigation()
 
         val searchItem = binding.topAppBar.menu.findItem(R.id.search)
         searchView = searchItem.actionView as SearchView
@@ -79,9 +59,6 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
         setupRecyclerView()
 
         binding.fabAdd.setOnClickListener {
-
-            setupMaterialElevationScale()
-
             findNavController().navigate(
                 PlaylistsFragmentDirections.actionPlaylistsFragmentToCreatePlaylistFragment(
                     Playlist(),
@@ -93,31 +70,16 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
         setObservers()
     }
 
-    private fun setupRecyclerView() {
-
+    private fun setupRecyclerView() = binding.rvPlaylists.apply {
+        layoutManager = getGridLayoutManager(context)
         adapter = PlaylistsAdapter(
             playlists = playlists,
-            listener = this,
-            convertByteArrayToBitmapUseCase = convertByteArrayToBitmapUseCase
+            listener = this@PlaylistsFragment,
         )
-
-        binding.rvPlaylists.layoutManager = LinearLayoutManager(
-            context,
-            LinearLayoutManager.VERTICAL,
-            false
-        )
-
-        binding.rvPlaylists.adapter = adapter
-
-        binding.rvPlaylists.doOnPreDraw {
+        doOnPreDraw {
             startPostponedEnterTransition()
         }
     }
-
-//    override fun onResume() {
-//        super.onResume()
-//        setObservers()
-//    }
 
     private  fun setObservers() {
         dataViewModel.getAllPlaylists().observe(viewLifecycleOwner) {
@@ -142,12 +104,12 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
         binding.rvPlaylists.adapter?.notifyItemRangeRemoved(0, size ?: 0)
     }
 
-    override fun onPlaylistClick(playlist: Playlist) {
-        setupSharedAxisAnimations()
+    override fun onPlaylistClick(playlist: Playlist, view: View) {
+        view.transitionName = "playlist_transition"
         findNavController().navigate(
             PlaylistsFragmentDirections.actionPlaylistsFragmentToTrackListFragment(
                 playlist
-            )
+            ),FragmentNavigatorExtras(view to "playlist_transition")
         )
     }
 

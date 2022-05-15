@@ -8,5 +8,8 @@ data class Track(
     var id: Int = 0,
     var name: String = "Unknown",
     var artist: String = "Unknown",
+    var duration: Long = 0,
     var path: String = "N/A",
+    var genre: String = "N/A",
+    var year: Int = 0
 ) : Parcelable

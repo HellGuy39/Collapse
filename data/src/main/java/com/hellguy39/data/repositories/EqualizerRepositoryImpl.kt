@@ -1,100 +1,54 @@
 package com.hellguy39.data.repositories
 
 import android.content.SharedPreferences
-import com.hellguy39.domain.models.EqualizerSettings
-import com.hellguy39.domain.repositories.EqualizerSettingsRepository
+import com.hellguy39.domain.repositories.EqualizerRepository
 
-private const val IS_EQ_ENABLED = "isEqEnabled"
-private const val IS_BASS_ENABLED = "isBassEnabled"
-private const val IS_VIRTUALIZER_ENABLED = "isVirtualizerEnabled"
-private const val BAND_1 = "band1"
-private const val BAND_2 = "band2"
-private const val BAND_3 = "band3"
-private const val BAND_4 = "band4"
-private const val BAND_5 = "band5"
-private const val BAND_BASS_BOOST = "band_bass_boost"
-private const val BAND_VIRTUALIZER = "band_virtualizer"
-private const val PRESET = "preset"
+private const val IS_EQ_ENABLED = "is_eq_enabled"
+private const val EQ_PRESET_NUMBER = "eq_preset_number"
+private const val EQ_BAND_1_LEVEL = "eq_band_1_level"
+private const val EQ_BAND_2_LEVEL = "eq_band_2_level"
+private const val EQ_BAND_3_LEVEL = "eq_band_3_level"
+private const val EQ_BAND_4_LEVEL = "eq_band_4_level"
+private const val EQ_BAND_5_LEVEL = "eq_band_5_level"
 
-class EqualizerRepositoryImpl(private val prefs: SharedPreferences): EqualizerSettingsRepository {
-    override fun getEqualizerSettings(): EqualizerSettings {
+class EqualizerRepositoryImpl(private val prefs: SharedPreferences): EqualizerRepository {
+    override fun savePreset(values: MutableList<Short>) {
+        prefs.edit().apply {
+            putInt(EQ_BAND_1_LEVEL, values[0].toInt())
+            putInt(EQ_BAND_2_LEVEL, values[1].toInt())
+            putInt(EQ_BAND_3_LEVEL, values[2].toInt())
+            putInt(EQ_BAND_4_LEVEL, values[3].toInt())
+            putInt(EQ_BAND_5_LEVEL, values[4].toInt())
+        }.apply()
+    }
 
-        val equalizerSettings = EqualizerSettings(
-            isEqEnabled = prefs.getBoolean(IS_EQ_ENABLED, false),
-            isBassEnabled = prefs.getBoolean(IS_BASS_ENABLED, false),
-            isVirtualizerEnabled = prefs.getBoolean(IS_VIRTUALIZER_ENABLED, false),
-            band1Level = prefs.getFloat(BAND_1, 0f),
-            band2Level = prefs.getFloat(BAND_2, 0f),
-            band3Level = prefs.getFloat(BAND_3, 0f),
-            band4Level = prefs.getFloat(BAND_4, 0f),
-            band5Level = prefs.getFloat(BAND_5, 0f),
-            bandBassBoost = prefs.getFloat(BAND_BASS_BOOST, 0f),
-            bandVirtualizer = prefs.getFloat(BAND_VIRTUALIZER, 0f),
-            preset = prefs.getInt(PRESET, 0)
+    override fun getPreset(): MutableList<Short> {
+        return mutableListOf(
+            prefs.getInt(EQ_BAND_1_LEVEL, 0).toShort(),
+            prefs.getInt(EQ_BAND_2_LEVEL, 0).toShort(),
+            prefs.getInt(EQ_BAND_3_LEVEL, 0).toShort(),
+            prefs.getInt(EQ_BAND_4_LEVEL, 0).toShort(),
+            prefs.getInt(EQ_BAND_5_LEVEL, 0).toShort()
         )
-
-        return equalizerSettings
     }
 
-    override fun saveEqualizerSettings(equalizerSettings: EqualizerSettings) {
+    override fun getPresetNumber(): Short {
+        return prefs.getInt(EQ_PRESET_NUMBER, -1).toShort()
+    }
+
+    override fun savePresetNumber(preset: Short) {
         prefs.edit().apply {
-            this.putBoolean(IS_EQ_ENABLED, equalizerSettings.isEqEnabled)
-            this.putBoolean(IS_VIRTUALIZER_ENABLED, equalizerSettings.isVirtualizerEnabled)
-            this.putBoolean(IS_BASS_ENABLED, equalizerSettings.isBassEnabled)
-            this.putFloat(BAND_1, equalizerSettings.band1Level)
-            this.putFloat(BAND_2, equalizerSettings.band2Level)
-            this.putFloat(BAND_3, equalizerSettings.band3Level)
-            this.putFloat(BAND_4, equalizerSettings.band4Level)
-            this.putFloat(BAND_5, equalizerSettings.band5Level)
-            this.putFloat(BAND_BASS_BOOST, equalizerSettings.bandBassBoost)
-            this.putFloat(BAND_VIRTUALIZER, equalizerSettings.bandVirtualizer)
-            this.putInt(PRESET, equalizerSettings.preset)
+            putInt(EQ_PRESET_NUMBER, preset.toInt())
         }.apply()
     }
 
-    override fun savePreset(preset: Int) {
-        prefs.edit().apply {
-            this.putInt(PRESET, preset)
-        }.apply()
+    override fun getIsEnabled(): Boolean {
+        return prefs.getBoolean(IS_EQ_ENABLED, false)
     }
 
-    override fun saveEqSwitch(isEnabled: Boolean) {
+    override fun saveIsEnabled(enabled: Boolean) {
         prefs.edit().apply {
-            this.putBoolean(IS_EQ_ENABLED, isEnabled)
-        }.apply()
-    }
-
-    override fun saveBassBoostSwitch(isEnabled: Boolean) {
-        prefs.edit().apply {
-            this.putBoolean(IS_BASS_ENABLED, isEnabled)
-        }.apply()
-    }
-
-    override fun saveBassBoostValue(bass: Float) {
-        prefs.edit().apply {
-            this.putFloat(BAND_BASS_BOOST, bass)
-        }.apply()
-    }
-
-    override fun saveVirtualizerValue(virtualize: Float) {
-        prefs.edit().apply {
-            this.putFloat(BAND_VIRTUALIZER, virtualize)
-        }.apply()
-    }
-
-    override fun saveVirtualizerSwitch(isEnabled: Boolean) {
-        prefs.edit().apply {
-            this.putBoolean(IS_VIRTUALIZER_ENABLED, isEnabled)
-        }.apply()
-    }
-
-    override fun saveBandsLevel(levels: List<Float>) {
-        prefs.edit().apply {
-            this.putFloat(BAND_1, levels[0])
-            this.putFloat(BAND_2, levels[1])
-            this.putFloat(BAND_3, levels[2])
-            this.putFloat(BAND_4, levels[3])
-            this.putFloat(BAND_5, levels[4])
+            putBoolean(IS_EQ_ENABLED, enabled)
         }.apply()
     }
 }

@@ -5,9 +5,10 @@ import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
-import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.WindowCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.palette.graphics.Palette
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.MediaMetadata
@@ -20,18 +21,15 @@ import com.hellguy39.collapse.databinding.ActivityTrackBinding
 import com.hellguy39.collapse.presentaton.fragments.trackMenuBottomSheet.TrackMenuBottomSheet
 import com.hellguy39.collapse.presentaton.fragments.track_list.TrackMenuEvents
 import com.hellguy39.collapse.presentaton.services.PlayerService
+import com.hellguy39.collapse.utils.formatAsDate
+import com.hellguy39.collapse.utils.getColorByResId
+import com.hellguy39.collapse.utils.setOnBackActivityNavigation
+import com.hellguy39.collapse.utils.toBitmap
 import com.hellguy39.domain.models.Track
-import com.hellguy39.domain.usecases.ConvertByteArrayToBitmapUseCase
-import com.hellguy39.domain.usecases.GetColorFromThemeUseCase
-import com.hellguy39.domain.usecases.GetImageBitmapUseCase
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
-import com.hellguy39.domain.usecases.playlist.PlaylistUseCases
 import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
-import java.text.SimpleDateFormat
-import java.util.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -42,51 +40,33 @@ class TrackActivity : AppCompatActivity(),
     Slider.OnSliderTouchListener{
 
     @Inject
-    lateinit var getImageBitmapUseCase: GetImageBitmapUseCase
-
-    @Inject
-    lateinit var playlistUseCases: PlaylistUseCases
-
-    @Inject
-    lateinit var favouriteTracksUseCase: FavouriteTracksUseCases
-
-    @Inject
-    lateinit var convertByteArrayToBitmapUseCase: ConvertByteArrayToBitmapUseCase
-
-    @Inject
     lateinit var favouriteTracksUseCases: FavouriteTracksUseCases
-
-    @Inject
-    lateinit var getColorFromThemeUseCase: GetColorFromThemeUseCase
 
     private lateinit var binding: ActivityTrackBinding
 
-    private lateinit var primaryColorStateList: ColorStateList
-    private lateinit var onSurfaceColorStateList: ColorStateList
-    @ColorInt private var colorSurface: Int = 0
-    @ColorInt private var textColor: Int = 0
-    private lateinit var iconTint: ColorStateList
+    private lateinit var viewModel: TrackActivityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
         binding = ActivityTrackBinding.inflate(layoutInflater)
 
-        initColors()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        viewModel = ViewModelProvider(this)[TrackActivityViewModel::class.java]
 
         window.sharedElementEnterTransition = MaterialContainerTransform().apply {
             addTarget(binding.root)
-            setAllContainerColors(colorSurface)
+            setAllContainerColors(theme.getColorByResId(com.google.android.material.R.attr.colorSurface))
         }
         window.sharedElementReturnTransition = MaterialContainerTransform().apply {
             addTarget(binding.root)
-            setAllContainerColors(colorSurface)
+            setAllContainerColors(theme.getColorByResId(com.google.android.material.R.attr.colorSurface))
         }
+
         setContentView(binding.root)
 
-        binding.topAppBar.setNavigationOnClickListener {
-            onBackPressed()
-        }
+        binding.topAppBar.setOnBackActivityNavigation(this)
 
         binding.ibPlayPause.setOnClickListener(this)
         binding.ibNextTrack.setOnClickListener(this)
@@ -94,23 +74,19 @@ class TrackActivity : AppCompatActivity(),
         binding.ibShuffle.setOnClickListener(this)
         binding.ibRepeatTrack.setOnClickListener(this)
 
-        binding.sliderTime.addOnChangeListener { slider, value, fromUser ->
-            if (fromUser)
-                PlayerService.onSeekTo((value * 1000).toLong())
-        }
-
         binding.topAppBar.menu.findItem(R.id.more).setOnMenuItemClickListener {
-            val bottomSheet = TrackMenuBottomSheet(track = PlayerService.getCurrentTrack() ?: Track(),
+            val bottomSheet = TrackMenuBottomSheet(
+                track = PlayerService.getCurrentTrack() ?: Track(),
                 position = PlayerService.getContentPosition().value ?: 0,
                 listener = this,
                 playlistType = PlayerService.getServiceContent().playlist?.type ?: PlaylistType.Undefined,
-                getImageBitmapUseCase = getImageBitmapUseCase,
-                isTrackFavouriteUseCase = favouriteTracksUseCases.isTrackFavouriteUseCase
+                isTrackFavouriteUseCase = favouriteTracksUseCases.isTrackFavouriteUseCase,
             )
             bottomSheet.show(supportFragmentManager, TrackMenuBottomSheet.TRACK_MENU_TAG)
             true
         }
 
+        setupTimeSlider()
         setupVolumeSlider()
         setDeviceVolumeObserver()
 
@@ -124,6 +100,13 @@ class TrackActivity : AppCompatActivity(),
             else -> {
 
             }
+        }
+    }
+
+    private fun setupTimeSlider() {
+        binding.sliderTime.addOnChangeListener { slider, value, fromUser ->
+            if (fromUser)
+                PlayerService.onSeekTo(value.toLong())
         }
     }
 
@@ -146,7 +129,7 @@ class TrackActivity : AppCompatActivity(),
 
     private fun setupImage(bytes: ByteArray?) {
         if (bytes != null) {
-            val bitmap = convertByteArrayToBitmapUseCase.invoke(bytes)
+            val bitmap = bytes.toBitmap()
             Glide.with(this).load(bitmap).into(binding.ivCover)
             updatePalette(bitmap)
         } else {
@@ -156,22 +139,11 @@ class TrackActivity : AppCompatActivity(),
     }
 
     private fun setupUIForLocalTrack() {
-
         setCurrentMetadataObserver()
         setIsPlayingObserver()
         setShuffleObserver()
         setRepeatModeObserver()
-    }
-
-    private fun initColors() {
-        @ColorInt val colorPrimary = getColorFromThemeUseCase.invoke(theme, com.google.android.material.R.attr.colorPrimary)
-        @ColorInt val colorOnSurface = getColorFromThemeUseCase.invoke(theme, com.google.android.material.R.attr.colorOnSurface)
-        primaryColorStateList = ColorStateList.valueOf(colorPrimary)
-        onSurfaceColorStateList = ColorStateList.valueOf(colorOnSurface)
-
-        textColor = binding.tvTrackName.currentTextColor
-        iconTint = binding.ibPlayPause.imageTintList ?: ColorStateList.valueOf(colorOnSurface)
-        colorSurface = getColorFromThemeUseCase.invoke(theme, com.google.android.material.R.attr.colorSurface)
+        setTimelineObserver()
     }
 
     private fun setupVolumeSlider() {
@@ -195,9 +167,9 @@ class TrackActivity : AppCompatActivity(),
 
     private fun setIsPlayingObserver() = PlayerService.isPlaying().observe(this) {
         if (it) {
-            binding.ibPlayPause.setImageResource(R.drawable.ic_baseline_pause_circle_filled_24)
+            binding.ibPlayPause.setImageResource(R.drawable.ic_baseline_pause_circle_filled_64)
         } else {
-            binding.ibPlayPause.setImageResource(R.drawable.ic_baseline_play_circle_filled_24)
+            binding.ibPlayPause.setImageResource(R.drawable.ic_baseline_play_circle_filled_64)
         }
     }
 
@@ -210,19 +182,44 @@ class TrackActivity : AppCompatActivity(),
         updateRepeatMode(it)
     }
 
-    private fun setShuffleObserver() =  PlayerService.isShuffle().observe(this) {
+    private fun setShuffleObserver() = PlayerService.isShuffle().observe(this) {
         updateShuffle(it)
+    }
+
+    private fun setTimelineObserver() = PlayerService.getCurrentDuration().observe(this) {
+
+        val duration = PlayerService.getDuration()
+
+        if (duration < 0 || it < 0)
+            return@observe
+
+        binding.sliderTime.apply {
+            valueFrom = 0f
+            valueTo = (duration).toFloat()
+            value = (it).toFloat()
+        }
+
+        binding.tvCurrentTrackTime.text = it.formatAsDate()
+        binding.tvRemainingTrackTime.text = (duration - it).formatAsDate()
+
     }
 
     private fun updateShuffle(b: Boolean) {
         if (b) {
-            binding.ibShuffle.imageTintList = primaryColorStateList
+            binding.ibShuffle.imageTintList = ColorStateList.valueOf(
+                theme.getColorByResId(com.google.android.material.R.attr.colorPrimary)
+            )
         } else {
-            binding.ibShuffle.imageTintList = onSurfaceColorStateList
+            binding.ibShuffle.imageTintList = ColorStateList.valueOf(
+                theme.getColorByResId(com.google.android.material.R.attr.colorOnSurface)
+            )
         }
     }
 
     private fun updateRepeatMode(repeatMode: Int) {
+        val primaryColorStateList = ColorStateList.valueOf(theme.getColorByResId(com.google.android.material.R.attr.colorOnSurface))
+        val onSurfaceColorStateList = ColorStateList.valueOf(theme.getColorByResId(com.google.android.material.R.attr.colorPrimary))
+        
         when (repeatMode) {
             Player.REPEAT_MODE_ALL -> {
                 binding.ibRepeatTrack.imageTintList = primaryColorStateList
@@ -239,38 +236,10 @@ class TrackActivity : AppCompatActivity(),
         }
     }
 
-    private val listener = CoroutineScope(Dispatchers.Default).launch {
-//        while () {
-//
-//        }
-    }
-
     private fun updateUI(mediaMetadata: MediaMetadata) {
 
-        listener.start()
-
-        CoroutineScope(Dispatchers.Main).launch {
-            while (true) {
-                val duration = PlayerService.getDuration() / 1000
-                val position = PlayerService.getCurrentPosition() / 1000
-
-                if (duration > 0 || position > 0) {
-                    binding.sliderTime.apply {
-                        valueFrom = 0f
-                        valueTo = (duration).toFloat()
-                        value = (position).toFloat()
-                    }
-                    binding.tvCurrentTrackTime.text = SimpleDateFormat("m:ss", Locale.getDefault())
-                        .format(Date(position * 1000))
-                    binding.tvRemainingTrackTime.text = SimpleDateFormat("m:ss", Locale.getDefault())
-                        .format(Date((duration - position) * 1000))
-                }
-                delay(500)
-            }
-        }
-
         binding.sliderTime.setLabelFormatter {
-            SimpleDateFormat("m:ss", Locale.getDefault()).format(Date(it.toLong() * 1000))
+            (it.toLong()).formatAsDate()
         }
 
         binding.topAppBar.title = PlayerService.getServiceContent().playlist?.name
@@ -317,9 +286,9 @@ class TrackActivity : AppCompatActivity(),
         Palette.from(bitmap).generate { palette ->
             if (palette != null) {
                 val mutedColor = palette.getMutedColor(1)
-                val darkMutedColor = palette.getDarkMutedColor(1)
+                //val darkMutedColor = palette.getDarkMutedColor(1)
                 val white = ResourcesCompat.getColor(resources, R.color.white,null)
-                val stateListMuted = ColorStateList.valueOf(mutedColor)
+                //val stateListMuted = ColorStateList.valueOf(mutedColor)
                 val stateListWhite = ColorStateList.valueOf(white)
 
                 binding.topAppBar.setNavigationIconTint(white)
@@ -340,22 +309,26 @@ class TrackActivity : AppCompatActivity(),
         }
     }
 
-
     private fun setDefaultUIColors() {
-        binding.topAppBar.setNavigationIconTint(iconTint.defaultColor)
-        binding.topAppBar.setTitleTextColor(textColor)
-        binding.tvTrackName.setTextColor(textColor)
-        binding.tvPerformer.setTextColor(textColor)
-        binding.tvRemainingTrackTime.setTextColor(textColor)
-        binding.tvCurrentTrackTime.setTextColor(textColor)
-        binding.ibPlayPause.imageTintList = iconTint
-        binding.ibNextTrack.imageTintList = iconTint
-        binding.ibPreviousTrack.imageTintList = iconTint
-        binding.topAppBar.menu.findItem(R.id.more).iconTintList = iconTint
+        theme.getColorByResId(com.google.android.material.R.attr.colorOnSurface).also { colorOnSurface ->
+            binding.topAppBar.setTitleTextColor(colorOnSurface)
+            binding.tvTrackName.setTextColor(colorOnSurface)
+            binding.tvPerformer.setTextColor(colorOnSurface)
+            binding.tvRemainingTrackTime.setTextColor(colorOnSurface)
+            binding.tvCurrentTrackTime.setTextColor(colorOnSurface)
+            binding.topAppBar.setNavigationIconTint(colorOnSurface)
 
-        binding.topAppBar.setBackgroundColor(colorSurface)
-        binding.root.setBackgroundColor(colorSurface)
-
+            ColorStateList.valueOf(colorOnSurface).also { colorStateList ->
+                binding.ibPlayPause.imageTintList = colorStateList
+                binding.ibNextTrack.imageTintList = colorStateList
+                binding.ibPreviousTrack.imageTintList = colorStateList
+                binding.topAppBar.menu.findItem(R.id.more).iconTintList = colorStateList
+            }
+        }
+        theme.getColorByResId(com.google.android.material.R.attr.colorSurface).also { colorSurface ->
+            binding.topAppBar.setBackgroundColor(colorSurface)
+            binding.root.setBackgroundColor(colorSurface)
+        }
     }
 
     @SuppressLint("RestrictedApi")
@@ -375,55 +348,15 @@ class TrackActivity : AppCompatActivity(),
     }
 
     override fun onAddToFavourites(track: Track) {
-        CoroutineScope(Dispatchers.IO).launch {
-            favouriteTracksUseCase.addFavouriteTrackUseCase.invoke(track = track)
-        }
+        viewModel.addToFavourites(track)
     }
 
     override fun onDeleteFromFavourites(track: Track) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val list = favouriteTracksUseCases.getAllFavouriteTracksUseCase.invoke().toMutableList()
-
-            for (n in list.indices) {
-                if (isFavourite(list[n], track)) {
-                    list.remove(list[n])
-                    favouriteTracksUseCase.deleteFromFavouritesWithoutIdUseCase.invoke(track)
-                }
-            }
-        }
+        viewModel.deleteFromFavourites(track)
     }
 
     override fun onDeleteFromPlaylist(track: Track, position: Int) {
-        val type = PlayerService.getServiceContent().type
-        val playlist = PlayerService.getServiceContent().playlist
-
-        CoroutineScope(Dispatchers.IO).launch {
-            when (type) {
-                PlaylistType.Favourites -> {
-                    favouriteTracksUseCase.deleteFavouriteTrackUseCase.invoke(track)
-                }
-                else -> {
-
-                    if (playlist != null) {
-
-                        if (playlist.tracks.size == 1) {
-                            playlist.tracks = mutableListOf()
-                        } else {
-                            playlist.tracks.removeAt(position)
-                        }
-
-                        playlistUseCases.updatePlaylistUseCase.invoke(playlist)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun isFavourite(track1: Track, track2: Track): Boolean {
-        return (track1.path == track2.path &&
-                track1.artist == track2.artist &&
-                track1.name == track2.name)
-
+        viewModel.deleteFromPlaylist(track, position)
     }
 
 }

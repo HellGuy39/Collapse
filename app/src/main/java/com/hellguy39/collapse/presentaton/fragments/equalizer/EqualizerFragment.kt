@@ -3,285 +3,277 @@ package com.hellguy39.collapse.presentaton.fragments.equalizer
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.CompoundButton
+import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.chip.Chip
 import com.google.android.material.slider.Slider
-import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.hellguy39.collapse.R
+import com.hellguy39.collapse.controllers.audio_effect.AudioEffectController
+import com.hellguy39.collapse.controllers.audio_effect.EqState
 import com.hellguy39.collapse.databinding.EqualizerFragmentBinding
-import com.hellguy39.collapse.presentaton.services.PlayerService
+import com.hellguy39.collapse.utils.*
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
     Slider.OnChangeListener,
     Slider.OnSliderTouchListener,
-    CompoundButton.OnCheckedChangeListener
-{
+    CompoundButton.OnCheckedChangeListener {
+
+    @Inject
+    lateinit var effectController: AudioEffectController
 
     companion object {
         fun newInstance() = EqualizerFragment()
+
         private const val STEP_SIZE = 1f
+        private const val MAX_BASS_BOOST_VALUE = 10f
+        private const val MIN_BASS_BOOST_VALUE = 0f
+        private const val MAX_VIRTUALIZER_VALUE = 10f
+        private const val MIN_VIRTUALIZER_VALUE = 0f
+
+//        private val reverbPresetMap: Map<String, Short> = mutableMapOf(
+//            "None" to PresetReverb.PRESET_NONE,
+//            "Small room" to PresetReverb.PRESET_SMALLROOM,
+//            "Medium room" to PresetReverb.PRESET_MEDIUMROOM,
+//            "Large room" to PresetReverb.PRESET_LARGEROOM,
+//            "Medium hall" to PresetReverb.PRESET_MEDIUMHALL,
+//            "Large hall" to PresetReverb.PRESET_LARGEHALL,
+//            "Plate" to PresetReverb.PRESET_PLATE
+//        )
     }
 
-    private lateinit var viewModel: EqualizerViewModel
     private lateinit var binding: EqualizerFragmentBinding
-
-    private var selectedPreset = 0
-    private var isPresetMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enterTransition = MaterialFadeThrough()
-        viewModel = ViewModelProvider(this)[EqualizerViewModel::class.java]
+        setMaterialFadeThoughtAnimation()
+
+        setSharedElementTransitionAnimation()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = EqualizerFragmentBinding.bind(view)
 
-        enableUI(false)
+        binding.topAppBar.setOnBackFragmentNavigation()
 
+        setupUI()
         setObservers()
     }
 
-    private fun setObservers() {
-        PlayerService.isEqualizerInitialized().observe(viewLifecycleOwner) {
-            if (it) {
-                enableUI(true)
+    private fun setupUI() {
+        val properties = effectController.getProperties()
 
-                setupEqualizer()
-                setupPreset()
-                setupBassBoost()
-                setupVirtualizer()
-
-                applySettings()
-
-                binding.eqSwitch.setOnCheckedChangeListener(this)
-                binding.virtualizerSwitch.setOnCheckedChangeListener(this)
-                binding.bassSwitch.setOnCheckedChangeListener(this)
-            }
-        }
-    }
-
-    private fun enableUI(b: Boolean) {
-        binding.eqSwitch.isEnabled = b
-        binding.band1.isEnabled = b
-        binding.band2.isEnabled = b
-        binding.band3.isEnabled = b
-        binding.band4.isEnabled = b
-        binding.band5.isEnabled = b
-        binding.bassBoostBand.isEnabled = b
-        binding.surroundBand.isEnabled = b
-        binding.acPreset.isEnabled = b
-        binding.bassSwitch.isEnabled = b
-        binding.virtualizerSwitch.isEnabled = b
-
-        if (b)
-            binding.cardEqMessage.visibility = View.GONE
-        else
-            binding.cardEqMessage.visibility = View.VISIBLE
-    }
-
-    private fun setupEqualizer() {
-
-        val upperBandLevel = PlayerService.getUpperBandLevel()
-        val lowestBandLevel = PlayerService.getLowestBandLevel()
-        val bandsCenterFreq = PlayerService.getBandsCenterFreq()
+        val upperBandLevel = properties.upperBandLevel
+        val lowestBandLevel = properties.lowestBandLevel
+        val bandsCenterFreq = properties.bandsCenterFreq
 
         binding.tvDbMax.text = (upperBandLevel / 100).toString() + " dB"
         binding.tvDbMin.text = (lowestBandLevel / 100).toString() + " dB"
 
-        binding.tvBand1CenterFreq.text = bandsCenterFreq[0].toString() + " Hz"
-        binding.tvBand2CenterFreq.text = bandsCenterFreq[1].toString() + " Hz"
-        binding.tvBand3CenterFreq.text = bandsCenterFreq[2].toString() + " Hz"
-        binding.tvBand4CenterFreq.text = bandsCenterFreq[3].toString() + " Hz"
-        binding.tvBand5CenterFreq.text = bandsCenterFreq[4].toString() + " Hz"
+        binding.tvBand1CenterFreq.text = bandsCenterFreq[0].formatAsFreq()
+        binding.tvBand2CenterFreq.text = bandsCenterFreq[1].formatAsFreq()
+        binding.tvBand3CenterFreq.text = bandsCenterFreq[2].formatAsFreq()
+        binding.tvBand4CenterFreq.text = bandsCenterFreq[3].formatAsFreq()
+        binding.tvBand5CenterFreq.text = bandsCenterFreq[4].formatAsFreq()
+
+        binding.eqSwitch.setOnCheckedChangeListener(this)
+        binding.virtualizerSwitch.setOnCheckedChangeListener(this)
+        binding.bassSwitch.setOnCheckedChangeListener(this)
+        binding.reverbSwitch.setOnCheckedChangeListener(this)
 
         binding.band1.apply {
-            valueFrom = (lowestBandLevel / 100).toFloat()
-            valueTo = (upperBandLevel / 100).toFloat()
+            valueFrom = lowestBandLevel.toSliderValue()
+            valueTo = upperBandLevel.toSliderValue()
             stepSize = STEP_SIZE
             addOnChangeListener(this@EqualizerFragment)
             addOnSliderTouchListener(this@EqualizerFragment)
         }
         binding.band2.apply {
-            valueFrom = (lowestBandLevel / 100).toFloat()
-            valueTo = (upperBandLevel / 100).toFloat()
+            valueFrom = lowestBandLevel.toSliderValue()
+            valueTo = upperBandLevel.toSliderValue()
             stepSize = STEP_SIZE
             addOnChangeListener(this@EqualizerFragment)
             addOnSliderTouchListener(this@EqualizerFragment)
         }
         binding.band3.apply {
-            valueFrom = (lowestBandLevel / 100).toFloat()
-            valueTo = (upperBandLevel / 100).toFloat()
+            valueFrom = lowestBandLevel.toSliderValue()
+            valueTo = upperBandLevel.toSliderValue()
             stepSize = STEP_SIZE
             addOnChangeListener(this@EqualizerFragment)
             addOnSliderTouchListener(this@EqualizerFragment)
         }
         binding.band4.apply {
-            valueFrom = (lowestBandLevel / 100).toFloat()
-            valueTo = (upperBandLevel / 100).toFloat()
+            valueFrom = lowestBandLevel.toSliderValue()
+            valueTo = upperBandLevel.toSliderValue()
             stepSize = STEP_SIZE
             addOnChangeListener(this@EqualizerFragment)
             addOnSliderTouchListener(this@EqualizerFragment)
         }
         binding.band5.apply {
-            valueFrom = (lowestBandLevel / 100).toFloat()
-            valueTo = (upperBandLevel / 100).toFloat()
+            valueFrom = lowestBandLevel.toSliderValue()
+            valueTo = upperBandLevel.toSliderValue()
             stepSize = STEP_SIZE
             addOnChangeListener(this@EqualizerFragment)
             addOnSliderTouchListener(this@EqualizerFragment)
         }
-    }
-
-    private fun applySettings() {
-        val settings = viewModel.getEqualizerSettings()
-
-        binding.eqSwitch.isChecked = settings.isEqEnabled
-        binding.bassSwitch.isChecked = settings.isBassEnabled
-        binding.virtualizerSwitch.isChecked = settings.isVirtualizerEnabled
-
-        if (settings.preset == -1) {
-            isPresetMode = false
-            binding.band1.value = settings.band1Level / 100
-            binding.band2.value = settings.band2Level / 100
-            binding.band3.value = settings.band3Level / 100
-            binding.band4.value = settings.band4Level / 100
-            binding.band5.value = settings.band5Level / 100
-            binding.acPreset.setText(binding.acPreset.adapter.getItem(PlayerService.getPresetNames().lastIndex).toString(), false)
-        } else {
-            isPresetMode = true
-            selectedPreset = settings.preset
-            binding.acPreset.setText(binding.acPreset.adapter.getItem(settings.preset).toString(), false)
-            updateBands(PlayerService.getBandsLevels())
-        }
-
-        if (PlayerService.isBassBoostSupported())
-            binding.bassBoostBand.value = settings.bandBassBoost / 100
-
-        if (PlayerService.isVirtualizerSupported())
-            binding.surroundBand.value = settings.bandVirtualizer / 100
-    }
-
-    private fun setupPreset() {
-        val presets = PlayerService.getPresetNames()
-        val presetAdapter = ArrayAdapter(requireContext(), R.layout.list_item, presets)
-        binding.acPreset.setAdapter(presetAdapter)
-
-        binding.acPreset.setOnItemClickListener { adapterView, view, i, l ->
-            if (binding.acPreset.text.toString() == "Custom") {
-                isPresetMode = false
-                selectedPreset = -1
-            } else {
-                isPresetMode = true
-                selectedPreset = i
-            }
-
-            viewModel.savePreset(selectedPreset)
-
-            if (selectedPreset == -1) {
-                applyCustomPreset()
-            } else {
-                PlayerService.usePreset(i.toShort())
-                updateBands(PlayerService.getBandsLevels())
-            }
-        }
-    }
-
-    private fun applyCustomPreset() {
-        val settings = viewModel.getEqualizerSettings()
-
-        binding.band1.value = settings.band1Level / 100
-        binding.band2.value = settings.band2Level / 100
-        binding.band3.value = settings.band3Level / 100
-        binding.band4.value = settings.band4Level / 100
-        binding.band5.value = settings.band5Level / 100
-    }
-
-    private fun updateBands(list: List<Short>) {
-        binding.band1.value = (list[0] / 100).toFloat()
-        binding.band2.value = (list[1] / 100).toFloat()
-        binding.band3.value = (list[2] / 100).toFloat()
-        binding.band4.value = (list[3] / 100).toFloat()
-        binding.band5.value = (list[4] / 100).toFloat()
-    }
-
-    private fun setupBassBoost() {
-        if (PlayerService.isBassBoostSupported()) {
+        if (properties.bassBoostSupport) {
             binding.bassBoostBand.apply {
-                valueFrom = 0f
-                valueTo = 10f
+                valueFrom = MIN_BASS_BOOST_VALUE
+                valueTo = MAX_BASS_BOOST_VALUE
                 stepSize = STEP_SIZE
                 addOnChangeListener(this@EqualizerFragment)
                 addOnSliderTouchListener(this@EqualizerFragment)
             }
         } else {
+            binding.bassSwitch.isEnabled = false
             binding.bassBoostBand.isEnabled = false
         }
-    }
-
-    private fun setupVirtualizer() {
-        if (PlayerService.isVirtualizerSupported()) {
+        if (properties.virtualizerSupport) {
             binding.surroundBand.apply {
-                valueFrom = 0f
-                valueTo = 10f
+                valueFrom = MIN_VIRTUALIZER_VALUE
+                valueTo = MAX_VIRTUALIZER_VALUE
                 stepSize = STEP_SIZE
                 addOnChangeListener(this@EqualizerFragment)
                 addOnSliderTouchListener(this@EqualizerFragment)
             }
         } else {
+            binding.eqSwitch.isEnabled = false
             binding.surroundBand.isEnabled = false
+        }
+
+        setupPresetChips()
+        //setupReverbChips()
+    }
+
+    private fun setObservers() {
+        effectController.eqState.getPresetNumber().observe(viewLifecycleOwner) {
+            setSelectedPresetChip(it)
+        }
+
+        effectController.eqState.getIsEnabled().observe(viewLifecycleOwner) {
+            binding.eqSwitch.isChecked = it
+        }
+
+        effectController.eqState.getBandValues().observe(viewLifecycleOwner) {
+            binding.band1.value = it[0].toSliderValue()
+            binding.band2.value = it[1].toSliderValue()
+            binding.band3.value = it[2].toSliderValue()
+            binding.band4.value = it[3].toSliderValue()
+            binding.band5.value = it[4].toSliderValue()
+        }
+
+        effectController.bassBoostState.getBassStrength().observe(viewLifecycleOwner) {
+            binding.bassBoostBand.value = it.toSliderValue()
+        }
+
+        effectController.bassBoostState.getIsEnabled().observe(viewLifecycleOwner) {
+            binding.bassSwitch.isChecked = it
+        }
+
+        effectController.virtualizerState.getIsEnabled().observe(viewLifecycleOwner) {
+            binding.virtualizerSwitch.isChecked = it
+        }
+
+        effectController.virtualizerState.getVirtualizerStrength().observe(viewLifecycleOwner) {
+            binding.surroundBand.value = it.toSliderValue()
         }
     }
 
-    private fun setupUItoCustomPreset() {
-        isPresetMode = false
-        binding.acPreset.setText(binding.acPreset.adapter.getItem(
-            PlayerService.getPresetNames().lastIndex).toString(),
-            false
-        )
-        viewModel.saveBandsLevel(PlayerService.getBandsLevels())
-        viewModel.savePreset(-1)
+    private fun setSelectedPresetChip(presetNumber: Short) {
+        binding.presetChipGroup.forEach {
+            if ((it as Chip).tag == presetNumber) {
+                it.isChecked = true
+                return@forEach
+            }
+        }
     }
 
+    private fun setupPresetChips() {
+        val presets = effectController.getProperties().presets
+
+        binding.presetChipGroup.isSingleSelection = true
+
+        Chip(requireContext()).apply {
+            isCheckable = true
+            tag = EqState.CUSTOM_PRESET
+            text = "Custom"
+            setOnCheckedChangeListener { compoundButton, isChecked ->
+                if (isChecked)
+                    onEqPresetChange(compoundButton.tag.toString().toShort())
+            }
+        }.also { newChip ->
+            binding.presetChipGroup.addView(newChip)
+        }
+
+        for (preset in presets) {
+            Chip(requireContext()).apply {
+                isCheckable = true
+                tag = preset.presetNumber
+                text = preset.name
+                setOnCheckedChangeListener { compoundButton, isChecked ->
+                    if (isChecked)
+                        onEqPresetChange(compoundButton.tag.toString().toShort())
+                }
+            }.also { newChip ->
+                binding.presetChipGroup.addView(newChip)
+            }
+        }
+    }
+
+//    private fun setupReverbChips() {
+//        for(reverbPreset in reverbPresetMap) {
+//            Chip(requireContext()).apply {
+//                isCheckable = true
+//                text = reverbPreset.key
+//                tag = reverbPreset.value
+//                setOnCheckedChangeListener { compoundButton, isChecked ->
+//                    if (isChecked)
+//                        onReverbPresetChange(compoundButton.tag.toString().toShort())
+//                }
+//            }.also { newChip ->
+//                binding.reverbChipGroup.addView(newChip)
+//            }
+//        }
+//    }
+
+    private fun onEqPresetChange(presetNumber: Short) {
+        effectController.setPreset(presetNumber)
+    }
+
+//    private fun onReverbPresetChange(reverbPreset: Short) {
+//        effectController.setReverbPreset(reverbPreset)
+//    }
+
     private fun onSliderChangeValue(slider: Slider, value: Float, fromUser: Boolean) {
+        if (!fromUser)
+            return
+
         when (slider.id) {
             R.id.band1 -> {
-                if (fromUser)
-                    setupUItoCustomPreset()
-                PlayerService.setBandLevel(0, (value * 100).toInt().toShort())
+                effectController.setBandLevel(0, value.toAdjustableValue())
             }
             R.id.band2 -> {
-                if (fromUser)
-                    setupUItoCustomPreset()
-                PlayerService.setBandLevel(1, (value * 100).toInt().toShort())
+                effectController.setBandLevel(1, value.toAdjustableValue())
             }
             R.id.band3 -> {
-                if (fromUser)
-                    setupUItoCustomPreset()
-                PlayerService.setBandLevel(2, (value * 100).toInt().toShort())
+                effectController.setBandLevel(2, value.toAdjustableValue())
             }
             R.id.band4 -> {
-                if (fromUser)
-                    setupUItoCustomPreset()
-                PlayerService.setBandLevel(3, (value * 100).toInt().toShort())
+                effectController.setBandLevel(3, value.toAdjustableValue())
             }
             R.id.band5 -> {
-                if (fromUser)
-                    setupUItoCustomPreset()
-                PlayerService.setBandLevel(4, (value * 100).toInt().toShort())
+                effectController.setBandLevel(4, value.toAdjustableValue())
             }
             R.id.bassBoostBand -> {
-                PlayerService.setBassBoostBandLevel((value * 100).toInt().toShort())
-                viewModel.saveBassBoostValue(value * 100)
+                effectController.setBassStrength(value.toAdjustableValue())
             }
             R.id.surroundBand -> {
-                PlayerService.setVirtualizerBandLevel((value * 100).toInt().toShort())
-                viewModel.saveVirtualizerValue(value * 100)
+                effectController.setVirtualizeStrength(value.toAdjustableValue())
             }
         }
     }
@@ -303,18 +295,10 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
 
     override fun onCheckedChanged(p0: CompoundButton?, b: Boolean) {
         when(p0?.id) {
-            binding.eqSwitch.id -> {
-                PlayerService.enableEq(b)
-                viewModel.saveEqSwitch(b)
-            }
-            binding.bassSwitch.id -> {
-                PlayerService.enableBass(b)
-                viewModel.saveBassBoostSwitch(b)
-            }
-            binding.virtualizerSwitch.id -> {
-                PlayerService.enableVirtualizer(b)
-                viewModel.saveVirtualizerSwitch(b)
-            }
+            binding.eqSwitch.id -> effectController.setEqEnabled(b)
+            binding.bassSwitch.id -> effectController.setBassEnabled(b)
+            binding.virtualizerSwitch.id -> effectController.setVirtualizeEnabled(b)
+            binding.reverbSwitch.id -> effectController.setReverbEnabled(b)
         }
     }
 }
