@@ -2,5 +2,6 @@ package com.hellguy39.domain.models
 
 data class AppSettings(
     var isAnimationsEnabled: Boolean,
-    var isSaveStateEnabled: Boolean
+    var isSaveStateEnabled: Boolean,
+    var isAdaptableBackgroundEnabled: Boolean
 )

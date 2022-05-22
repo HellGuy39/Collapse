@@ -29,6 +29,15 @@ internal fun Long.formatAsDate(): String {
     return SimpleDateFormat(PATTERN, Locale.getDefault()).format(Date(this))
 }
 
+internal fun CharSequence?.formatForDisplaying(): CharSequence {
+    return if(this.isNullOrBlank())
+        "Unknown"
+    else if(this.isNullOrEmpty())
+        "Unknown"
+    else
+        this
+}
+
 internal fun Short.toSliderValue(): Float {
     return (this / 100).toFloat()
 }

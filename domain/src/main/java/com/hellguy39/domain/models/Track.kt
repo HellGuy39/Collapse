@@ -11,5 +11,7 @@ data class Track(
     var duration: Long = 0,
     var path: String = "N/A",
     var genre: String = "N/A",
-    var year: Int = 0
+    var year: Int = 0,
+    var mimeType: String = "N/A",
+    var displayName: String = "N/A"
 ) : Parcelable

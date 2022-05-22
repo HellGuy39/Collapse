@@ -4,9 +4,14 @@ import android.content.Context
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestOptions
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.TrackItemBinding
 import com.hellguy39.collapse.presentaton.adapters.TracksAdapter
+import com.hellguy39.collapse.utils.formatForDisplaying
 import com.hellguy39.collapse.utils.getImageOfTrackByPath
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.utils.PlaylistType
@@ -26,15 +31,16 @@ class TrackViewHolder(
         isPlaying: Boolean
     ) {
 
-        binding.tvTrackName.text = track.name//.ifEmpty { "Unknown" }
-        binding.tvAuthor.text = track.artist//.ifEmpty { "Unknown" }
+        binding.tvTrackName.text = track.name.formatForDisplaying()
+        binding.tvAuthor.text = track.artist.formatForDisplaying()
 
-        val bitmap = getImageOfTrackByPath(track.path)
-
-        if (bitmap != null)
-            binding.ivTrackImage.setImageBitmap(bitmap)
-        else
-            binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
+        Glide.with(binding.root)
+            .load(getImageOfTrackByPath(track.path))
+            .placeholder(R.drawable.ic_round_audiotrack_24)
+            .error(R.drawable.ic_round_audiotrack_24)
+            //.transition(DrawableTransitionOptions.withCrossFade())
+            .apply(RequestOptions.bitmapTransform(RoundedCorners(16)))
+            .into(binding.ivTrackImage)
 
         binding.root.setOnClickListener {
             listener.onTrackClick(track, position)

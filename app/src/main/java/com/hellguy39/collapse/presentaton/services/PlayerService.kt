@@ -5,9 +5,20 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.graphics.BitmapFactory
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.net.Uri
+import android.os.Binder
+import android.os.Build
 import android.os.CountDownTimer
 import android.os.IBinder
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
@@ -53,6 +64,23 @@ class PlayerService : LifecycleService() {
 
     @Inject
     lateinit var statisticController: StatisticController
+
+    private val metadataBuilder = MediaMetadataCompat.Builder()
+
+    private val stateBuilder = PlaybackStateCompat.Builder().setActions(
+        PlaybackStateCompat.ACTION_PLAY
+                or PlaybackStateCompat.ACTION_STOP
+                or PlaybackStateCompat.ACTION_PAUSE
+                or PlaybackStateCompat.ACTION_PLAY_PAUSE
+                or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+    )
+
+    private var mediaSession: MediaSessionCompat? = null
+
+    private val audioManager: AudioManager? = null
+    private var audioFocusRequest: AudioFocusRequest? = null
+    private var audioFocusRequested = false
 
     private lateinit var playerNotificationManager: PlayerNotificationManager
 
@@ -177,6 +205,23 @@ class PlayerService : LifecycleService() {
 
     override fun onCreate() {
         super.onCreate()
+
+        val audioAttributes: AudioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+//        audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+//            .setOnAudioFocusChangeListener(audioFocusChangeListener)
+//            .setAcceptsDelayedFocusGain(false)
+//            .setWillPauseWhenDucked(true)
+//            .setAudioAttributes(audioAttributes)
+//            .build()
+
+        mediaSession = MediaSessionCompat(this, "PlayerService")
+        //mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+
+        //mediaSession?.setCallback(mediaSessionCallback)
+
         exoPlayer = ExoPlayer.Builder(this).build()
 
         effectController.updateAudioSession(exoPlayer.audioSessionId)
@@ -252,10 +297,8 @@ class PlayerService : LifecycleService() {
         if (trackList.isEmpty())
             return
 
-        for (n in trackList.indices) {
-            exoPlayer.addMediaItem(MediaItem.fromUri(trackList[n].path))
-        }
-
+        for (track in trackList)
+            exoPlayer.addMediaItem(MediaItem.fromUri(track.path))
     }
 
     private fun initRadioPlayer(radioStation: RadioStation) {
@@ -389,6 +432,9 @@ class PlayerService : LifecycleService() {
             mediaMetadataLiveData.value = mediaMetadata
             contentPositionLiveData.value = exoPlayer.currentMediaItemIndex
             trackDurationLiveData.value = 0
+
+            //Log.d("DEBUG", exoPlayer.media)
+            Log.d("DEBUG", "IS PLAYABLE: ${mediaMetadata}\tIndex: ${exoPlayer.currentMediaItemIndex}")
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -421,4 +467,136 @@ class PlayerService : LifecycleService() {
             deviceVolumeLiveData.value = volume
         }
     }
+
+//    private val mediaSessionCallback: MediaSessionCompat.Callback =
+//        object : MediaSessionCompat.Callback() {
+//            private var currentUri: Uri? = null
+//            var currentState = PlaybackStateCompat.STATE_STOPPED
+//            override fun onPlay() {
+//                if (!exoPlayer.playWhenReady) {
+//                    startService(Intent(applicationContext, PlayerService::class.java))
+//                    val track: MusicRepository.Track = musicRepository.getCurrent()
+//                    updateMetadataFromTrack(track)
+//                    prepareToPlay(track.getUri())
+//                    if (!audioFocusRequested) {
+//                        audioFocusRequested = true
+//                        val audioFocusResult: Int
+//                        audioFocusResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                            audioManager!!.requestAudioFocus(audioFocusRequest!!)
+//                        } else {
+//                            audioManager!!.requestAudioFocus(
+//                                audioFocusChangeListener,
+//                                AudioManager.STREAM_MUSIC,
+//                                AudioManager.AUDIOFOCUS_GAIN
+//                            )
+//                        }
+//                        if (audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) return
+//                    }
+//                    mediaSession!!.isActive = true // Сразу после получения фокуса
+//                    registerReceiver(
+//                        becomingNoisyReceiver,
+//                        IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+//                    )
+//                    exoPlayer.playWhenReady = true
+//                }
+//                mediaSession!!.setPlaybackState(
+//                    stateBuilder.setState(
+//                        PlaybackStateCompat.STATE_PLAYING,
+//                        PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
+//                        1f
+//                    ).build()
+//                )
+//                currentState = PlaybackStateCompat.STATE_PLAYING
+//                refreshNotificationAndForegroundStatus(currentState)
+//            }
+//
+//            override fun onPause() {
+//                if (exoPlayer.playWhenReady) {
+//                    exoPlayer.playWhenReady = false
+//                    unregisterReceiver(becomingNoisyReceiver)
+//                }
+//                mediaSession!!.setPlaybackState(
+//                    stateBuilder.setState(
+//                        PlaybackStateCompat.STATE_PAUSED,
+//                        PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
+//                        1f
+//                    ).build()
+//                )
+//                currentState = PlaybackStateCompat.STATE_PAUSED
+//                refreshNotificationAndForegroundStatus(currentState)
+//            }
+//
+//            override fun onStop() {
+//                if (exoPlayer.playWhenReady) {
+//                    exoPlayer.playWhenReady = false
+//                    unregisterReceiver(becomingNoisyReceiver)
+//                }
+//                if (audioFocusRequested) {
+//                    audioFocusRequested = false
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                        audioManager!!.abandonAudioFocusRequest(audioFocusRequest!!)
+//                    } else {
+//                        audioManager!!.abandonAudioFocus(audioFocusChangeListener)
+//                    }
+//                }
+//                mediaSession!!.isActive = false
+//                mediaSession!!.setPlaybackState(
+//                    stateBuilder.setState(
+//                        PlaybackStateCompat.STATE_STOPPED,
+//                        PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
+//                        1f
+//                    ).build()
+//                )
+//                currentState = PlaybackStateCompat.STATE_STOPPED
+//                refreshNotificationAndForegroundStatus(currentState)
+//                stopSelf()
+//            }
+//
+//            override fun onSkipToNext() {
+//                val track: MusicRepository.Track = musicRepository.getNext()
+//                updateMetadataFromTrack(track)
+//                refreshNotificationAndForegroundStatus(currentState)
+//                prepareToPlay(track.getUri())
+//            }
+//
+//            override fun onSkipToPrevious() {
+//                val track: MusicRepository.Track = musicRepository.getPrevious()
+//                updateMetadataFromTrack(track)
+//                refreshNotificationAndForegroundStatus(currentState)
+//                prepareToPlay(track.getUri())
+//            }
+//
+//            private fun prepareToPlay(uri: Uri) {
+//                if (uri != currentUri) {
+//                    currentUri = uri
+//                    val mediaSource =
+//                        ExtractorMediaSource(uri, dataSourceFactory, extractorsFactory, null, null)
+//                    exoPlayer.prepare(mediaSource)
+//                }
+//            }
+//
+//            private fun updateMetadataFromTrack(track: MusicRepository.Track) {
+//                metadataBuilder.putBitmap(
+//                    MediaMetadataCompat.METADATA_KEY_ART, BitmapFactory.decodeResource(
+//                        resources, track.getBitmapResId()
+//                    )
+//                )
+//                metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, track.getTitle())
+//                metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, track.getArtist())
+//                metadataBuilder.putString(
+//                    MediaMetadataCompat.METADATA_KEY_ARTIST,
+//                    track.getArtist()
+//                )
+//                metadataBuilder.putLong(
+//                    MediaMetadataCompat.METADATA_KEY_DURATION,
+//                    track.getDuration()
+//                )
+//                mediaSession!!.setMetadata(metadataBuilder.build())
+//            }
+//        }
+
+//    class PlayerServiceBinder : Binder() {
+//        val mediaSessionToken: MediaSessionCompat.Token
+//            get() = mediaSession.getSessionToken()
+//    }
 }

@@ -15,7 +15,7 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
-            app:menu="@menu/search_top_menu"
+            app:menu="@menu/playlists_top_menu"
             app:navigationIcon="@drawable/ic_round_arrow_back_ios_24"
             android:layout_height="?attr/actionBarSize"
             app:title="Playlists" />
@@ -37,5 +37,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:transitionGroup="true"/>
+
+    <include
+        android:id="@+id/emptyView"
+        layout="@layout/empty_recycler_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

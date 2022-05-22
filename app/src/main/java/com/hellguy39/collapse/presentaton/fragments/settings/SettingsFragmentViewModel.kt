@@ -33,4 +33,11 @@ class SettingsFragmentViewModel @Inject constructor(
         appSettingsUseCases.saveIsSaveStateEnabledUseCase.invoke(enabled)
     }
 
+    fun saveIsAdaptableBackground(enabled: Boolean) {
+        settingsLiveData.value.apply {
+            this?.isAdaptableBackgroundEnabled = enabled
+        }
+        appSettingsUseCases.saveIsAdaptableBackgroundEnabledUseCase.invoke(enabled)
+    }
+
 }

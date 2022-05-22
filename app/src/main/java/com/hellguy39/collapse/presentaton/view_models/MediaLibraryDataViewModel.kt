@@ -27,9 +27,9 @@ class MediaLibraryDataViewModel @Inject constructor(
     private val allFavouriteTracksLiveData = MutableLiveData<List<Track>>()
     private val allArtistsLiveData = MutableLiveData<List<Playlist>>()
 
-    init {
-        initSetup()
-    }
+//    init {
+//        initSetup()
+//    }
 
     fun initSetup() = viewModelScope.launch(Dispatchers.IO) {
         fetchAllTrackList()

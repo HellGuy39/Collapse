@@ -32,25 +32,30 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), View.OnClickListe
         binding.topAppBar.setOnBackFragmentNavigation()
 
         binding.switchAnimations.setOnClickListener(this)
-        binding.swithSaveState.setOnClickListener(this)
+        binding.switchSaveState.setOnClickListener(this)
+        binding.switchAdaptableBackgroundColor.setOnClickListener(this)
 
         setObserver()
     }
 
     private fun setObserver() {
         viewModel.getSettings().observe(viewLifecycleOwner) {
-            binding.swithSaveState.isChecked = it.isSaveStateEnabled
+            binding.switchSaveState.isChecked = it.isSaveStateEnabled
             binding.switchAnimations.isChecked = it.isAnimationsEnabled
+            binding.switchAdaptableBackgroundColor.isChecked = it.isAdaptableBackgroundEnabled
         }
     }
 
     override fun onClick(p0: View?) {
         when(p0?.id) {
-            binding.swithSaveState.id -> {
-                viewModel.saveIsSaveStateEnabled(binding.swithSaveState.isChecked)
+            binding.switchSaveState.id -> {
+                viewModel.saveIsSaveStateEnabled(binding.switchSaveState.isChecked)
             }
             binding.switchAnimations.id -> {
                 viewModel.saveIsAnimationsEnabled(binding.switchAnimations.isChecked)
+            }
+            binding.switchAdaptableBackgroundColor.id -> {
+                viewModel.saveIsAdaptableBackground(binding.switchAdaptableBackgroundColor.isChecked)
             }
         }
     }

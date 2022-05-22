@@ -60,8 +60,15 @@
                 android:layout_height="wrap_content"/>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/swithSaveState"
+                android:id="@+id/switchSaveState"
                 android:text="Save state"
+                android:textSize="@dimen/medium_text_size"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchAdaptableBackgroundColor"
+                android:text="Adaptable background"
                 android:textSize="@dimen/medium_text_size"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>

@@ -2,10 +2,7 @@ package com.hellguy39.collapse.di
 
 import com.hellguy39.data.repositories.*
 import com.hellguy39.domain.repositories.TracksRepository
-import com.hellguy39.domain.usecases.app_settings.AppSettingsUseCases
-import com.hellguy39.domain.usecases.app_settings.GetAppSettingsUseCase
-import com.hellguy39.domain.usecases.app_settings.SaveIsAnimationsEnabledUseCase
-import com.hellguy39.domain.usecases.app_settings.SaveIsSaveStateEnabledUseCase
+import com.hellguy39.domain.usecases.app_settings.*
 import com.hellguy39.domain.usecases.favourites.*
 import com.hellguy39.domain.usecases.playlist.*
 import com.hellguy39.domain.usecases.radio.*
@@ -86,7 +83,10 @@ class DomainModule {
         return AppSettingsUseCases(
             getAppSettingsUseCase = GetAppSettingsUseCase(repository),
             saveIsAnimationsEnabledUseCase = SaveIsAnimationsEnabledUseCase(repository),
-            saveIsSaveStateEnabledUseCase = SaveIsSaveStateEnabledUseCase(repository)
+            saveIsSaveStateEnabledUseCase = SaveIsSaveStateEnabledUseCase(repository),
+            getLayoutTypeUseCase = GetLayoutTypeUseCase(repository),
+            saveLayoutTypeUseCase = SaveLayoutTypeUseCase(repository),
+            saveIsAdaptableBackgroundEnabledUseCase = SaveIsAdaptableBackgroundEnabledUseCase(repository)
         )
     }
 }

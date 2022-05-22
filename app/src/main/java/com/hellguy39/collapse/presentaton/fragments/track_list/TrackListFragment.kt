@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.doOnPreDraw
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
@@ -91,6 +92,13 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
             }
             PlaylistType.Custom -> {
                 onTracksReceived(receivedPlaylist.tracks, PlaylistType.Custom, receivedPlaylist.name)
+
+                binding.emptyView.btnAction.apply {
+                    text = "Edit this playlist"
+                    setOnClickListener {
+                        onEditPlaylist()
+                    }
+                }
             }
             PlaylistType.Favourites -> {
                 setFavouritesTracksObserver()
@@ -253,6 +261,10 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
         }
     }
 
+    private fun checkEmptyView() {
+        binding.emptyView.root.isVisible = binding.rvTrackList.adapter?.itemCount == 0
+    }
+
     private fun updateRecyclerView(receivedTracks: List<Track>) = CoroutineScope(Dispatchers.IO).launch {
         for (n in receivedTracks.indices) {
             recyclerTracks.add(receivedTracks[n])
@@ -261,6 +273,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
             val position = binding.rvTrackList.adapter?.itemCount ?: 0
             binding.rvTrackList.adapter?.notifyItemRangeInserted(position, recyclerTracks.size)
             setContentObserver()
+            checkEmptyView()
         }
     }
 

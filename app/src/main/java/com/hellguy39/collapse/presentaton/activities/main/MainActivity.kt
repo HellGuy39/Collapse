@@ -1,14 +1,18 @@
 package com.hellguy39.collapse.presentaton.activities.main
 
+import android.Manifest
 import android.animation.LayoutTransition
 import android.app.ActivityOptions
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
@@ -16,6 +20,9 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import androidx.palette.graphics.Palette
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.exoplayer2.MediaMetadata
 import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import com.hellguy39.collapse.R
@@ -24,15 +31,21 @@ import com.hellguy39.collapse.presentaton.activities.track.TrackActivity
 import com.hellguy39.collapse.presentaton.services.PlayerService
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
 import com.hellguy39.collapse.presentaton.view_models.RadioStationsDataViewModel
+import com.hellguy39.collapse.utils.formatForDisplaying
 import com.hellguy39.collapse.utils.getColorByResId
 import com.hellguy39.collapse.utils.toBitmap
 import com.hellguy39.domain.models.RadioStation
+import com.hellguy39.domain.usecases.app_settings.AppSettingsUseCases
 import com.hellguy39.domain.utils.PlayerType
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), View.OnClickListener {
+
+    @Inject
+    lateinit var appSettingsUseCases: AppSettingsUseCases
 
     private lateinit var navController: NavController
     private lateinit var navHostFragment: NavHostFragment
@@ -52,6 +65,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         initModels()
+        initSetupMediaLibraryDataViewModel()
 
         setupBottomNavigation()
 
@@ -136,8 +150,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     fun initSetupMediaLibraryDataViewModel() {
-        mediaLibraryDataViewModel.initSetup()
+        if (isPermissionGranted())
+            mediaLibraryDataViewModel.initSetup()
     }
+
+    private fun isPermissionGranted(): Boolean =
+        (ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED)
 
     private fun updateCardUI(
         type: Enum<PlayerType>,
@@ -151,15 +172,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 if (metadata != null) {
                     binding.ibNextTrack.visibility = View.VISIBLE
 
-                    binding.tvTrackName.text = if (metadata.title.isNullOrEmpty())
-                        "Unknown"
-                    else
-                        metadata.title
+                    binding.tvTrackName.text = metadata.title.formatForDisplaying()
 
-                    binding.tvArtist.text = if (metadata.artist.isNullOrEmpty())
-                        "Unknown"
-                    else
-                        metadata.artist
+                    binding.tvArtist.text = metadata.artist.formatForDisplaying()
 
                     bytes = metadata.artworkData
                 }
@@ -168,7 +183,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 if (radioStation != null) {
                     binding.ibNextTrack.visibility = View.GONE
 
-                    binding.tvTrackName.text = radioStation.name
+                    binding.tvTrackName.text = radioStation.name.formatForDisplaying()
                     binding.tvArtist.text = ""
 
                     bytes = radioStation.picture
@@ -179,18 +194,26 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
 
-        if (bytes != null) {
-            setCustomCardColorScheme(bytes = bytes, type = type)
+        Glide.with(this)
+            .load(bytes)
+            .placeholder(
+                if (type == PlayerType.Radio)
+                    R.drawable.ic_round_radio_24
+                else
+                    R.drawable.ic_round_audiotrack_24
+            )
+            .apply(RequestOptions.bitmapTransform(RoundedCorners(16)))
+            .into(binding.ivTrackImage)
+
+        if (bytes != null && appSettingsUseCases.getAppSettingsUseCase.invoke().isAdaptableBackgroundEnabled) {
+            setCustomCardColorScheme(bitmap = bytes.toBitmap())
         } else {
-            setDefaultCardColorScheme(type = type)
+            setDefaultCardColorScheme()
         }
     }
 
-    private fun setCustomCardColorScheme(bytes: ByteArray, type: Enum<PlayerType>) {
-        val bitmap = bytes.toBitmap()
+    private fun setCustomCardColorScheme(bitmap: Bitmap) {
         val white = ResourcesCompat.getColor(resources, R.color.white,null)
-
-        binding.ivTrackImage.setImageBitmap(bitmap)
 
         Palette.from(bitmap).generate { palette ->
             if (palette != null) {
@@ -200,18 +223,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 binding.ibPlayPause.imageTintList = ColorStateList.valueOf(white)
                 binding.ibNextTrack.imageTintList = ColorStateList.valueOf(white)
             } else {
-                setDefaultCardColorScheme(type)
+                setDefaultCardColorScheme()
             }
         }
     }
 
-    private fun setDefaultCardColorScheme(type: Enum<PlayerType>) {
+    private fun setDefaultCardColorScheme() {
         val colorOnSurface = theme.getColorByResId(com.google.android.material.R.attr.colorOnSurface)
-
-        if (type == PlayerType.Radio)
-            binding.ivTrackImage.setImageResource(R.drawable.ic_round_radio_24)
-        else
-            binding.ivTrackImage.setImageResource(R.drawable.ic_round_audiotrack_24)
 
         binding.trackCard.backgroundTintList = null
 
