@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
@@ -21,11 +22,13 @@ import com.hellguy39.collapse.databinding.ActivityTrackBinding
 import com.hellguy39.collapse.presentaton.fragments.trackMenuBottomSheet.TrackMenuBottomSheet
 import com.hellguy39.collapse.presentaton.fragments.track_list.TrackMenuEvents
 import com.hellguy39.collapse.presentaton.services.PlayerService
+import com.hellguy39.collapse.utils.*
 import com.hellguy39.collapse.utils.formatAsDate
 import com.hellguy39.collapse.utils.getColorByResId
 import com.hellguy39.collapse.utils.setOnBackActivityNavigation
 import com.hellguy39.collapse.utils.toBitmap
 import com.hellguy39.domain.models.Track
+import com.hellguy39.domain.usecases.app_settings.AppSettingsUseCases
 import com.hellguy39.domain.usecases.favourites.FavouriteTracksUseCases
 import com.hellguy39.domain.utils.PlayerType
 import com.hellguy39.domain.utils.PlaylistType
@@ -41,6 +44,9 @@ class TrackActivity : AppCompatActivity(),
 
     @Inject
     lateinit var favouriteTracksUseCases: FavouriteTracksUseCases
+
+    @Inject
+    lateinit var appSettingsUseCases: AppSettingsUseCases
 
     private lateinit var binding: ActivityTrackBinding
 
@@ -58,10 +64,12 @@ class TrackActivity : AppCompatActivity(),
         window.sharedElementEnterTransition = MaterialContainerTransform().apply {
             addTarget(binding.root)
             setAllContainerColors(theme.getColorByResId(com.google.android.material.R.attr.colorSurface))
+            duration = 300L
         }
         window.sharedElementReturnTransition = MaterialContainerTransform().apply {
             addTarget(binding.root)
             setAllContainerColors(theme.getColorByResId(com.google.android.material.R.attr.colorSurface))
+            duration = 250L
         }
 
         setContentView(binding.root)
@@ -124,17 +132,25 @@ class TrackActivity : AppCompatActivity(),
 
         val bytes = PlayerService.getServiceContent().radioStation?.picture
         setupImage(bytes)
-        binding.tvTrackName.text = PlayerService.getServiceContent().radioStation?.name ?: "Unknown"
+        binding.tvTrackName.text = PlayerService.getServiceContent().radioStation?.name.formatForDisplaying()
     }
 
     private fun setupImage(bytes: ByteArray?) {
-        if (bytes != null) {
-            val bitmap = bytes.toBitmap()
-            Glide.with(this).load(bitmap).into(binding.ivCover)
-            updatePalette(bitmap)
+
+        Glide.with(this)
+            .load(bytes)
+            .placeholder(
+                if (PlayerService.getServiceContent().type == PlayerType.Radio)
+                    R.drawable.ic_round_radio_24
+                else
+                    R.drawable.ic_round_audiotrack_24
+            )
+            .into(binding.ivCover)
+
+        if (bytes.toBitmap() != null && appSettingsUseCases.getAppSettingsUseCase.invoke().isAdaptableBackgroundEnabled) {
+            updatePalette(bytes.toBitmap()!!)
         } else {
             setDefaultUIColors()
-            binding.ivCover.setImageResource(R.drawable.ic_round_audiotrack_24)
         }
     }
 
@@ -244,8 +260,8 @@ class TrackActivity : AppCompatActivity(),
 
         binding.topAppBar.title = PlayerService.getServiceContent().playlist?.name
 
-        binding.tvTrackName.text = mediaMetadata.title ?: "Unknown"
-        binding.tvPerformer.text = mediaMetadata.artist ?: "Unknown"
+        binding.tvTrackName.text = mediaMetadata.title.formatForDisplaying()
+        binding.tvPerformer.text = mediaMetadata.artist.formatForDisplaying()
 
         val bytes = mediaMetadata.artworkData
 

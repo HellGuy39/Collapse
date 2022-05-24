@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.doOnPreDraw
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -80,6 +81,11 @@ class ArtistsListFragment : Fragment(R.layout.fragment_artists_list),
         }
         val position = binding.rvArtists.adapter?.itemCount ?: 0
         binding.rvArtists.adapter?.notifyItemRangeInserted(position, playlists.size)
+        checkEmptyView()
+    }
+
+    private fun checkEmptyView() {
+        binding.emptyView.root.isVisible = binding.rvArtists.adapter?.itemCount == 0
     }
 
     private fun clearRecyclerView() {

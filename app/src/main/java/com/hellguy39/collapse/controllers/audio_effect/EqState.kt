@@ -1,6 +1,5 @@
 package com.hellguy39.collapse.controllers.audio_effect
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.hellguy39.domain.models.EqualizerPreset
@@ -18,9 +17,7 @@ class EqState(
     private val presetNumberLiveData = MutableLiveData<Short>()
     private val bandValuesLiveData = MutableLiveData<MutableList<Short>>(mutableListOf(0,0,0,0,0))
 
-    private val customPresetLiveData = MutableLiveData(eqUseCases.getCustomEqPresetUseCase.invoke())
-
-    fun getCustomPreset(): LiveData<MutableList<Short>> = customPresetLiveData
+    fun getCustomPreset(): MutableList<Short> = eqUseCases.getCustomEqPresetUseCase.invoke()
 
     fun getIsEnabled(): LiveData<Boolean> = isEnabledLiveData
 
@@ -32,14 +29,12 @@ class EqState(
         bandValuesLiveData.value = bandValuesLiveData.value.apply {
             this?.set(band.toInt(), value)
         }
-
-        if (presetNumberLiveData.value != CUSTOM_PRESET)
+        saveCustomPreset()
+        if (presetNumberLiveData.value != CUSTOM_PRESET) {
             presetNumberLiveData.value = CUSTOM_PRESET
 
-        if (presetNumberLiveData.value == CUSTOM_PRESET)
-            saveCustomPreset()
-
-        savePresetNumber()
+            savePresetNumber()
+        }
     }
 
     fun updateIsEnabled(isEnabled: Boolean) {

@@ -9,10 +9,9 @@ import com.hellguy39.domain.models.Track
 
 class SelectableTracksAdapter(
     private val tracks: List<Track>,
+    private val selectedTracks: MutableList<Track>,
     private val listener: OnSelectableTrackListener
 ): RecyclerView.Adapter<SelectableTrackViewHolder>() {
-
-    private val selectedPositions = mutableListOf<Int>()
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -23,27 +22,22 @@ class SelectableTracksAdapter(
     }
 
     override fun onBindViewHolder(
-        holder: SelectableTrackViewHolder, position: Int
+        holder: SelectableTrackViewHolder,
+        position: Int
     ) {
         holder.onBind(
             track = tracks[position],
             position = position,
             listener = listener,
-            isSelected = selectedPositions.contains(position)
+            isSelected = selectedTracks.contains(tracks[position])
         )
     }
 
     override fun getItemCount(): Int = tracks.size
 
-    fun getTrackByPosition(position: Int): Track = tracks[position]
-
     interface OnSelectableTrackListener {
-        fun onSelectTrack(position: Int)
-        fun onUnselectTrack(position: Int)
-    }
-
-    fun addSelectedPosition(position: Int) {
-        selectedPositions.add(position)
+        fun onSelectTrack(track: Track)
+        fun onUnselectTrack(track: Track)
     }
 
 }

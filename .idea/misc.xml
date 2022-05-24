@@ -6,33 +6,42 @@
         <entry key="..\:/Users/alexe/AndroidStudioProjects/Collapse/app/src/main/res/layout/activity_main.xml" value="0.259375" />
         <entry key="app/src/main/res/drawable/bottom_rounded_corner_rect.xml" value="0.23" />
         <entry key="app/src/main/res/drawable/bottom_sheet_rectangle.xml" value="0.23" />
+        <entry key="app/src/main/res/drawable/ic_baseline_grid_view_24.xml" value="0.244" />
         <entry key="app/src/main/res/drawable/ic_baseline_play_circle_filled_24.xml" value="0.23" />
+        <entry key="app/src/main/res/drawable/ic_baseline_view_list_24.xml" value="0.244" />
         <entry key="app/src/main/res/drawable/ic_impulse.xml" value="0.23" />
         <entry key="app/src/main/res/drawable/ic_round_arrow_back_ios_24.xml" value="0.248" />
         <entry key="app/src/main/res/drawable/ic_round_arrow_down_ios_24.xml" value="0.23" />
+        <entry key="app/src/main/res/drawable/ic_round_audio_file_24.xml" value="0.244" />
         <entry key="app/src/main/res/drawable/ic_round_equalizer_24.xml" value="0.23" />
         <entry key="app/src/main/res/drawable/ic_round_error_outline_24.xml" value="0.23" />
+        <entry key="app/src/main/res/drawable/ic_round_error_outline_64.xml" value="0.137" />
         <entry key="app/src/main/res/drawable/ic_round_favorite_24.xml" value="0.1055" />
+        <entry key="app/src/main/res/drawable/ic_round_grid_view_24.xml" value="0.244" />
+        <entry key="app/src/main/res/drawable/ic_round_list_24.xml" value="0.244" />
         <entry key="app/src/main/res/drawable/ic_round_pause_24.xml" value="0.248" />
         <entry key="app/src/main/res/drawable/ic_round_pause_24_small.xml" value="0.248" />
         <entry key="app/src/main/res/drawable/ic_round_play_arrow_24.xml" value="0.248" />
         <entry key="app/src/main/res/drawable/ic_round_play_arrow_24_small.xml" value="0.248" />
         <entry key="app/src/main/res/drawable/ic_round_queue_music_24.xml" value="0.23" />
         <entry key="app/src/main/res/drawable/ic_round_repeat_24.xml" value="0.119" />
+        <entry key="app/src/main/res/drawable/ic_round_search_24.xml" value="0.244" />
         <entry key="app/src/main/res/drawable/ic_round_shuffle_24.xml" value="0.119" />
         <entry key="app/src/main/res/drawable/ic_round_skip_next_24.xml" value="0.119" />
         <entry key="app/src/main/res/drawable/item_bottom_line_rect.xml" value="0.23" />
         <entry key="app/src/main/res/drawable/rectangle.xml" value="0.23" />
         <entry key="app/src/main/res/drawable/rounded_bottom_corners.xml" value="0.23" />
+        <entry key="app/src/main/res/layout/activity_error.xml" value="0.2833333333333333" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/activity_track.xml" value="0.1996133485041678" />
         <entry key="app/src/main/res/layout/add_radio_station_fragment.xml" value="0.3194427490234375" />
         <entry key="app/src/main/res/layout/artist_item.xml" value="0.25" />
         <entry key="app/src/main/res/layout/create_playlist_fragment.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/layout/empty_recycler_layout.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/equalizer_fragment.xml" value="0.3119400024414063" />
         <entry key="app/src/main/res/layout/equalizer_home_fragment_cardview.xml" value="0.31034545898437504" />
         <entry key="app/src/main/res/layout/fragment_about_app.xml" value="0.29739583333333336" />
-        <entry key="app/src/main/res/layout/fragment_artists_list.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_artists_list.xml" value="0.2960617065429687" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.2624923706054689" />
         <entry key="app/src/main/res/layout/fragment_radio_list.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/fragment_settings.xml" value="0.29739583333333336" />
@@ -42,6 +51,7 @@
         <entry key="app/src/main/res/layout/notification_player.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/playlist_fragment.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/playlist_item.xml" value="0.29739583333333336" />
+        <entry key="app/src/main/res/layout/playlist_item_list_view.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/playlist_menu_bottom_sheet.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/playlists_fragment.xml" value="0.27281494140625" />
         <entry key="app/src/main/res/layout/radio_fragment.xml" value="0.29739583333333336" />

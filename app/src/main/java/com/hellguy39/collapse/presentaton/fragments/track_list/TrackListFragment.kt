@@ -1,10 +1,12 @@
 package com.hellguy39.collapse.presentaton.fragments.track_list
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.doOnPreDraw
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
@@ -206,6 +208,8 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
             context = requireContext(),
             playlistType = receivedPlaylist.type,
         )
+        //setHasFixedSize(true)
+        //setItemViewCacheSize(20)
     }
 
     override fun onTrackMenuClick(track: Track, position: Int, playlistType: Enum<PlaylistType>) {
@@ -253,6 +257,10 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
         }
     }
 
+    private fun checkEmptyView() {
+        binding.emptyView.root.isVisible = binding.rvTrackList.adapter?.itemCount == 0
+    }
+
     private fun updateRecyclerView(receivedTracks: List<Track>) = CoroutineScope(Dispatchers.IO).launch {
         for (n in receivedTracks.indices) {
             recyclerTracks.add(receivedTracks[n])
@@ -261,6 +269,7 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
             val position = binding.rvTrackList.adapter?.itemCount ?: 0
             binding.rvTrackList.adapter?.notifyItemRangeInserted(position, recyclerTracks.size)
             setContentObserver()
+            checkEmptyView()
         }
     }
 
@@ -351,8 +360,9 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
 
     override fun onDeletePlaylist() {
         showDialog(
-            title = "Are you sure want to delete this playlist?",
-            positiveButtonText = "Yes",
+            title = "Confirm deletion",
+            message = "Are you sure want to delete this playlist?",
+            positiveButtonText = "Confirm",
             iconId = R.drawable.ic_round_delete_24,
             dialogEventListener = object : DialogEventListener {
                 override fun onPositiveButtonClick() {

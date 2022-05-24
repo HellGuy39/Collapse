@@ -5,6 +5,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.hellguy39.data.mappers.isContainArtist
 import com.hellguy39.domain.models.*
@@ -23,7 +24,9 @@ class TracksRepositoryImpl(
             MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.YEAR
+            MediaStore.Audio.Media.YEAR,
+            MediaStore.Audio.Media.MIME_TYPE,
+            MediaStore.Audio.Media.DISPLAY_NAME
         )
 
         const val MUSIC_SELECTION = MediaStore.Audio.Media.IS_MUSIC + " != 0"
@@ -138,7 +141,9 @@ class TracksRepositoryImpl(
             path = cursor.getString(1),
             duration = cursor.getLong(2),
             artist = cursor.getString(3),
-            year = cursor.getInt(4)
+            year = cursor.getInt(4),
+            mimeType = cursor.getString(5),
+            displayName = cursor.getString(6)
         )
     }
 }

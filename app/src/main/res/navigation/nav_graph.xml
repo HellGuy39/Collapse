@@ -66,11 +66,7 @@
             android:id="@+id/selectTracksFragment"
             android:name="com.hellguy39.collapse.presentaton.fragments.select_tracks.SelectTracksFragment"
             android:label="select_tracks_fragment"
-            tools:layout="@layout/select_tracks_fragment" >
-            <argument
-                android:name="SelectedTracks"
-                app:argType="com.hellguy39.domain.models.SelectedTracks" />
-        </fragment>
+            tools:layout="@layout/select_tracks_fragment" />
         <fragment
             android:id="@+id/artistsListFragment"
             android:name="com.hellguy39.collapse.presentaton.fragments.artists.ArtistsListFragment"

@@ -1,18 +1,18 @@
 package com.hellguy39.collapse.presentaton.fragments.select_tracks
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import androidx.core.os.bundleOf
 import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.navArgs
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.SelectTracksFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.adapters.SelectableTracksAdapter
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
+import com.hellguy39.collapse.presentaton.view_models.PlaylistSharedViewModel
 import com.hellguy39.collapse.utils.getTrackItemVerticalDivider
 import com.hellguy39.collapse.utils.getVerticalLayoutManager
 import com.hellguy39.collapse.utils.setMaterialFadeThoughtAnimation
@@ -30,12 +30,12 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
 
     private lateinit var binding: SelectTracksFragmentBinding
 
+    private val sharedViewModel: PlaylistSharedViewModel by activityViewModels()
+
     private lateinit var dataViewModel: MediaLibraryDataViewModel
 
     private var allTracks = mutableListOf<Track>()
-    private var positions = mutableListOf<Int>()
-
-    private val args: SelectTracksFragmentArgs by navArgs()
+    private var selectedTracks = mutableListOf<Track>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +53,11 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
 
         binding.topAppBar.setOnBackFragmentNavigation()
 
+        allTracks = dataViewModel.getAllTracks().value?.toMutableList() ?: mutableListOf()
+        selectedTracks = sharedViewModel.getSelectedTracks().value ?: mutableListOf()
+
+        updateTitleCounter()
+
         setupRecyclerView()
         setObservers()
     }
@@ -65,75 +70,42 @@ class SelectTracksFragment : Fragment(R.layout.select_tracks_fragment),
         }
         adapter = SelectableTracksAdapter(
             tracks = allTracks,
+            selectedTracks = selectedTracks,
             listener = this@SelectTracksFragment
         )
     }
 
     private fun setObservers() {
-        dataViewModel.getAllTracks().observe(viewLifecycleOwner) { receivedTracks ->
-            clearRecyclerView()
-            updateRecyclerView(receivedTracks)
-        }
+
+//        clearRecyclerView()
+//        updateRecyclerView()
     }
+//
+//    private fun clearRecyclerView() {
+//        val size = binding.rvTracks.adapter?.itemCount
+//        allTracks.clear()
+//        binding.rvTracks.adapter?.notifyItemRangeRemoved(0, size ?: 0)
+//    }
+//
+//    private fun updateRecyclerView() {
+//        val position = binding.rvTracks.adapter?.itemCount ?: 0
+//        binding.rvTracks.adapter?.notifyItemRangeInserted(position, allTracks.size)
+//    }
 
-    private fun clearRecyclerView() {
-        val size = binding.rvTracks.adapter?.itemCount
-        allTracks.clear()
-        binding.rvTracks.adapter?.notifyItemRangeRemoved(0, size ?: 0)
-    }
-
-    private fun updateRecyclerView(receivedTracks: List<Track>) {
-        for (n in receivedTracks.indices) {
-            allTracks.add(receivedTracks[n])
-        }
-
-        val selectedTracks = args.selectedTracks.trackList
-
-        for (n in selectedTracks.indices) {
-            if (allTracks.contains(selectedTracks[n])) {
-                (binding.rvTracks.adapter as SelectableTracksAdapter)
-                    .addSelectedPosition(allTracks.indexOf(selectedTracks[n]))
-            }
-        }
-
-        val position = binding.rvTracks.adapter?.itemCount ?: 0
-        binding.rvTracks.adapter?.notifyItemRangeInserted(position, allTracks.size)
-    }
-
-    override fun onSelectTrack(position: Int) {
-        positions.add(position)
+    override fun onSelectTrack(track: Track) {
+        sharedViewModel.addTrack(track)
+        //selectedTracks.add(track)
         updateTitleCounter()
     }
 
-    override fun onUnselectTrack(position: Int) {
-        positions.removeAt(index = positions.binarySearch(position))
+    override fun onUnselectTrack(track: Track) {
+        sharedViewModel.removeTrack(track)
+        selectedTracks.remove(track)
         updateTitleCounter()
     }
 
-    private fun updateTitleCounter() { binding.topAppBar.title = "${positions.size} selected"}
-
-    private fun collectTracks(positions: List<Int>): List<Track> {
-
-        val returnableList = mutableListOf<Track>()
-
-        for (n in positions.indices) {
-            returnableList.add(
-                (binding.rvTracks.adapter as SelectableTracksAdapter)
-                    .getTrackByPosition(positions[n])
-            )
-        }
-
-        return returnableList
-    }
-
-    override fun onPause() {
-        super.onPause()
-        setResult()
-    }
-
-    private fun setResult() {
-        setFragmentResult("pick_tracks",
-            bundleOf("tracks" to collectTracks(positions = positions)))
+    private fun updateTitleCounter() {
+        binding.topAppBar.title = "${selectedTracks.size} selected"
     }
 
 }
