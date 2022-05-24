@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.doOnPreDraw
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.FragmentNavigatorExtras
@@ -51,12 +52,7 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
         setupRecyclerView()
 
         binding.fabAdd.setOnClickListener {
-            findNavController().navigate(
-                RadioFragmentDirections.actionRadioFragmentToAddRadioStationFragment(
-                    Action.Create,
-                    RadioStation()
-                ), FragmentNavigatorExtras(binding.fabAdd to "create_radio_station_transition")
-            )
+            navigateToAddNewRadioStation()
         }
 
         val searchItem = binding.topAppBar.menu.findItem(R.id.search)
@@ -65,6 +61,13 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
         searchView.setOnQueryTextListener(this)
 
         setObservers()
+
+        binding.emptyView.btnAction.apply {
+            text = "Add new radio station"
+            setOnClickListener {
+                navigateToAddNewRadioStation()
+            }
+        }
     }
 
     private fun setupRecyclerView() = binding.rvStations.apply {
@@ -94,6 +97,11 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
 
         val position = binding.rvStations.adapter?.itemCount ?: 0
         binding.rvStations.adapter?.notifyItemInserted(position)
+        checkEmptyView()
+    }
+
+    private fun checkEmptyView() {
+        binding.emptyView.root.isVisible = binding.rvStations.adapter?.itemCount == 0
     }
 
     private fun clearRecyclerView() {
@@ -134,6 +142,15 @@ class RadioFragment : Fragment(R.layout.radio_fragment),
                 dataViewModel.deleteRadioStation(radioStation = radioStation)
             }
             .show()
+    }
+
+    private fun navigateToAddNewRadioStation() {
+        findNavController().navigate(
+            RadioFragmentDirections.actionRadioFragmentToAddRadioStationFragment(
+                Action.Create,
+                RadioStation()
+            ), FragmentNavigatorExtras(binding.fabAdd to "create_radio_station_transition")
+        )
     }
 
     override fun onDestroyView() {

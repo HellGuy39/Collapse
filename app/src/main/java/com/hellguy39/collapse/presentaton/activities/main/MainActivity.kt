@@ -212,8 +212,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun setCustomCardColorScheme(bitmap: Bitmap) {
+    private fun setCustomCardColorScheme(bitmap: Bitmap?) {
         val white = ResourcesCompat.getColor(resources, R.color.white,null)
+
+        if (bitmap == null) {
+            setDefaultCardColorScheme()
+            return
+        }
 
         Palette.from(bitmap).generate { palette ->
             if (palette != null) {

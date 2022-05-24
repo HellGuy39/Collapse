@@ -29,6 +29,7 @@ internal fun Fragment.setSharedElementTransitionAnimation() {
                 com.google.android.material.R.attr.colorSurface
             )
         )
+        duration = 300L
         pathMotion = MaterialArcMotion()
     }
 }
@@ -37,8 +38,12 @@ internal fun Fragment.setMaterialFadeThoughtAnimation() {
     if (!isAnimationsEnabled(requireContext()))
         return
 
-    enterTransition = MaterialFadeThrough()
-    reenterTransition = MaterialFadeThrough()
+    enterTransition = MaterialFadeThrough().apply {
+        duration = 300L
+    }
+    reenterTransition = MaterialFadeThrough().apply {
+        duration = 250L
+    }
 }
 
 internal fun Fragment.showDialog(

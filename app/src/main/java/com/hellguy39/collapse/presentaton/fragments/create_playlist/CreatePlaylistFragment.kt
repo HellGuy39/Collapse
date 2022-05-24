@@ -2,13 +2,12 @@ package com.hellguy39.collapse.presentaton.fragments.create_playlist
 
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
-import androidx.fragment.app.setFragmentResultListener
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -17,14 +16,13 @@ import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.CreatePlaylistFragmentBinding
 import com.hellguy39.collapse.presentaton.activities.main.MainActivity
 import com.hellguy39.collapse.presentaton.view_models.MediaLibraryDataViewModel
+import com.hellguy39.collapse.presentaton.view_models.PlaylistSharedViewModel
 import com.hellguy39.collapse.utils.*
 import com.hellguy39.domain.models.Playlist
-import com.hellguy39.domain.models.SelectedTracks
 import com.hellguy39.domain.models.Track
 import com.hellguy39.domain.utils.PlaylistType
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.InputStream
-
 
 @AndroidEntryPoint
 class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View.OnClickListener {
@@ -34,7 +32,7 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
     }
 
     private lateinit var dataViewModel: MediaLibraryDataViewModel
-    private lateinit var createViewModel: CreatePlaylistViewModel
+    private val sharedViewModel: PlaylistSharedViewModel by activityViewModels()
     private lateinit var binding: CreatePlaylistFragmentBinding
 
     private lateinit var pickImage: ActivityResultLauncher<String>
@@ -43,45 +41,28 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
 
     private val args: CreatePlaylistFragmentArgs by navArgs()
 
+    private var isLoaded: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        sharedViewModel.clearData()
 
         setMaterialFadeThoughtAnimation()
 
         setSharedElementTransitionAnimation()
 
         dataViewModel = ViewModelProvider(activity as MainActivity)[MediaLibraryDataViewModel::class.java]
-        createViewModel = ViewModelProvider(this)[CreatePlaylistViewModel::class.java]
 
         pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
-            if (it != null) {
+            it?.let {
                 val imageStream: InputStream? = context?.contentResolver?.openInputStream(it)
                 val selectedImage = BitmapFactory.decodeStream(imageStream)
-                binding.ivImage.setImageBitmap(selectedImage)
-
-                selectedImage.toByteArray().also { bytes ->
-                    createViewModel.setPicture(bytes)
-                }
+                sharedViewModel.updatePicture(selectedImage.toByteArray())
             }
         }
 
         tracks = args.playlist.tracks
-    }
-
-    private fun updateUI(playlist: Playlist) {
-        binding.etName.setText(playlist.name)
-        binding.etDesc.setText(playlist.description)
-
-        val bytes = playlist.picture
-
-        if (bytes != null)
-            bytes.toBitmap().also { bitmap ->
-                Glide.with(this).load(bitmap).into(binding.ivImage)
-            }
-        else
-            binding.ivImage.setImageResource(R.drawable.ic_round_queue_music_24)
-
-        updateTracksCounter(tracks.size)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -99,31 +80,28 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
                 binding.topAppBar.title = "New playlist"
             }
             Action.Update -> {
-                binding.topAppBar.title = "Edit"
-                if (args.playlist.picture != null)
-                    createViewModel.setPicture(args.playlist.picture!!)
-                updateUI(args.playlist)
+                if (!isLoaded) {
+                    binding.topAppBar.title = "Edit"
+                    sharedViewModel.updateExistingPlaylist(args.playlist)
+                    binding.etDesc.setText(args.playlist.description)
+                    binding.etName.setText(args.playlist.name)
+                    isLoaded = true
+                }
             }
             else -> {}
-        }
-
-        setFragmentResultListener("pick_tracks") { requestKey, bundle ->
-            tracks = bundle.get("tracks") as MutableList<Track>
-            createViewModel.setSelectedTracks(tracks)
         }
 
         setObservers()
     }
 
     private fun setObservers() {
-        createViewModel.getPicture().observe(viewLifecycleOwner) { bytes ->
-            bytes?.let { notNullBytes ->
-                notNullBytes.toBitmap().also { bitmap ->
-                    binding.ivImage.setImageBitmap(bitmap)
-                }
-            }
+        sharedViewModel.getPicture().observe(viewLifecycleOwner) {
+            Glide.with(this)
+                .load(it)
+                .placeholder(R.drawable.ic_round_queue_music_24)
+                .into(binding.ivImage)
         }
-        createViewModel.getSelectedTracks().observe(viewLifecycleOwner) {
+        sharedViewModel.getSelectedTracks().observe(viewLifecycleOwner) {
             updateTracksCounter(it.size)
         }
     }
@@ -146,9 +124,7 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
             }
             R.id.btnSelectTracks -> {
                 findNavController().navigate(
-                    CreatePlaylistFragmentDirections.actionCreatePlaylistFragmentToSelectTracksFragment(
-                        SelectedTracks(trackList = tracks)
-                    )
+                    CreatePlaylistFragmentDirections.actionCreatePlaylistFragmentToSelectTracksFragment()
                 )
             }
             R.id.ivImage -> {
@@ -158,27 +134,27 @@ class CreatePlaylistFragment : Fragment(R.layout.create_playlist_fragment), View
     }
 
     private fun createNewPlaylist() {
+        val picture = sharedViewModel.getPicture().value
+
         dataViewModel.addNewPlaylist(Playlist(
             name = binding.etName.text.toString(),
             description = binding.etDesc.text.toString(),
-            tracks = tracks,
-            picture = createViewModel.getPicture().value,
+            tracks = sharedViewModel.getSelectedTracks().value ?: mutableListOf(),
+            picture = if (picture?.size == 0) null else picture,
             type = PlaylistType.Custom
         ))
     }
 
     private fun updatePlaylist() {
-        val updatedPlaylist = Playlist(
+        val picture = sharedViewModel.getPicture().value
+
+        dataViewModel.updateExistingPlaylist(Playlist(
             id = args.playlist.id,
             name = binding.etName.text.toString(),
             description = binding.etDesc.text.toString(),
-            tracks = tracks,
-            picture = createViewModel.getPicture().value,
+            tracks = sharedViewModel.getSelectedTracks().value ?: mutableListOf(),
+            picture = if (picture?.size == 0) null else picture,
             type = PlaylistType.Custom
-        )
-        dataViewModel.updateExistingPlaylist(updatedPlaylist)
-        setFragmentResult("updatedPlaylist",
-            bundleOf("playlist" to updatedPlaylist)
-        )
+        ))
     }
 }

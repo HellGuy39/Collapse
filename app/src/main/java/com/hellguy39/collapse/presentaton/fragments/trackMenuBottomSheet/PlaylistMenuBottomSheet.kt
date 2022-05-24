@@ -4,10 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.hellguy39.collapse.R
 import com.hellguy39.collapse.databinding.PlaylistMenuBottomSheetBinding
 import com.hellguy39.collapse.presentaton.fragments.track_list.PlaylistMenuEvents
+import com.hellguy39.collapse.utils.formatAsDate
+import com.hellguy39.collapse.utils.getTotalDuration
 import com.hellguy39.collapse.utils.toBitmap
 import com.hellguy39.domain.models.Playlist
 import com.hellguy39.domain.utils.PlaylistType
@@ -40,16 +45,15 @@ class PlaylistMenuBottomSheet(
     }
 
     private fun setupHeader() {
-        val bytes = playlist.picture
-
-        if (bytes != null)
-            bytes.toBitmap().also { bitmap ->
-                binding.ivCover.setImageBitmap(bitmap)
-            }
-         else
-            binding.ivCover.setImageResource(R.drawable.ic_round_audiotrack_24)
+        Glide.with(this)
+            .load(playlist.picture)
+            .placeholder(R.drawable.ic_round_queue_music_24)
+            .apply(RequestOptions.bitmapTransform(RoundedCorners(16)))
+            .into(binding.ivCover)
 
         binding.tvPlaylistName.text = playlist.name
+
+        binding.tvTotalDuration.text = playlist.tracks.getTotalDuration().formatAsDate()
 
         val itemCount = playlist.tracks.size
 

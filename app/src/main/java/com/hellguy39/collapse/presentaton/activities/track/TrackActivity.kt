@@ -64,10 +64,12 @@ class TrackActivity : AppCompatActivity(),
         window.sharedElementEnterTransition = MaterialContainerTransform().apply {
             addTarget(binding.root)
             setAllContainerColors(theme.getColorByResId(com.google.android.material.R.attr.colorSurface))
+            duration = 300L
         }
         window.sharedElementReturnTransition = MaterialContainerTransform().apply {
             addTarget(binding.root)
             setAllContainerColors(theme.getColorByResId(com.google.android.material.R.attr.colorSurface))
+            duration = 250L
         }
 
         setContentView(binding.root)
@@ -145,9 +147,8 @@ class TrackActivity : AppCompatActivity(),
             )
             .into(binding.ivCover)
 
-        if (bytes != null && appSettingsUseCases.getAppSettingsUseCase.invoke().isAdaptableBackgroundEnabled) {
-            val bitmap = bytes.toBitmap()
-            updatePalette(bitmap)
+        if (bytes.toBitmap() != null && appSettingsUseCases.getAppSettingsUseCase.invoke().isAdaptableBackgroundEnabled) {
+            updatePalette(bytes.toBitmap()!!)
         } else {
             setDefaultUIColors()
         }

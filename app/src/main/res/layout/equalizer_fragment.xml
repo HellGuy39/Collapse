@@ -61,6 +61,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <HorizontalScrollView
+                        android:id="@+id/hsChips"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
                         android:requiresFadingEdge="horizontal"

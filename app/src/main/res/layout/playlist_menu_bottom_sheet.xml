@@ -19,7 +19,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
         android:orientation="horizontal">
 
         <ImageView
@@ -37,7 +36,7 @@
                 android:id="@+id/tvPlaylistName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="22sp"
+                android:textSize="@dimen/medium_text_size"
                 android:ellipsize="end"
                 tools:text="Nevermind"/>
 
@@ -45,15 +44,24 @@
             <TextView
                 android:id="@+id/tvTracksCount"
                 android:ellipsize="end"
-                android:textSize="18sp"
+                android:textSize="@dimen/small_text_size"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:text="8 tracks" />
 
         </LinearLayout>
-
-
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvTotalDuration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="end"
+        android:layout_marginVertical="4dp"
+        android:layout_marginHorizontal="16dp"
+        android:textSize="@dimen/small_text_size"
+        tools:text="5:10" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -127,8 +135,8 @@
 
                 <ImageView
                     android:id="@+id/ivEdit"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/ui_icon_width"
+                    android:layout_height="@dimen/ui_icon_height"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_round_edit_24" />
 
@@ -140,7 +148,7 @@
                     android:layout_marginStart="16dp"
                     android:baselineAligned="false"
                     android:text="Edit"
-                    android:textSize="20sp" />
+                    android:textSize="@dimen/medium_text_size" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -165,8 +173,8 @@
                 android:paddingBottom="16dp">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/ui_icon_width"
+                    android:layout_height="@dimen/ui_icon_height"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_round_delete_24" />
 
@@ -174,7 +182,7 @@
                     android:id="@+id/tvDelete"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"
+                    android:textSize="@dimen/medium_text_size"
                     android:layout_marginStart="16dp"
                     android:layout_gravity="center"
                     android:text="Delete" />

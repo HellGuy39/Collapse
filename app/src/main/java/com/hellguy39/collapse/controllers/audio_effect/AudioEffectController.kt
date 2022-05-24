@@ -35,7 +35,7 @@ class AudioEffectController(
 
 //    fun getReverbPresetList(): List<Short> = reverbPresetList
 
-    fun getProperties(): EqualizerProperties = equalizerProperties
+    fun getProperties(): EqualizerProperties = getEqualizerPropertiesUseCase.invoke()
 
     init {
         eqState.loadSavedState(presets = equalizerProperties.presets)
@@ -114,7 +114,7 @@ class AudioEffectController(
 
     fun setPreset(presetNumber: Short) {
         when(presetNumber) {
-            EqState.CUSTOM_PRESET -> eqState.getCustomPreset().value ?: mutableListOf<Short>(0,0,0,0,0)
+            EqState.CUSTOM_PRESET -> eqState.getCustomPreset()
             else -> getProperties().presets[presetNumber.toInt()].bandValues
         }.also { values ->
             applyValuesToEq(values)

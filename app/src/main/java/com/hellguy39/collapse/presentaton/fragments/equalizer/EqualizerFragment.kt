@@ -15,6 +15,7 @@ import com.hellguy39.collapse.databinding.EqualizerFragmentBinding
 import com.hellguy39.collapse.utils.*
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
@@ -187,6 +188,7 @@ class EqualizerFragment : Fragment(R.layout.equalizer_fragment),
     private fun setSelectedPresetChip(presetNumber: Short) {
         binding.presetChipGroup.forEach {
             if ((it as Chip).tag == presetNumber) {
+                //binding.hsChips.smoothScrollTo(it.x.roundToInt(), it.y.roundToInt())
                 it.isChecked = true
                 return@forEach
             }

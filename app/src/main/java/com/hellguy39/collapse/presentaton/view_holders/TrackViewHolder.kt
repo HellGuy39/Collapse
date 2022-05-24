@@ -30,7 +30,6 @@ class TrackViewHolder(
         listener: TracksAdapter.OnTrackListener,
         isPlaying: Boolean
     ) {
-
         binding.tvTrackName.text = track.name.formatForDisplaying()
         binding.tvAuthor.text = track.artist.formatForDisplaying()
 

@@ -69,10 +69,10 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
         updateLayoutIcon()
 
         binding.topAppBar.menu.findItem(R.id.layoutType).setOnMenuItemClickListener {
-            if(layoutType == LayoutType.Grid)
-                layoutType = LayoutType.Linear
+            layoutType = if(layoutType == LayoutType.Grid)
+                LayoutType.Linear
             else
-                layoutType = LayoutType.Grid
+                LayoutType.Grid
 
             appSettingsUseCases.saveLayoutTypeUseCase.invoke(layoutType)
 
@@ -136,11 +136,7 @@ class PlaylistsFragment : Fragment(R.layout.playlists_fragment),
             startPostponedEnterTransition()
         }
         also {
-
-            TransitionManager.beginDelayedTransition(binding.root, MaterialSharedAxis(MaterialSharedAxis.Y, true))
-
-            binding.rvPlaylists.visibility = View.GONE
-            binding.rvPlaylists.visibility = View.VISIBLE
+            binding.rvPlaylists.updateAnimation(binding.root)
         }
     }
 

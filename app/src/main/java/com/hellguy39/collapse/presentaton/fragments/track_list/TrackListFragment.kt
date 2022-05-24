@@ -1,6 +1,7 @@
 package com.hellguy39.collapse.presentaton.fragments.track_list
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
@@ -92,13 +93,6 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
             }
             PlaylistType.Custom -> {
                 onTracksReceived(receivedPlaylist.tracks, PlaylistType.Custom, receivedPlaylist.name)
-
-                binding.emptyView.btnAction.apply {
-                    text = "Edit this playlist"
-                    setOnClickListener {
-                        onEditPlaylist()
-                    }
-                }
             }
             PlaylistType.Favourites -> {
                 setFavouritesTracksObserver()
@@ -214,6 +208,8 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
             context = requireContext(),
             playlistType = receivedPlaylist.type,
         )
+        //setHasFixedSize(true)
+        //setItemViewCacheSize(20)
     }
 
     override fun onTrackMenuClick(track: Track, position: Int, playlistType: Enum<PlaylistType>) {
@@ -364,8 +360,9 @@ class TrackListFragment : Fragment(R.layout.track_list_fragment),
 
     override fun onDeletePlaylist() {
         showDialog(
-            title = "Are you sure want to delete this playlist?",
-            positiveButtonText = "Yes",
+            title = "Confirm deletion",
+            message = "Are you sure want to delete this playlist?",
+            positiveButtonText = "Confirm",
             iconId = R.drawable.ic_round_delete_24,
             dialogEventListener = object : DialogEventListener {
                 override fun onPositiveButtonClick() {
