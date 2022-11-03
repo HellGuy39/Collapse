@@ -5,144 +5,14 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/navigation_home">
 
+    <include app:graph="@navigation/navigation_artists" />
 
-    <navigation android:id="@+id/navigation_media_library"
-        app:startDestination="@id/mediaLibraryFragment">
-        <fragment
-            android:id="@+id/mediaLibraryFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.media_library.MediaLibraryFragment"
-            android:label="media_library_fragment"
-            tools:layout="@layout/media_library_fragment">
-            <action
-                android:id="@+id/action_mediaLibraryFragment_to_playlistFragment"
-                app:destination="@id/playlistsFragment" />
-            <action
-                android:id="@+id/action_mediaLibraryFragment_to_trackListFragment"
-                app:destination="@id/trackListFragment" />
-            <action
-                android:id="@+id/action_mediaLibraryFragment_to_artistsListFragment"
-                app:destination="@id/artistsListFragment" />
-        </fragment>
-        <fragment
-            android:id="@+id/trackListFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.track_list.TrackListFragment"
-            android:label="track_list_fragment"
-            tools:layout="@layout/track_list_fragment">
-            <argument
-                android:name="playlist"
-                app:argType="com.hellguy39.domain.models.Playlist" />
-            <action
-                android:id="@+id/action_trackListFragment_to_createPlaylistFragment"
-                app:destination="@id/createPlaylistFragment" />
-        </fragment>
-        <fragment
-            android:id="@+id/playlistsFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.playlists.PlaylistsFragment"
-            android:label="playlists_fragment"
-            tools:layout="@layout/playlists_fragment">
-            <action
-                android:id="@+id/action_playlistsFragment_to_trackListFragment"
-                app:destination="@id/trackListFragment" />
-            <action
-                android:id="@+id/action_playlistsFragment_to_createPlaylistFragment"
-                app:destination="@id/createPlaylistFragment" />
-        </fragment>
-        <fragment
-            android:id="@+id/createPlaylistFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.create_playlist.CreatePlaylistFragment"
-            android:label="create_playlist_fragment"
-            tools:layout="@layout/create_playlist_fragment" >
-            <action
-                android:id="@+id/action_createPlaylistFragment_to_selectTracksFragment"
-                app:destination="@id/selectTracksFragment" />
-            <argument
-                android:name="playlist"
-                app:argType="com.hellguy39.domain.models.Playlist" />
-            <argument
-                android:name="action"
-                app:argType="com.hellguy39.collapse.utils.Action" />
-        </fragment>
-        <fragment
-            android:id="@+id/selectTracksFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.select_tracks.SelectTracksFragment"
-            android:label="select_tracks_fragment"
-            tools:layout="@layout/select_tracks_fragment" />
-        <fragment
-            android:id="@+id/artistsListFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.artists.ArtistsListFragment"
-            android:label="fragment_artists_list"
-            tools:layout="@layout/fragment_artists_list" >
-            <action
-                android:id="@+id/action_artistsListFragment_to_trackListFragment"
-                app:destination="@id/trackListFragment" />
-        </fragment>
-    </navigation>
-    <navigation android:id="@+id/navigation_radio"
-        app:startDestination="@id/radioFragment">
-        <fragment
-            android:id="@+id/radioFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.radio.RadioFragment"
-            android:label="radio_fragment"
-            tools:layout="@layout/radio_fragment">
-            <action
-                android:id="@+id/action_radioFragment_to_addRadioStationFragment"
-                app:destination="@id/addRadioStationFragment" />
-        </fragment>
-        <fragment
-            android:id="@+id/addRadioStationFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.add_radio_station.AddRadioStationFragment"
-            android:label="add_radio_station_fragment"
-            tools:layout="@layout/add_radio_station_fragment" >
-            <argument
-                android:name="action"
-                app:argType="com.hellguy39.collapse.utils.Action" />
-            <argument
-                android:name="radioStation"
-                app:argType="com.hellguy39.domain.models.RadioStation" />
-        </fragment>
-    </navigation>
-    <navigation android:id="@+id/navigation_home"
-        app:startDestination="@id/homeFragment">
+    <include app:graph="@navigation/navigation_songs" />
 
-        <fragment
-            android:id="@+id/homeFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.home.HomeFragment"
-            android:label="fragment_home"
-            tools:layout="@layout/fragment_home">
+    <include app:graph="@navigation/navigation_playlists" />
 
-            <action
-                android:id="@+id/action_homeFragment_to_equalizerFragment"
-                app:destination="@id/equalizerFragment" />
-            <action
-                android:id="@+id/action_homeFragment_to_statisticFragment"
-                app:destination="@id/statisticFragment" />
-            <action
-                android:id="@+id/action_homeFragment_to_aboutAppFragment"
-                app:destination="@id/aboutAppFragment" />
-            <action
-                android:id="@+id/action_homeFragment_to_settingsFragment"
-                app:destination="@id/settingsFragment" />
-        </fragment>
+    <include app:graph="@navigation/navigation_home" />
 
-        <fragment
-            android:id="@+id/equalizerFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.equalizer.EqualizerFragment"
-            android:label="equalizer_fragment"
-            tools:layout="@layout/equalizer_fragment" />
-        <fragment
-            android:id="@+id/statisticFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.statistic.StatisticFragment"
-            android:label="fragment_statistic"
-            tools:layout="@layout/fragment_statistic" />
-        <fragment
-            android:id="@+id/aboutAppFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.about_app.AboutAppFragment"
-            android:label="fragment_about_app"
-            tools:layout="@layout/fragment_about_app" />
-        <fragment
-            android:id="@+id/settingsFragment"
-            android:name="com.hellguy39.collapse.presentaton.fragments.settings.SettingsFragment"
-            android:label="SettingsFragment" />
-    </navigation>
+    <include app:graph="@navigation/navigation_albums" />
 
 </navigation>

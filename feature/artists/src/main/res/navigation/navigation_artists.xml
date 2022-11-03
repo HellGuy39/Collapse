@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_artists"
+    app:startDestination="@id/artistListFragment">
+
+    <fragment
+        android:id="@+id/artistDetailFragment"
+        android:name="com.hellguy39.collapse.artists.detail.ArtistDetailFragment"
+        android:label="fragment_artist_detail"
+        tools:layout="@layout/fragment_artist_detail" >
+
+        <argument
+            android:name="artistId"
+            app:argType="long" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/artistListFragment"
+        android:name="com.hellguy39.collapse.artists.list.ArtistListFragment"
+        android:label="ArtistListFragment" >
+        <action
+            android:id="@+id/action_artistListFragment_to_artistDetailFragment"
+            app:destination="@id/artistDetailFragment" />
+    </fragment>
+
+</navigation>

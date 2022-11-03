@@ -1,6 +1,7 @@
 package com.hellguy39.collapse.utils
 
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.drawable.InsetDrawable
 import android.util.TypedValue
@@ -8,9 +9,10 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.view.menu.MenuBuilder
+import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
 import androidx.transition.TransitionManager
 import com.google.android.material.transition.MaterialSharedAxis
-import com.hellguy39.domain.models.Track
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,6 +33,13 @@ internal fun Long.formatAsDate(): String {
     }
 }
 
+internal fun Fragment.isPermissionGranted(
+    permission: String
+): Boolean = (ActivityCompat.checkSelfPermission(
+        requireActivity(),
+        permission
+    ) == PackageManager.PERMISSION_GRANTED)
+
 internal fun CharSequence?.formatForDisplaying(): CharSequence {
     return if(this.isNullOrBlank())
         "Unknown"
@@ -48,14 +57,14 @@ internal fun Float.toAdjustableValue(): Short {
     return (this * 100).toInt().toShort()
 }
 
-internal fun List<Track>.getTotalDuration(): Long {
-    var totalDuration: Long = 0
-
-    for (track in this)
-        totalDuration += track.duration
-
-    return totalDuration
-}
+//internal fun List<Track>.getTotalDuration(): Long {
+//    var totalDuration: Long = 0
+//
+//    for (track in this)
+//        totalDuration += track.duration
+//
+//    return totalDuration
+//}
 
 internal fun View.updateAnimation(container: ViewGroup) {
     TransitionManager.beginDelayedTransition(

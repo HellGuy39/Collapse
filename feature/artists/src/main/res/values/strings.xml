@@ -1,0 +1,7 @@
+<resources>
+
+    <string name="title_no_artists">No artists found</string>
+
+    <string name="shared_artist_transition">shared_artist_transition</string>
+
+</resources>

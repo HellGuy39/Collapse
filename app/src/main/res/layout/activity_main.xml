@@ -5,109 +5,27 @@
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
     android:orientation="vertical"
     tools:context=".presentaton.activities.main.MainActivity">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/fragmentContainer"
-        android:name="androidx.navigation.fragment.NavHostFragment"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        app:defaultNavHost="true"
-        app:layout_constraintBottom_toTopOf="@+id/trackCard"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navGraph="@navigation/nav_graph" />
+        android:layout_weight="1">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/trackCard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        app:cardCornerRadius="0dp"
-        android:transitionName="track_card_transition"
-        style="@style/Widget.Material3.CardView.Filled"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:strokeWidth="0dp">
-
-        <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/trackProgressIndicator"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="0dp"
-            app:trackCornerRadius="4dp" />
-
-        <LinearLayout
-            android:id="@+id/layoutCardPlayer"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fragmentContainer"
+            android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:animateLayoutChanges="true"
-            android:orientation="horizontal"
-            android:paddingHorizontal="8dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="12dp">
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/nav_graph" />
 
-            <ImageView
-                android:id="@+id/ivTrackImage"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_weight="0"
-                android:src="@drawable/ic_round_audiotrack_24" />
+        <include
+            android:id="@+id/bottomSheetPlayback"
+            layout="@layout/bottom_sheet_playback" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:layout_gravity="center"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tvTrackName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textSize="18sp"
-                    tools:text="Smells Like Teen Spirit" />
-
-                <TextView
-                    android:id="@+id/tvArtist"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textSize="14sp"
-                    tools:text="Nirvana" />
-            </LinearLayout>
-
-            <ImageButton
-                android:id="@+id/ibPlayPause"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_weight="0"
-                android:backgroundTint="@android:color/transparent"
-                android:src="@drawable/ic_round_play_arrow_48" />
-
-            <ImageButton
-                android:id="@+id/ibNextTrack"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_weight="0"
-                android:backgroundTint="@android:color/transparent"
-                android:src="@drawable/ic_round_skip_next_48" />
-
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"

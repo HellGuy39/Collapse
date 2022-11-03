@@ -16,5 +16,20 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Collapse"
 include ':app'
-include ':data'
-include ':domain'
+
+//include ':data'
+//include ':domain'
+
+include ':core:ui'
+include ':core:domain'
+include ':core:data'
+include ':core:model'
+
+include ':feature:songs'
+include ':feature:artists'
+include ':feature:albums'
+include ':feature:playlists'
+include ':feature:home'
+include ':feature:settings'
+include ':feature:equalizer'
+include ':core:mediaplayer'

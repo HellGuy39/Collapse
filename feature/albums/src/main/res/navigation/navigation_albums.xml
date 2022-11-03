@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_albums"
+    app:startDestination="@id/albumListFragment">
+
+    <fragment
+        android:id="@+id/albumDetailFragment"
+        android:name="com.hellguy39.collapse.albums.detail.AlbumDetailFragment"
+        android:label="AlbumDetailFragment" >
+        <argument
+            android:name="albumId"
+            app:argType="long" />
+    </fragment>
+    <fragment
+        android:id="@+id/albumListFragment"
+        android:name="com.hellguy39.collapse.albums.list.AlbumListFragment"
+        android:label="fragment_album_list"
+        tools:layout="@layout/fragment_album_list" >
+        <action
+            android:id="@+id/action_albumListFragment_to_albumDetailFragment"
+            app:destination="@id/albumDetailFragment" />
+    </fragment>
+</navigation>

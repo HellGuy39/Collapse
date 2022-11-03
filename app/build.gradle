@@ -11,10 +11,10 @@ android {
 
     defaultConfig {
         applicationId "com.hellguy39.collapse"
-        minSdk 26
+        minSdk 28
         targetSdk 33
         versionCode 1
-        versionName "0.3.2"
+        versionName "1.0.0-alpha01" // X.Y.Z; X = Major, Y = minor, Z = Patch level
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -40,8 +40,22 @@ android {
 dependencies {
 
     // Modules
-    implementation project(path: ':domain')
-    implementation project(path: ':data')
+//    implementation project(path: ':domain')
+//    implementation project(path: ':data')
+
+    implementation project(path: ':feature:albums')
+    implementation project(path: ':feature:artists')
+    implementation project(path: ':feature:equalizer')
+    implementation project(path: ':feature:home')
+    implementation project(path: ':feature:playlists')
+    implementation project(path: ':feature:settings')
+    implementation project(path: ':feature:songs')
+
+    implementation project(path: ':core:data')
+    implementation project(path: ':core:domain')
+    implementation project(path: ':core:model')
+    implementation project(path: ':core:ui')
+    implementation project(path: ':core:mediaplayer')
 
     // Error activity
     implementation 'cat.ereza:customactivityoncrash:2.3.0'
@@ -49,34 +63,35 @@ dependencies {
     // Default
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     implementation 'androidx.preference:preference:1.2.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
-    // ExoPlayer
-    implementation ("com.google.android.exoplayer:exoplayer:$exoplayer_version")
-    implementation ("com.google.android.exoplayer:exoplayer-hls:$exoplayer_version")
-    implementation ("com.google.android.exoplayer:exoplayer-core:$exoplayer_version")
-    implementation ("com.google.android.exoplayer:exoplayer-dash:$exoplayer_version")
-    implementation ("com.google.android.exoplayer:exoplayer-ui:$exoplayer_version")
+//    // ExoPlayer
+//    implementation ("com.google.android.exoplayer:exoplayer:$exoplayer_version")
+//    implementation ("com.google.android.exoplayer:exoplayer-hls:$exoplayer_version")
+//    implementation ("com.google.android.exoplayer:exoplayer-core:$exoplayer_version")
+//    implementation ("com.google.android.exoplayer:exoplayer-dash:$exoplayer_version")
+//    implementation ("com.google.android.exoplayer:exoplayer-ui:$exoplayer_version")
 
     //Dagger
 //    implementation ("com.google.dagger:dagger:$hilt_version")
 //    kapt ("com.google.dagger:dagger-compiler:$hilt_version")
 //    implementation 'javax.inject:javax.inject:1'
 
-    // Hilt
-    implementation ("com.google.dagger:hilt-android:$hilt_version")
-    kapt ("com.google.dagger:hilt-android-compiler:$hilt_version")
+//    // Hilt
+//    implementation ("com.google.dagger:hilt-android:$hilt_version")
+//    kapt ("com.google.dagger:hilt-android-compiler:$hilt_version")
 
-    // Lifecycle extension
+    // Lifecycle
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
 
     // ViewPager
     implementation "androidx.viewpager2:viewpager2:1.0.0"
@@ -116,4 +131,39 @@ dependencies {
 
     // Palette
     implementation 'androidx.palette:palette:1.0.0'
+
+    // Paging
+    implementation "androidx.paging:paging-runtime:$paging_version"
+
+    // Jetpack Media3
+    implementation "androidx.media3:media3-exoplayer:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-rtsp:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-ima:$media3_version"
+
+    implementation "androidx.media3:media3-datasource-cronet:$media3_version"
+    implementation "androidx.media3:media3-datasource-okhttp:$media3_version"
+    implementation "androidx.media3:media3-datasource-rtmp:$media3_version"
+
+    implementation "androidx.media3:media3-ui:$media3_version"
+    implementation "androidx.media3:media3-ui-leanback:$media3_version"
+
+    implementation "androidx.media3:media3-session:$media3_version"
+
+    implementation "androidx.media3:media3-extractor:$media3_version"
+
+    implementation "androidx.media3:media3-cast:$media3_version"
+
+    implementation "androidx.media3:media3-exoplayer-workmanager:$media3_version"
+
+    implementation "androidx.media3:media3-transformer:$media3_version"
+
+    implementation "androidx.media3:media3-test-utils:$media3_version"
+    implementation "androidx.media3:media3-test-utils-robolectric:$media3_version"
+
+    implementation "androidx.media3:media3-database:$media3_version"
+    implementation "androidx.media3:media3-decoder:$media3_version"
+    implementation "androidx.media3:media3-datasource:$media3_version"
+    implementation "androidx.media3:media3-common:$media3_version"
 }

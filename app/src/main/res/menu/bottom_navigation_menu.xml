@@ -1,24 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/navigation_radio"
-        android:enabled="true"
-        android:icon="@drawable/ic_round_radio_24"
-        android:title="Radio"/>
+
     <item
         android:id="@+id/navigation_home"
         android:enabled="true"
-        android:icon="@drawable/ic_round_home_24"
-        android:title="Home"/>
-    <item
-        android:id="@+id/navigation_media_library"
-        android:enabled="true"
-        android:icon="@drawable/ic_round_library_music_24"
-        android:title="Media library"/>
+        android:icon="@drawable/ic_baseline_home_24"
+        android:title="@string/title_home"/>
 
-<!--    <item-->
-<!--        android:id="@+id/equalizerFragment"-->
-<!--        android:enabled="true"-->
-<!--        android:icon="@drawable/ic_round_equalizer_24"-->
-<!--        android:title="Equalizer"/>-->
+    <item
+        android:id="@+id/navigation_songs"
+        android:enabled="true"
+        android:icon="@drawable/ic_outline_music_note_24"
+        android:title="@string/title_songs"/>
+
+    <item
+        android:id="@+id/navigation_albums"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_album_24"
+        android:title="@string/title_albums"/>
+
+    <item
+        android:id="@+id/navigation_playlists"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_queue_music_24"
+        android:title="@string/title_playlists"/>
+
+    <item
+        android:id="@+id/navigation_artists"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_person_24"
+        android:title="@string/title_artists"/>
 </menu>

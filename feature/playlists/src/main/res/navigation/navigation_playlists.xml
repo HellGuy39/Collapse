@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_playlists"
+    app:startDestination="@id/playlistListFragment">
+
+    <fragment
+        android:id="@+id/playlistListFragment"
+        android:name="com.hellguy39.collapse.playlists.PlaylistListFragment"
+        android:label="fragment_playlist_list"
+        tools:layout="@layout/fragment_playlist_list" >
+        <action
+            android:id="@+id/action_playlistListFragment_to_playlistDetailFragment"
+            app:destination="@id/playlistDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/playlistDetailFragment"
+        android:name="com.hellguy39.collapse.playlists.PlaylistDetailFragment"
+        android:label="PlaylistDetailFragment" />
+
+</navigation>

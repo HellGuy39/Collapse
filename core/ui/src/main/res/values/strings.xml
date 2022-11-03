@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Collapse</string>
+
+    <string name="title_settings">Settings</string>
+    <string name="title_about_app">About app</string>
+
+    <string name="title_songs">Songs</string>
+
+
+    <string name="act_play">Play</string>
+
+    <string name="subtitle_songs_count">%1$s Songs • %2$s</string>
+    <string name="subtitle_song_count">%1$s Song • %2$s</string>
+
+</resources>

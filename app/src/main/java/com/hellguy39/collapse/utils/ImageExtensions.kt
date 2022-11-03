@@ -1,10 +1,21 @@
 package com.hellguy39.collapse.utils
 
+import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.util.Log
+import android.util.Size
+import android.widget.ImageView
+import com.bumptech.glide.Glide
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
+import java.io.FileNotFoundException
 
 internal fun Bitmap.toByteArray(): ByteArray {
     val compressedBitmap = Bitmap.createScaledBitmap(this, 256, 256, true)
